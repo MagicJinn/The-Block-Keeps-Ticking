@@ -2,7 +2,6 @@ package net.what42.aliveworld.mixin;
 
 import net.what42.aliveworld.api.CampfireAccess;
 import net.what42.aliveworld.simulator.CampfireSimulator;
-import net.what42.aliveworld.util.BlockEntityUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.item.ItemStack;

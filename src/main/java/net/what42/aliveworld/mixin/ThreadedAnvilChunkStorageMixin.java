@@ -1,9 +1,7 @@
 package net.what42.aliveworld.mixin;
 
-import net.what42.aliveworld.AliveWorld;
 import net.what42.aliveworld.manager.ChunkManager;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
-import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,7 +13,7 @@ public class ThreadedAnvilChunkStorageMixin {
     @Inject(method = "save(Z)V", at = @At("HEAD"))
     private void onSave(boolean flush, CallbackInfo ci) {
         if (flush) {
-            ThreadedAnvilChunkStorage storage = (ThreadedAnvilChunkStorage)(Object)this;
+            //ThreadedAnvilChunkStorage storage = (ThreadedAnvilChunkStorage)(Object)this;
             // Como ya no tenemos acceso directo al chunk, el ChunkManager se encargará
             // de procesar los chunks pendientes
             ChunkManager.getInstance().processAllPendingChunks();

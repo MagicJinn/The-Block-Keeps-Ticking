@@ -133,7 +133,7 @@ public class ChunkLifeSimulator {
         if (!AliveWorld.CONFIG.isCropsGrowingEnabled()) return;
 
         int randomTickSpeed = world.getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
-        long totalRandomTicks = (timePassed * randomTickSpeed) / TimeUtils.TICK_PER_SECOND;
+        long totalRandomTicks = (timePassed * randomTickSpeed) / TimeUtils.TICKS_PER_SECOND;
         
         if (totalRandomTicks > 0) {
             for (int sectionY = 0; sectionY < chunk.getHeight() >> 4; ++sectionY) {

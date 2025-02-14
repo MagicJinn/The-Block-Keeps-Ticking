@@ -23,14 +23,9 @@ public class Config {
     private boolean chickenEggLayingEnabled = true;
     private boolean cropsGrowingEnabled = true;
 
-    private static final int SIMULATION_MIN_INTERVAL = 200; // 10 segundos en ticks
-    private static final int SIMULATION_MAX_INTERVAL = 72000; // 1 hora en ticks
-
     private static Config INSTANCE;
 
-    private Config() {
-        // Constructor privado para evitar instanciación directa
-    }
+    private Config() {}
 
     public static Config getInstance() {
         if (INSTANCE == null) {
@@ -108,13 +103,5 @@ public class Config {
 
     public void setCropsGrowingEnabled(boolean cropsGrowingEnabled) {
         this.cropsGrowingEnabled = cropsGrowingEnabled;
-    }
-
-    public int getMinUpdateInterval() {
-        return SIMULATION_MIN_INTERVAL;
-    }
-
-    public int getMaxUpdateInterval() {
-        return SIMULATION_MAX_INTERVAL;
     }
 }

@@ -1,6 +1,5 @@
 package net.what42.aliveworld.manager;
 
-import net.what42.aliveworld.AliveWorld;
 import net.what42.aliveworld.api.TickableChunk;
 import net.what42.aliveworld.simulator.ChunkLifeSimulator;
 import net.what42.aliveworld.event.ChunkUnloadCallback;
