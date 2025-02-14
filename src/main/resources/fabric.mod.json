@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "alive-world",
+  "version": "${version}",
+  "name": "Alive World",
+  "description": "Mod that adds progress for some blocks & entities in unloaded chunks. Commission for What42Pizza",
+  "authors": ["Javivi09dev"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/alive-world/icon.png",
+  "environment": "*",
+  "accessWidener": "aliveworld.accesswidener",
+  "entrypoints": {
+    "client": [
+      "net.what42.aliveworld.client.AliveWorldClient"
+    ],
+    "main": [
+      "net.what42.aliveworld.AliveWorld"
+    ]
+  },
+  "mixins": [
+    "aliveworld.mixins.json",
+    {
+      "config": "aliveworld.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

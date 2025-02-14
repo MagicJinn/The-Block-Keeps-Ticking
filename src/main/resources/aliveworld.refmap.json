@@ -1,0 +1,11 @@
+{
+  "mappings": {
+    "net/what42/aliveworld/mixin/ChunkAccessMixin": {
+      "onIncrementInhabitedTime(JLorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V": "method_12225(J)V"
+    },
+    "net/what42/aliveworld/mixin/ChunkSerializerMixin": {
+      "onRead": "method_12610",
+      "onSave": "method_12618"
+    }
+  }
+}
