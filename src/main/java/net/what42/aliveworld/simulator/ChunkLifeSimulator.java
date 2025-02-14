@@ -169,13 +169,29 @@ public class ChunkLifeSimulator {
 	}
 	
 	private static void simulateCrop(ServerWorld world, BlockPos pos, BlockState state, CropBlock crop, long totalRandomTicks) {
-		int currentAge = state.get(crop.getAgeProperty());
-		if (currentAge < crop.getMaxAge()) {
-			int growthStages = calculateGrowthStages(totalRandomTicks, crop.getMaxAge() - currentAge);
-			if (canPlantGrow(world, pos)) {
-				world.setBlockState(pos, state.with(crop.getAgeProperty(), Math.min(currentAge + growthStages, crop.getMaxAge())), 2);
-			}
-		}
+	    BlockState farmland = world.getBlockState(pos.down());
+	    if (!farmland.isOf(Blocks.FARMLAND)) {
+	        return;
+	    }
+
+	    int currentAge = state.get(crop.getAgeProperty());
+	    if (currentAge >= crop.getMaxAge()) {
+	        return;
+	    }
+
+	    double baseChance = 0.5;
+	    double effectiveTicks = totalRandomTicks * baseChance;
+	    int growthStages = (int)(Math.log1p(effectiveTicks) * 1.5);
+	    
+	    if (totalRandomTicks > 20 && growthStages == 0) {
+	        growthStages = 1;
+	    }
+
+	    int newAge = Math.min(currentAge + growthStages, crop.getMaxAge());
+	    
+	    if (newAge > currentAge) {
+	        world.setBlockState(pos, state.with(crop.getAgeProperty(), newAge), 2);
+	    }
 	}
 	
 	private static void simulateSugarCane(ServerWorld world, BlockPos pos, BlockState state, long totalRandomTicks) {
@@ -262,11 +278,6 @@ public class ChunkLifeSimulator {
 			   soil.isOf(Blocks.SAND);
 	}
 	
-	private static boolean canPlantGrow(ServerWorld world, BlockPos pos) {
-		return world.getBaseLightLevel(pos, 0) >= 9 &&
-			   world.getBlockState(pos.down()).isOf(Blocks.FARMLAND);
-	}
-	
 	private static boolean canSugarCaneGrow(ServerWorld world, BlockPos pos) {
 		BlockState soil = world.getBlockState(pos.down());
 		return (soil.isOf(Blocks.GRASS_BLOCK) || 
@@ -301,7 +312,7 @@ public class ChunkLifeSimulator {
 	}
 	
 	private static float calculateGrowthChance(long totalRandomTicks) {
-		return Math.min(0.99f, (float)Math.log10(1 + totalRandomTicks) * 0.5f);
+	    return (float)(1.0 - Math.exp(-totalRandomTicks / 100.0));
 	}
 	
 	private static int calculateGrowthStages(long totalRandomTicks, int maxGrowth) {
