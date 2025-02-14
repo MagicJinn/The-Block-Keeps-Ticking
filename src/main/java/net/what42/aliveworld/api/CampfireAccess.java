@@ -6,6 +6,6 @@ import net.minecraft.block.BlockState;
 import net.what42.aliveworld.simulator.CampfireSimulator;
 
 public interface CampfireAccess {
-    CampfireSimulator createSimulator();
-    void apply(World world, BlockPos pos, BlockState state, CampfireSimulator simulator);
+	CampfireSimulator createSimulator();
+	void apply(World world, BlockPos pos, BlockState state, CampfireSimulator simulator);
 }

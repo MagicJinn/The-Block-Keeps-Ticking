@@ -6,6 +6,6 @@ import net.minecraft.block.BlockState;
 import net.what42.aliveworld.simulator.BrewingSimulator;
 
 public interface BrewingStandAccess {
-    BrewingSimulator createSimulator();
-    void apply(World world, BlockPos pos, BlockState state, BrewingSimulator simulator);
+	BrewingSimulator createSimulator();
+	void apply(World world, BlockPos pos, BlockState state, BrewingSimulator simulator);
 }

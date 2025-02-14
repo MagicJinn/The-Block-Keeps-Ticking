@@ -14,31 +14,31 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(CampfireBlockEntity.class)
 public abstract class CampfireBlockEntityMixin implements CampfireAccess {
-    @Shadow @Final private DefaultedList<ItemStack> itemsBeingCooked;
-    @Shadow private int[] cookingTimes;
-    @Shadow private int[] cookingTotalTimes;
-
-    @Override
-    public CampfireSimulator createSimulator() {
-        if (cookingTimes == null) cookingTimes = new int[4];
-        if (cookingTotalTimes == null) cookingTotalTimes = new int[4];
-        return new CampfireSimulator(itemsBeingCooked, cookingTimes, cookingTotalTimes);
-    }
-
-    @Override
-    public void apply(World world, BlockPos pos, BlockState state, CampfireSimulator simulator) {
-        DefaultedList<ItemStack> newItems = simulator.getItems();
-        for (int i = 0; i < itemsBeingCooked.size(); i++) {
-            itemsBeingCooked.set(i, newItems.get(i));
-        }
-
-        System.arraycopy(simulator.getCookingTimes(), 0, cookingTimes, 0, cookingTimes.length);
-
-        if (simulator.isDataChanged()) {
-            world.markDirty(pos);
-            if (!state.isAir()) {
-                world.updateComparators(pos, state.getBlock());
-            }
-        }
-    }
+	@Shadow @Final private DefaultedList<ItemStack> itemsBeingCooked;
+	@Shadow private int[] cookingTimes;
+	@Shadow private int[] cookingTotalTimes;
+	
+	@Override
+	public CampfireSimulator createSimulator() {
+		if (cookingTimes == null) cookingTimes = new int[4];
+		if (cookingTotalTimes == null) cookingTotalTimes = new int[4];
+		return new CampfireSimulator(itemsBeingCooked, cookingTimes, cookingTotalTimes);
+	}
+	
+	@Override
+	public void apply(World world, BlockPos pos, BlockState state, CampfireSimulator simulator) {
+		DefaultedList<ItemStack> newItems = simulator.getItems();
+		for (int i = 0; i < itemsBeingCooked.size(); i++) {
+			itemsBeingCooked.set(i, newItems.get(i));
+		}
+		
+		System.arraycopy(simulator.getCookingTimes(), 0, cookingTimes, 0, cookingTimes.length);
+		
+		if (simulator.isDataChanged()) {
+			world.markDirty(pos);
+			if (!state.isAir()) {
+				world.updateComparators(pos, state.getBlock());
+			}
+		}
+	}
 }

@@ -7,16 +7,16 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(ProtoChunk.class)
 public class ProtoChunkMixin implements TickableChunk {
-    @Unique
-    private long lastUpdateTime;
-
-    @Override
-    public long getLastUpdateTime() {
-        return lastUpdateTime;
-    }
-
-    @Override
-    public void setLastUpdateTime(long time) {
-        this.lastUpdateTime = time;
-    }
+	@Unique
+	private long lastUpdateTime;
+	
+	@Override
+	public long getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+	
+	@Override
+	public void setLastUpdateTime(long time) {
+		this.lastUpdateTime = time;
+	}
 }

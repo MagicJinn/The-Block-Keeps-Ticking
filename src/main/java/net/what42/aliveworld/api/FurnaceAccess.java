@@ -9,8 +9,8 @@ import net.minecraft.block.BlockState;
 import net.what42.aliveworld.simulator.FurnaceSimulator;
 
 public interface FurnaceAccess {
-    int getFuelBurnTime(ItemStack stack);
-    RecipeType<? extends AbstractCookingRecipe> getRecipeType();
-    FurnaceSimulator createSimulator();
-    void apply(World world, BlockPos pos, BlockState state, FurnaceSimulator simulator);
+	int getFuelBurnTime(ItemStack stack);
+	RecipeType<? extends AbstractCookingRecipe> getRecipeType();
+	FurnaceSimulator createSimulator();
+	void apply(World world, BlockPos pos, BlockState state, FurnaceSimulator simulator);
 }
