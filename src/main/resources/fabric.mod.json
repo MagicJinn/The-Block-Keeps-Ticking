@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "alive-world",
+  "id": "block-keeps-ticking",
   "version": "${version}",
   "name": "Alive World",
   "description": "Mod that adds progress for some blocks & entities in unloaded chunks. Commission for What42Pizza",
   "authors": ["Javivi09dev"],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/alive-world/icon.png",
+  "icon": "assets/block-keeps-ticking/icon.png",
   "environment": "*",
-  "accessWidener": "aliveworld.accesswidener",
+  "accessWidener": "blockkeepsticking.accesswidener",
   "entrypoints": {
     "client": [
-      "net.what42.aliveworld.client.AliveWorldClient"
+      "magicjinn.blockkeepsticking.client.BlockKeepsTickingClient"
     ],
     "main": [
-      "net.what42.aliveworld.AliveWorld"
+      "magicjinn.blockkeepsticking.BlockKeepsTicking"
     ]
   },
   "mixins": [
-    "aliveworld.mixins.json",
+    "blockkeepsticking.mixins.json",
     {
-      "config": "aliveworld.client.mixins.json",
+      "config": "blockkeepsticking.client.mixins.json",
       "environment": "client"
     }
   ],

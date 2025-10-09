@@ -1,9 +1,9 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.what42.aliveworld.mixin",
+  "package": "magicjinn.blockkeepsticking.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "aliveworld.refmap.json",
+  "refmap": "blockkeepsticking.refmap.json",
   "mixins": [
     "ChunkAccessMixin",
     "ChunkSerializerMixin",

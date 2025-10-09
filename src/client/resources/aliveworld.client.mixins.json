@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.what42.aliveworld.mixin.client",
+  "package": "magicjinn.blockkeepsticking.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
   ],
