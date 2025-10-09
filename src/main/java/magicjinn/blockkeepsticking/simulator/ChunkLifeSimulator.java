@@ -65,7 +65,7 @@ public class ChunkLifeSimulator {
 			if (blockEntity instanceof AbstractFurnaceBlockEntity && 
 					BlockKeepsTicking.CONFIG.isFurnacesEnabled()) {
 				FurnaceAccess access = (FurnaceAccess) blockEntity;
-				FurnaceSimulator simulator = access.createSimulator();
+				FurnaceSimulator simulator = access.createSimulator(world);
 				if (simulator.hasItemsToProcess()) {
 					simulator.simulateFinalResult(forcedTime, world, access);
 					access.apply(world, pos, state, simulator);
