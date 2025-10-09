@@ -3,17 +3,20 @@ package magicjinn.blockkeepsticking.simulator;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.BrewingRecipeRegistry;
+import net.minecraft.world.World;
 
 public class BrewingSimulator {
 	private final Inventory items;
 	private int brewTime;
 	private int fuel;
 	private boolean dataChanged;
+	private final World world;
 	
-	public BrewingSimulator(Inventory items, int brewTime, int fuel) {
+	public BrewingSimulator(Inventory items, int brewTime, int fuel, World world) {
 		this.items = items;
 		this.brewTime = brewTime;
 		this.fuel = fuel;
+		this.world = world;
 	}
 	
 	public boolean canBrew() {
@@ -21,10 +24,11 @@ public class BrewingSimulator {
 			return false;
 		}
 		
+		BrewingRecipeRegistry registry = world.getBrewingRecipeRegistry();
 		ItemStack ingredient = items.getStack(3);
 		for (int i = 0; i < 3; i++) {
 			ItemStack potion = items.getStack(i);
-			if (!potion.isEmpty() && BrewingRecipeRegistry.isValidIngredient(ingredient)) {
+			if (!potion.isEmpty() && registry.isValidIngredient(ingredient)) {
 				return true;
 			}
 		}
@@ -34,20 +38,22 @@ public class BrewingSimulator {
 	public void simulateFinalResult(int ticksPassed) {
 		if (!canBrew()) return;
 		
-		// Calcula cuántas operaciones completas de brewing pueden ocurrir
+		// Calculate how many complete brewing operations can occur
+		// comment already translated}}
 		int totalTime = brewTime + ticksPassed;
-		int completedBrews = totalTime / 400;  // 400 ticks por operación de brewing
-		int fuelNeeded = (completedBrews + 19) / 20;  // 20 operaciones por unidad de fuel
+		int completedBrews = totalTime / 400; // 400 ticks per brewing operation
+		int fuelNeeded = (completedBrews + 19) / 20; // 20 operations per fuel unit
 
 		if (completedBrews > 0 && fuel >= fuelNeeded) {
+			BrewingRecipeRegistry registry = world.getBrewingRecipeRegistry();
 			ItemStack ingredient = items.getStack(3);
 			boolean didBrew = false;
 			
-			// Procesar todas las pociones de una vez
+			// Process all potions at once
 			for (int i = 0; i < 3; i++) {
 				ItemStack potion = items.getStack(i);
-				if (!potion.isEmpty() && BrewingRecipeRegistry.isValidIngredient(ingredient)) {
-					ItemStack result = BrewingRecipeRegistry.craft(ingredient, potion);
+				if (!potion.isEmpty() && registry.isValidIngredient(ingredient)) {
+					ItemStack result = registry.craft(ingredient, potion);
 					if (!result.isEmpty()) {
 						items.setStack(i, result);
 						didBrew = true;
@@ -56,7 +62,7 @@ public class BrewingSimulator {
 			}
 			
 			if (didBrew) {
-				// Consumir ingrediente y combustible
+				// Consume ingredient and fuel
 				ingredient.decrement(1);
 				items.setStack(3, ingredient);
 				fuel -= fuelNeeded;

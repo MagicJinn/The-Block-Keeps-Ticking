@@ -17,8 +17,8 @@ public class BrewingStandBlockEntityMixin implements BrewingStandAccess {
 	@Shadow private net.minecraft.util.collection.DefaultedList<net.minecraft.item.ItemStack> inventory;
 	
 	@Override
-	public BrewingSimulator createSimulator() {
-		return new BrewingSimulator(ContainerUtils.createContainer(inventory), brewTime, fuel);
+	public BrewingSimulator createSimulator(World world) {
+		return new BrewingSimulator(ContainerUtils.createContainer(inventory), brewTime, fuel, world);
 	}
 	
 	@Override

@@ -20,6 +20,7 @@ import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.server.world.ServerWorld;
@@ -32,20 +33,20 @@ import java.util.Map;
 public class ChunkLifeSimulator {
 	public static void simulate(WorldChunk chunk, long timePassed) {
 		World world = chunk.getWorld();
-		if (!world.isClient && timePassed >= TimeUtils.MIN_PROCESS_INTERVAL) {
+		if (!world.isClient() && timePassed >= TimeUtils.MIN_PROCESS_INTERVAL) {
 			
-			// Procesar bloques
+			// Process blocks
 			if (!chunk.getBlockEntities().isEmpty()) {
 				simulateBlockEntities(chunk, (int)timePassed);
 			}
 			
-			// Procesar entidades
+			// Process entities
 			if ((BlockKeepsTicking.CONFIG.isMobGrowingEnabled()
 					|| BlockKeepsTicking.CONFIG.isChickenEggLayingEnabled())) {
 				simulateEntities(chunk, timePassed);
 			}
 			
-			// Procesar cultivos
+			// Process crops
 			if (BlockKeepsTicking.CONFIG.isCropsGrowingEnabled() && world instanceof ServerWorld) {
 				simulateCropGrowth((ServerWorld)world, chunk, timePassed);
 			}
@@ -74,7 +75,7 @@ public class ChunkLifeSimulator {
 			if (blockEntity instanceof BrewingStandBlockEntity && 
 					BlockKeepsTicking.CONFIG.isBrewingStandsEnabled()) {
 				BrewingStandAccess access = (BrewingStandAccess) blockEntity;
-				BrewingSimulator simulator = access.createSimulator();
+				BrewingSimulator simulator = access.createSimulator(world);
 				if (simulator.canBrew()) {
 					simulator.simulateFinalResult(forcedTime);
 					access.apply(world, pos, state, simulator);
@@ -97,13 +98,14 @@ public class ChunkLifeSimulator {
 	
 	private static void simulateEntities(WorldChunk chunk, long timePassed) {
 		World world = chunk.getWorld();
+		ChunkPos chunkPos = chunk.getPos();
 		Box box = new Box(
-			chunk.getPos().getStartX(),
+				chunkPos.getStartX(),
 			world.getBottomY(),
-			chunk.getPos().getStartZ(),
-			chunk.getPos().getEndX() + 1,
+				chunkPos.getStartZ(),
+				chunkPos.getEndX() + 1,
 				world.getHeight(),
-			chunk.getPos().getEndZ() + 1
+				chunkPos.getEndZ() + 1
 		);
 		
 		List<Entity> entities = world.getEntitiesByClass(Entity.class, box, entity -> true);
@@ -176,7 +178,7 @@ public class ChunkLifeSimulator {
 	        return;
 	    }
 
-	    int currentAge = state.get(crop.getAgeProperty());
+		int currentAge = crop.getAge(state);
 	    if (currentAge >= crop.getMaxAge()) {
 	        return;
 	    }
@@ -192,7 +194,7 @@ public class ChunkLifeSimulator {
 	    int newAge = Math.min(currentAge + growthStages, crop.getMaxAge());
 	    
 	    if (newAge > currentAge) {
-	        world.setBlockState(pos, state.with(crop.getAgeProperty(), newAge), 2);
+			world.setBlockState(pos, state.with(CropBlock.AGE, newAge), 2);
 	    }
 	}
 	
