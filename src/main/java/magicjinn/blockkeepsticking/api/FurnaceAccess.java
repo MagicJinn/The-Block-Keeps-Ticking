@@ -11,6 +11,7 @@ import magicjinn.blockkeepsticking.simulator.FurnaceSimulator;
 public interface FurnaceAccess {
 	int getFuelBurnTime(ItemStack stack);
 	RecipeType<? extends AbstractCookingRecipe> getRecipeType();
-	FurnaceSimulator createSimulator();
+
+	FurnaceSimulator createSimulator(World world);
 	void apply(World world, BlockPos pos, BlockState state, FurnaceSimulator simulator);
 }

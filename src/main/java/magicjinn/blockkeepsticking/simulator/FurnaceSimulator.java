@@ -4,8 +4,11 @@ import magicjinn.blockkeepsticking.BlockKeepsTicking;
 import magicjinn.blockkeepsticking.api.FurnaceAccess;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -18,20 +21,28 @@ public class FurnaceSimulator {
 	private int cookingProgress;
 	private int cookingTotalTime;
 	private boolean dataChanged;
+	private final World world;
 	private final Object2IntOpenHashMap<Identifier> recipesUsed = new Object2IntOpenHashMap<>();
 	
-	public FurnaceSimulator(Inventory items, int litTime, int litDuration, int cookingProgress, int cookingTotalTime) {
+	public FurnaceSimulator(Inventory items, int litTime, int litDuration, int cookingProgress, int cookingTotalTime,
+			World world) {
 		this.items = items;
 		this.litTime = litTime;
 		this.litDuration = litDuration;
 		this.cookingProgress = cookingProgress;
 		this.cookingTotalTime = cookingTotalTime;
+		this.world = world;
 	}
+
 	
 	public boolean hasItemsToProcess() {
 		return !ingredient().isEmpty() && (hasFuel() || litTime > 0);
 	}
-	
+
+	public ItemStack getOutputCheat(AbstractCookingRecipe recipe) {
+		return recipe.craft(new SingleStackRecipeInput(ingredient()), (RegistryWrapper.WrapperLookup) world.getRegistryManager())
+	}
+
 	public void simulateFinalResult(int tickPassed, World world, FurnaceAccess furnace) {
 		if (!hasItemsToProcess()) return;
 		
@@ -42,8 +53,8 @@ public class FurnaceSimulator {
 		if (recipe.isEmpty()) return;
 		
 		AbstractCookingRecipe cookingRecipe = recipe.get();
-		cookingTotalTime = cookingRecipe.getCookTime();
-		ItemStack recipeResult = cookingRecipe.getOutput();
+		cookingTotalTime = cookingRecipe.getCookingTime();
+		ItemStack recipeResult = getOutputCheat(cookingRecipe);
 		
 		// Procesar al menos una operación completa
 		int forcedTicks = Math.max(tickPassed, cookingTotalTime);
@@ -61,15 +72,15 @@ public class FurnaceSimulator {
 		int ingredientLimit = ingredient().getCount();
 		
 		// Espacio disponible para resultados
-		int maxStackSize = getMaxStackSize(items, recipe.getOutput());
+		int maxStackSize = getMaxStackSize(items, getOutputCheat(recipe));
 		int currentResultCount = result().isEmpty() ? 0 : result().getCount();
-		int outputLimit = (maxStackSize - currentResultCount) / recipe.getOutput().getCount();
+		int outputLimit = (maxStackSize - currentResultCount) / getOutputCheat(recipe).getCount();
 		
 		// Combustible disponible
-		int fuelLimit = calculateFuelLimit(furnace, recipe.getCookTime());
+		int fuelLimit = calculateFuelLimit(furnace, recipe.getCookingTime());
 		
 		// Tiempo total disponible (incluyendo progreso actual)
-		int timeLimit = (tickPassed + cookingProgress) / recipe.getCookTime();
+		int timeLimit = (tickPassed + cookingProgress) / recipe.getCookingTime();
 		
 		// Garantizar al menos una operación si hay suficientes recursos
 		if (ingredientLimit > 0 && outputLimit > 0 && fuelLimit > 0) {

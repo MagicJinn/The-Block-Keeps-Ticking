@@ -34,8 +34,9 @@ public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 	@Shadow protected abstract int getFuelTime(ItemStack fuel);
 	
 	@Override
-	public FurnaceSimulator createSimulator() {
-		return new FurnaceSimulator(ContainerUtils.createContainer(inventory), burnTime, fuelTime, cookTime, cookTimeTotal);
+	public FurnaceSimulator createSimulator(World world) {
+		return new FurnaceSimulator(ContainerUtils.createContainer(inventory), burnTime, fuelTime, cookTime,
+				cookTimeTotal,world);
 	}
 	
 	@Override
