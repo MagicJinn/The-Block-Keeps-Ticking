@@ -102,7 +102,7 @@ public class ChunkLifeSimulator {
 			world.getBottomY(),
 			chunk.getPos().getStartZ(),
 			chunk.getPos().getEndX() + 1,
-			world.getTopY(),
+				world.getHeight(),
 			chunk.getPos().getEndZ() + 1
 		);
 		

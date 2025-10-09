@@ -41,7 +41,7 @@ public class ChunkAccessMixin implements TickableChunk {
 	}
 
 	private boolean hasUpdatableContent(WorldChunk chunk) {
-		// Verificar entidades de bloque específicas que nos interesan
+		// Check specific block entities that we are interested in
 		for (var entry : chunk.getBlockEntities().entrySet()) {
 			if (entry.getValue() instanceof net.minecraft.block.entity.AbstractFurnaceBlockEntity ||
 					entry.getValue() instanceof net.minecraft.block.entity.BrewingStandBlockEntity ||
@@ -50,17 +50,17 @@ public class ChunkAccessMixin implements TickableChunk {
 			}
 		}
 
-		// Verificar entidades solo si es necesario
+		// Check entities only if necessary
 		ChunkPos pos = chunk.getPos();
 		Box chunkBox = new Box(
 				pos.getStartX(), chunk.getWorld().getBottomY(), pos.getStartZ(),
-				pos.getEndX() + 1, chunk.getWorld().getTopY(), pos.getEndZ() + 1);
+				pos.getEndX() + 1, chunk.getWorld().getHeight(), pos.getEndZ() + 1);
 
 		if (!chunk.getWorld().getEntitiesByClass(net.minecraft.entity.Entity.class, chunkBox, e -> true).isEmpty()) {
 			return true;
 		}
 
-		// Verificar rápidamente si hay secciones con bloques
+		// Quickly check if there are sections with blocks
 		for (var section : chunk.getSectionArray()) {
 			if (section != null && !section.isEmpty()) {
 				return true;
