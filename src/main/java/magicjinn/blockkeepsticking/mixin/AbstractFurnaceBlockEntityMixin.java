@@ -11,7 +11,8 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.ServerRecipeManager;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -24,61 +25,64 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 	@Shadow protected DefaultedList<ItemStack> inventory;
-	@Shadow protected int burnTime;
-	@Shadow protected int fuelTime;
-	@Shadow protected int cookTime;
-	@Shadow protected int cookTimeTotal;
-	@Shadow @Final private RecipeType<? extends AbstractCookingRecipe> recipeType;
+	@Shadow protected int litTimeRemaining;
+	@Shadow protected int litTotalTime;
+	@Shadow protected int cookingTimeSpent;
+	@Shadow protected int cookingTotalTime;
 	@Shadow @Final private Object2IntOpenHashMap<Identifier> recipesUsed;
-	
-	@Shadow protected abstract int getFuelTime(ItemStack fuel);
-	
+	@Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
+	@Shadow public World world;
+
+	@Shadow
+	protected abstract int getFuelTime(net.minecraft.item.FuelRegistry fuelRegistry,
+			ItemStack stack);
+
 	@Override
 	public FurnaceSimulator createSimulator(World world) {
-		return new FurnaceSimulator(ContainerUtils.createContainer(inventory), burnTime, fuelTime, cookTime,
-				cookTimeTotal,world);
+		return new FurnaceSimulator(ContainerUtils.createContainer(inventory), litTimeRemaining,
+				litTotalTime, cookingTimeSpent, cookingTotalTime, world);
 	}
-	
+
 	@Override
 	public int getFuelBurnTime(ItemStack fuel) {
-		return getFuelTime(fuel);
+		return getFuelTime(world.getFuelRegistry(), fuel);
 	}
-	
-	@Override
-	public RecipeType<? extends AbstractCookingRecipe> getRecipeType() {
-		return recipeType;
+
+	public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> getMatchGetter() {
+		return matchGetter;
 	}
-	
+
 	@Override
 	public void apply(World world, BlockPos pos, BlockState state, FurnaceSimulator simulator) {
-		boolean oldLit = burnTime > 0;
+		boolean oldLit = litTimeRemaining > 0;
 		boolean dataChanged = simulator.isDataChanged();
-		
+
 		if (dataChanged) {
-			// Actualizar inventario
+			// Update inventory
 			ContainerUtils.extractContainer(simulator.getContainer(), inventory);
-			
-			// Actualizar estados
-			burnTime = simulator.getLitTime();
-			fuelTime = simulator.getLitDuration();
-			cookTime = simulator.getCookingProgress();
-			cookTimeTotal = simulator.getCookingTotalTime();
-			
-			// Actualizar recetas usadas
+
+			// Update states
+			litTimeRemaining = simulator.getLitTime();
+			litTotalTime = simulator.getLitDuration();
+			cookingTimeSpent = simulator.getCookingProgress();
+			cookingTotalTime = simulator.getCookingTotalTime();
+
+			// Update used recipes
 			for (Object2IntMap.Entry<Identifier> entry : simulator.getRecipesUsed().object2IntEntrySet()) {
 				recipesUsed.addTo(entry.getKey(), entry.getIntValue());
 			}
-			
-			BlockKeepsTicking.LOGGER.info("Aplying changes on furnace {}: burnTime={}, cookTime={}/{}", pos, burnTime,
-					cookTime, cookTimeTotal);
-			
-			// Actualizar estado de encendido si cambió
-			if (oldLit != burnTime > 0) {
-				state = state.with(AbstractFurnaceBlock.LIT, burnTime > 0);
+
+			BlockKeepsTicking.LOGGER.info(
+					"Applying changes on furnace {}: litTimeRemaining={}, cookingTimeSpent={}/{}",
+					pos, litTimeRemaining, cookingTimeSpent, cookingTotalTime);
+
+			// Update lit state if changed
+			if (oldLit != litTimeRemaining > 0) {
+				state = state.with(AbstractFurnaceBlock.LIT, litTimeRemaining > 0);
 				world.setBlockState(pos, state, 3);
 			}
-			
-			// Marcar cambios
+
+			// Mark changes
 			BlockEntityUtils.markChanged(world, pos, state);
 		}
 	}
