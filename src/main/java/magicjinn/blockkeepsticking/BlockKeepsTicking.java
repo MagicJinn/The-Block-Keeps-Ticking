@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 public class BlockKeepsTicking implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("block-keeps-ticking");
 	public static final Config CONFIG = Config.getInstance();
+	public static final String LAST_UPDATE_KEY = "BlockKeepsTicking_LastUpdateTime";
 
 	@Override
 	public void onInitialize() {
