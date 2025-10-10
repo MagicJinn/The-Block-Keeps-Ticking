@@ -14,7 +14,7 @@ public class Config {
 		.setPrettyPrinting()
 		.registerTypeAdapter(Config.class, new ConfigDeserializer())
 		.create();
-	private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("alive_world.json");
+	private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("block-keeps-ticking.json");
 	
 	private boolean furnacesEnabled = true;
 	private boolean brewingStandsEnabled = true;
@@ -43,7 +43,7 @@ public class Config {
 			}
 			save();
 		} catch (IOException e) {
-			BlockKeepsTicking.LOGGER.error("Failed to load Alive World config: {}", e.getMessage());
+			BlockKeepsTicking.LOGGER.error("Failed to load The Block Keeps Ticking config: {}", e.getMessage());
 			save();  // Guardar config por defecto si falla la carga
 		}
 	}
@@ -53,7 +53,7 @@ public class Config {
 			Files.createDirectories(CONFIG_PATH.getParent());
 			Files.writeString(CONFIG_PATH, GSON.toJson(this));
 		} catch (IOException e) {
-			BlockKeepsTicking.LOGGER.error("Failed to save Alive World config: {}", e.getMessage());
+			BlockKeepsTicking.LOGGER.error("Failed to save The Block Keeps Ticking config: {}", e.getMessage());
 		}
 	}
 	

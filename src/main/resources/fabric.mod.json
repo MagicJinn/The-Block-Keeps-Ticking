@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "block-keeps-ticking",
   "version": "${version}",
-  "name": "Alive World",
+  "name": "The Block Keeps Ticking",
   "description": "Mod that adds progress for some blocks & entities in unloaded chunks. Commission for What42Pizza",
   "authors": ["Javivi09dev"],
   "contact": {},

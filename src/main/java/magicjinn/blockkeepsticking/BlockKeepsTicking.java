@@ -13,9 +13,9 @@ public class BlockKeepsTicking implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing Alive World");
+		LOGGER.info("Initializing The Block Keeps Ticking");
 
-		// Registrar el ChunkManager como listener de eventos de chunks
+        // Register the ChunkManager as a chunk events listener
 		ChunkEvents.registerUnloadCallback(ChunkManager.getInstance());
 	}
 }
