@@ -5,15 +5,16 @@ import magicjinn.blockkeepsticking.api.FurnaceAccess;
 import magicjinn.blockkeepsticking.simulator.FurnaceSimulator;
 import magicjinn.blockkeepsticking.util.BlockEntityUtils;
 import magicjinn.blockkeepsticking.util.ContainerUtils;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
-import net.minecraft.util.Identifier;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -29,7 +30,7 @@ public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 	@Shadow protected int litTotalTime;
 	@Shadow protected int cookingTimeSpent;
 	@Shadow protected int cookingTotalTime;
-	@Shadow @Final private Object2IntOpenHashMap<Identifier> recipesUsed;
+	@Shadow @Final private Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed;
 	@Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
 	@Shadow public World world;
 
@@ -48,9 +49,10 @@ public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 		return getFuelTime(world.getFuelRegistry(), fuel);
 	}
 
-	public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> getMatchGetter() {
-		return matchGetter;
-	}
+	// public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends
+	// AbstractCookingRecipe> getMatchGetter() {
+	// return matchGetter;
+	// }
 
 	@Override
 	public void apply(World world, BlockPos pos, BlockState state, FurnaceSimulator simulator) {
@@ -68,7 +70,8 @@ public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 			cookingTotalTime = simulator.getCookingTotalTime();
 
 			// Update used recipes
-			for (Object2IntMap.Entry<Identifier> entry : simulator.getRecipesUsed().object2IntEntrySet()) {
+			for (Reference2IntMap.Entry<RegistryKey<Recipe<?>>> entry : simulator.getRecipesUsed()
+					.reference2IntEntrySet()) {
 				recipesUsed.addTo(entry.getKey(), entry.getIntValue());
 			}
 

@@ -4,15 +4,17 @@ import magicjinn.blockkeepsticking.BlockKeepsTicking;
 import magicjinn.blockkeepsticking.api.FurnaceAccess;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.recipe.AbstractCookingRecipe;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.Optional;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 
 public class FurnaceSimulator {
 	private final Inventory items;
@@ -22,7 +24,10 @@ public class FurnaceSimulator {
 	private int cookingTotalTime;
 	private boolean dataChanged;
 	private final World world;
-	private final Object2IntOpenHashMap<Identifier> recipesUsed = new Object2IntOpenHashMap<>();
+	private final Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed =
+			new Reference2IntOpenHashMap<RegistryKey<Recipe<?>>>();
+	private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
+
 	
 	public FurnaceSimulator(Inventory items, int litTime, int litDuration, int cookingProgress, int cookingTotalTime,
 			World world) {
@@ -40,28 +45,38 @@ public class FurnaceSimulator {
 	}
 
 	public ItemStack getOutputCheat(AbstractCookingRecipe recipe) {
-		return recipe.craft(new SingleStackRecipeInput(ingredient()), (RegistryWrapper.WrapperLookup) world.getRegistryManager())
+		return recipe.craft(new SingleStackRecipeInput(ingredient()),
+				(RegistryWrapper.WrapperLookup) world.getRegistryManager());
 	}
 
 	public void simulateFinalResult(int tickPassed, World world, FurnaceAccess furnace) {
 		if (!hasItemsToProcess()) return;
 		
 		@SuppressWarnings("unchecked")
-		RecipeType<AbstractCookingRecipe> type = (RecipeType<AbstractCookingRecipe>) furnace.getRecipeType();
-		Optional<AbstractCookingRecipe> recipe = world.getRecipeManager().getFirstMatch(type, new SimpleInventory(ingredient()), world);
-		
-		if (recipe.isEmpty()) return;
-		
-		AbstractCookingRecipe cookingRecipe = recipe.get();
+		RecipeType<AbstractCookingRecipe> type =
+				(RecipeType<AbstractCookingRecipe>) furnace.getRecipeType();
+
+		matchGetter = ServerRecipeManager.createCachedMatchGetter(type);
+		SingleStackRecipeInput input = new SingleStackRecipeInput(ingredient());
+		@SuppressWarnings("rawtypes")
+		RecipeEntry recipe = matchGetter.getFirstMatch(input, (ServerWorld) world).orElse(null);
+
+
+		if (recipe == null)
+			return;
+
+		AbstractCookingRecipe cookingRecipe = (AbstractCookingRecipe) recipe.value();
 		cookingTotalTime = cookingRecipe.getCookingTime();
 		ItemStack recipeResult = getOutputCheat(cookingRecipe);
 		
-		// Procesar al menos una operación completa
+		// Process at least one complete operation
 		int forcedTicks = Math.max(tickPassed, cookingTotalTime);
 		int maxOperations = calculateMaxOperations(furnace, forcedTicks, cookingRecipe);
 		
 		if (maxOperations > 0) {
-			applyFinalResult(maxOperations, recipeResult, cookingRecipe);
+			@SuppressWarnings("unchecked")
+			RecipeEntry<AbstractCookingRecipe> typedRecipe = recipe;
+			applyFinalResult(maxOperations, recipeResult, typedRecipe);
 			dataChanged = true;
 			BlockKeepsTicking.LOGGER.info("Applying final result: {} operations", maxOperations);
 		}
@@ -105,7 +120,8 @@ public class FurnaceSimulator {
 		return totalFuelTicks / recipeCookTime;
 	}
 	
-	private void applyFinalResult(int operations, ItemStack recipeResult, AbstractCookingRecipe recipe) {
+	private void applyFinalResult(int operations, ItemStack recipeResult,
+			RecipeEntry<AbstractCookingRecipe> recipe) {
 		// Consumir ingredientes
 		ingredient().decrement(operations);
 		
@@ -122,9 +138,9 @@ public class FurnaceSimulator {
 		consumeFuelForTime(totalCookingTime);
 		
 		// Registrar recetas usadas
-		recipesUsed.addTo(recipe.getId(), operations);
+		recipesUsed.addTo(recipe.id(), operations);
 		
-		// Actualizar progreso
+		// Update progress
 		cookingProgress = 0;
 	}
 	
@@ -197,54 +213,55 @@ public class FurnaceSimulator {
 		return dataChanged;
 	}
 	
-	public Object2IntOpenHashMap<Identifier> getRecipesUsed() {
+	public Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> getRecipesUsed() {
 		return recipesUsed;
 	}
 	
-	private static class SimpleInventory implements Inventory {
-		private final ItemStack stack;
+	// Not required anymore, I think
+	// private static class SimpleInventory implements Inventory {
+	// private final ItemStack stack;
 		
-		SimpleInventory(ItemStack stack) {
-			this.stack = stack;
-		}
+	// SimpleInventory(ItemStack stack) {
+	// this.stack = stack;
+	// }
 		
-		@Override
-		public int size() {
-			return 1;
-		}
+	// @Override
+	// public int size() {
+	// return 1;
+	// }
 		
-		@Override
-		public boolean isEmpty() {
-			return stack.isEmpty();
-		}
+	// @Override
+	// public boolean isEmpty() {
+	// return stack.isEmpty();
+	// }
 		
-		@Override
-		public ItemStack getStack(int slot) {
-			return slot == 0 ? stack : ItemStack.EMPTY;
-		}
+	// @Override
+	// public ItemStack getStack(int slot) {
+	// return slot == 0 ? stack : ItemStack.EMPTY;
+	// }
 		
-		@Override
-		public ItemStack removeStack(int slot, int amount) {
-			return ItemStack.EMPTY;
-		}
+	// @Override
+	// public ItemStack removeStack(int slot, int amount) {
+	// return ItemStack.EMPTY;
+	// }
 		
-		@Override
-		public ItemStack removeStack(int slot) {
-			return ItemStack.EMPTY;
-		}
+	// @Override
+	// public ItemStack removeStack(int slot) {
+	// return ItemStack.EMPTY;
+	// }
 		
-		@Override
-		public void setStack(int slot, ItemStack stack) {}
+	// @Override
+	// public void setStack(int slot, ItemStack stack) {}
 		
-		@Override
-		public void markDirty() {}
+	// @Override
+	// public void markDirty() {}
 		
-		@Override
-		public boolean canPlayerUse(net.minecraft.entity.player.PlayerEntity player) {
-			return true;
-		}
+	// @Override
+	// public boolean canPlayerUse(net.minecraft.entity.player.PlayerEntity player) {
+	// return true;
+	// }
 		
-		@Override
-		public void clear() {}
-	}
+	// @Override
+	// public void clear() {}
+	// }
 }
