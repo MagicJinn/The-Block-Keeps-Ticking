@@ -111,7 +111,7 @@ public class FurnaceSimulator {
 		ItemStack fuelStack = fuel();
 		
 		if (!fuelStack.isEmpty()) {
-			int burnTime = furnace.getFuelBurnTime(fuelStack);
+			int burnTime = furnace.getFuelBurnTime(fuelStack, world);
 			if (burnTime > 0) {
 				totalFuelTicks += burnTime * fuelStack.getCount();
 			}

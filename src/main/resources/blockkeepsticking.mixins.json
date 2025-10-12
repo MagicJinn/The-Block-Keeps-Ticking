@@ -1,20 +1,16 @@
 {
   "required": true,
-  "minVersion": "0.8",
   "package": "magicjinn.blockkeepsticking.mixin",
   "compatibilityLevel": "JAVA_21",
   "refmap": "blockkeepsticking.refmap.json",
   "mixins": [
-    "ChunkAccessMixin",
-    "WorldChunkMixin",
     "AbstractFurnaceBlockEntityMixin",
     "BrewingStandBlockEntityMixin",
     "CampfireBlockEntityMixin",
+    "ChunkAccessMixin",
     "ProtoChunkMixin",
-    "ThreadedAnvilChunkStorageMixin"
+    "ServerChunkLoadingManagerMixin"
   ],
-  "client": [],
-  "server": [],
   "injectors": {
     "defaultRequire": 1
   }

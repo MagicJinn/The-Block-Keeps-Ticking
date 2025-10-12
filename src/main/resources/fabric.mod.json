@@ -1,33 +1,35 @@
 {
-  "schemaVersion": 1,
-  "id": "block-keeps-ticking",
-  "version": "${version}",
-  "name": "The Block Keeps Ticking",
-  "description": "Mod that adds progress for some blocks & entities in unloaded chunks. Commission for What42Pizza",
-  "authors": ["Javivi09dev"],
-  "contact": {},
-  "license": "MIT",
-  "icon": "assets/block-keeps-ticking/icon.png",
-  "environment": "*",
-  "accessWidener": "blockkeepsticking.accesswidener",
-  "entrypoints": {
-    "client": [
-      "magicjinn.blockkeepsticking.client.BlockKeepsTickingClient"
+    "schemaVersion": 1,
+    "id": "block-keeps-ticking",
+    "version": "${version}",
+    "name": "The Block Keeps Ticking",
+    "description": "Mod that adds progress for some blocks & entities in unloaded chunks. Commission for What42Pizza",
+    "authors": ["MagicJinn"],
+    "contact": {
+        "homepage": "https://github.com/MagicJinn/Beacon-Aura",
+        "issues": "https://github.com/MagicJinn/Beacon-Aura/issues"
+    },
+    "license": "MIT",
+    "icon": "assets/block-keeps-ticking/icon.png",
+    "environment": "*",
+    "accessWidener": "blockkeepsticking.accesswidener",
+    "entrypoints": {
+        "client": [
+            "magicjinn.blockkeepsticking.client.BlockKeepsTickingClient"
+        ],
+        "main": [
+            "magicjinn.blockkeepsticking.BlockKeepsTicking"
+        ]
+    },
+    "mixins": [
+        "blockkeepsticking.mixins.json",
+        {
+            "config": "blockkeepsticking.client.mixins.json",
+            "environment": "client"
+        }
     ],
-    "main": [
-      "magicjinn.blockkeepsticking.BlockKeepsTicking"
-    ]
-  },
-  "mixins": [
-    "blockkeepsticking.mixins.json",
-    {
-      "config": "blockkeepsticking.client.mixins.json",
-      "environment": "client"
+    "depends": {
+        "fabricloader": "*",
+        "minecraft": ">=1.21.0"
     }
-  ],
-  "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
-  }
 }

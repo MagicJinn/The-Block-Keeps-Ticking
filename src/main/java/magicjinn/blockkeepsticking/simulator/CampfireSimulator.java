@@ -1,6 +1,5 @@
 package magicjinn.blockkeepsticking.simulator;
 
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CampfireCookingRecipe;
 import net.minecraft.recipe.RecipeType;

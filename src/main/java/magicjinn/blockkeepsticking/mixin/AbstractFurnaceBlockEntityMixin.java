@@ -32,7 +32,7 @@ public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 	@Shadow protected int cookingTotalTime;
 	@Shadow @Final private Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed;
 	@Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
-	@Shadow public World world;
+	// @Shadow public World world;
 
 	@Shadow
 	protected abstract int getFuelTime(net.minecraft.item.FuelRegistry fuelRegistry,
@@ -45,14 +45,9 @@ public abstract class AbstractFurnaceBlockEntityMixin implements FurnaceAccess {
 	}
 
 	@Override
-	public int getFuelBurnTime(ItemStack fuel) {
+	public int getFuelBurnTime(ItemStack fuel, World world) {
 		return getFuelTime(world.getFuelRegistry(), fuel);
 	}
-
-	// public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends
-	// AbstractCookingRecipe> getMatchGetter() {
-	// return matchGetter;
-	// }
 
 	@Override
 	public void apply(World world, BlockPos pos, BlockState state, FurnaceSimulator simulator) {

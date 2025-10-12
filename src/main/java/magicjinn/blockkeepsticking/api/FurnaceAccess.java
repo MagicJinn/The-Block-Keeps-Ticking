@@ -9,7 +9,7 @@ import net.minecraft.block.BlockState;
 import magicjinn.blockkeepsticking.simulator.FurnaceSimulator;
 
 public interface FurnaceAccess {
-	int getFuelBurnTime(ItemStack stack);
+	int getFuelBurnTime(ItemStack stack, World world);
 	RecipeType<? extends AbstractCookingRecipe> getRecipeType();
 
 	FurnaceSimulator createSimulator(World world);

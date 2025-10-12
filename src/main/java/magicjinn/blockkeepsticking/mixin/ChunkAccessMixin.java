@@ -2,6 +2,7 @@ package magicjinn.blockkeepsticking.mixin;
 
 import magicjinn.blockkeepsticking.api.TickableChunk;
 import magicjinn.blockkeepsticking.simulator.ChunkLifeSimulator;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -17,7 +18,7 @@ public class ChunkAccessMixin implements TickableChunk {
 	private long lastUpdateTime = -1L;
 
 	@Inject(method = "increaseInhabitedTime", at = @At("HEAD"))
-	public void onIncrementInhabitedTime(long time, CallbackInfo ci) {
+	public void onIncreaseInhabitedTime(long time, CallbackInfo ci) {
 		if ((Object) this instanceof WorldChunk chunk) {
 			World world = chunk.getWorld();
 
@@ -43,9 +44,10 @@ public class ChunkAccessMixin implements TickableChunk {
 	private boolean hasUpdatableContent(WorldChunk chunk) {
 		// Check specific block entities that we are interested in
 		for (var entry : chunk.getBlockEntities().entrySet()) {
-			if (entry.getValue() instanceof net.minecraft.block.entity.AbstractFurnaceBlockEntity ||
-					entry.getValue() instanceof net.minecraft.block.entity.BrewingStandBlockEntity ||
-					entry.getValue() instanceof net.minecraft.block.entity.CampfireBlockEntity) {
+			BlockEntity blockEntity = entry.getValue();
+			if (blockEntity instanceof net.minecraft.block.entity.AbstractFurnaceBlockEntity
+					|| blockEntity instanceof net.minecraft.block.entity.BrewingStandBlockEntity
+					|| blockEntity instanceof net.minecraft.block.entity.CampfireBlockEntity) {
 				return true;
 			}
 		}
