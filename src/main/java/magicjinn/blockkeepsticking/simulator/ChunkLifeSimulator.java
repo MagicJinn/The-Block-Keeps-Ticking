@@ -17,6 +17,10 @@ import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.PassiveEntity;
+import net.minecraft.recipe.CampfireCookingRecipe;
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.ServerRecipeManager;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -89,7 +93,7 @@ public class ChunkLifeSimulator {
 				CampfireAccess access = (CampfireAccess) blockEntity;
 				CampfireSimulator simulator = access.createSimulator();
 				if (simulator.hasItemsCooking()) {
-					simulator.simulateFinalResult(forcedTime, world.getRecipeManager());
+					simulator.simulateFinalResult(forcedTime, world);
 					access.apply(world, pos, state, simulator);
 				}
 			}
