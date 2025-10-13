@@ -2,7 +2,6 @@
   "required": true,
   "package": "magicjinn.blockkeepsticking.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "blockkeepsticking.refmap.json",
   "mixins": [
     "AbstractFurnaceBlockEntityMixin",
     "BrewingStandBlockEntityMixin",
