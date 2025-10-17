@@ -10,34 +10,52 @@ base {
 	archivesName = project.archives_base_name
 }
 
-repositories {}
+repositories {
+	// YetAnotherConfigLib
+    maven {
+        url = "https://maven.isxander.dev/releases"
+        name = "Xander Maven"
+    }
+	// ModMenu
+    maven {
+        name = "Terraformers"
+        url = "https://maven.terraformersmc.com/"
+    }
+}
 
 loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"block-keeps-ticking" {
+		"the-block-keeps-ticking" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
 	}
-    // Explicitly enable refmap generation
-    accessWidenerPath = file("src/main/resources/blockkeepsticking.accesswidener")
+
 }
 
 dependencies {
+	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+	
 }
 
 processResources {
 	inputs.property "version", project.version
+	inputs.property "mod_name", project.mod_name
+	inputs.property "mod_author", project.mod_author
 
 	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
+		expand "version": inputs.properties.version,
+		       "mod_name": inputs.properties.mod_name,
+		       "mod_author": inputs.properties.mod_author
 	}
 }
 
@@ -69,8 +87,41 @@ publishing {
 		create("mavenJava", MavenPublication) {
 			artifactId = project.archives_base_name
 			from components.java
+			
+			pom {
+				name = project.mod_name
+				description = "A mod to simulate progress in unloaded chunks."
+				url = "https://github.com/MagicJinn/The-Block-Keeps-Ticking"
+				
+				developers {
+					developer {
+						id = "magicjinn"
+						name = "MagicJinn"
+						email = "magicjinn@mail.com"
+					}
+				}
+				
+				licenses {
+					license {
+						name = "MIT"
+						url = "https://mit-license.org/"
+					}
+				}
+				
+				scm {
+					connection = "scm:git:git://github.com/MagicJinn/The-Block-Keeps-Ticking.git"
+					developerConnection = "scm:git:ssh://github.com:MagicJinn/The-Block-Keeps-Ticking.git"
+					url = "https://github.com/MagicJinn/The-Block-Keeps-Ticking"
+				}
+			}
 		}
 	}
+
 	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {}
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
 }

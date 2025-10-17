@@ -1,35 +1,42 @@
 {
     "schemaVersion": 1,
-    "id": "block-keeps-ticking",
+    "id": "the-block-keeps-ticking",
     "version": "${version}",
     "name": "The Block Keeps Ticking",
-    "description": "Mod that adds progress for some blocks & entities in unloaded chunks. Commission for What42Pizza",
+    "description": "A mod to simulate progress in unloaded chunks.",
     "authors": ["MagicJinn"],
     "contact": {
         "homepage": "https://github.com/MagicJinn/Beacon-Aura",
         "issues": "https://github.com/MagicJinn/Beacon-Aura/issues"
     },
     "license": "MIT",
-    "icon": "assets/block-keeps-ticking/icon.png",
+    "icon": "assets/the-block-keeps-ticking/icon.png",
     "environment": "*",
-    "accessWidener": "blockkeepsticking.accesswidener",
     "entrypoints": {
-        "client": [
-            "magicjinn.blockkeepsticking.client.BlockKeepsTickingClient"
-        ],
-        "main": [
-            "magicjinn.blockkeepsticking.BlockKeepsTicking"
-        ]
+        "main": ["magicjinn.the-block-keeps-ticking.TheBlockKeepsTicking"],
+        "client": ["magicjinn.the-block-keeps-ticking.TheBlockKeepsTickingClient"],
+        "modmenu": ["magicjinn.the-block-keeps-ticking.config.ModMenuIntegration"]
     },
-    "mixins": [
-        "blockkeepsticking.mixins.json",
-        {
-            "config": "blockkeepsticking.client.mixins.json",
-            "environment": "client"
-        }
-    ],
+    "mixins": ["the-block-keeps-ticking.mixins.json", {
+        "config": "the-block-keeps-ticking.client.mixins.json",
+        "environment": "client"
+    }],
     "depends": {
         "fabricloader": "*",
-        "minecraft": ">=1.21.0"
+        "minecraft": ">=1.21.0",
+        "java": ">=17",
+		"fabric-api": "*"
+    },
+    "suggests": {
+        "modmenu": "*",
+        "yet-another-config-lib": "*"
+    },
+	"custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.discord": "https://discord.gg/bQvtauxXWp",
+                "modmenu.source": "https://github.com/MagicJinn/The-Block-Keeps-Ticking"
+            }
+        }
     }
 }
