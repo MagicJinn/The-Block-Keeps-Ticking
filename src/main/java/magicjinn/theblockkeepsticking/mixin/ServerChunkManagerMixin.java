@@ -7,9 +7,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
+import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ChunkLevelManager;
 import net.minecraft.server.world.ServerChunkManager;
@@ -64,16 +64,15 @@ public class ServerChunkManagerMixin {
     }
 
     private void onChunkEnterSimulation(long chunkPos) {
-        int chunkX = (int) chunkPos;
-        int chunkZ = (int) (chunkPos >> 32);
+        // int chunkX = (int) chunkPos;
+        // int chunkZ = (int) (chunkPos >> 32);
         WorldChunk chunk = getChunkFromPos(chunkPos);
-        // System.out.println("Chunk ENTERED simulation: " + chunkX + ", " + chunkZ);
-        // Your code here
+        WorldSimulator.SimulateWorld(chunk);
     }
 
     private void onChunkLeaveSimulation(long chunkPos) {
-        int chunkX = (int) chunkPos;
-        int chunkZ = (int) (chunkPos >> 32);
+        // int chunkX = (int) chunkPos;
+        // int chunkZ = (int) (chunkPos >> 32);
         WorldChunk chunk = getChunkFromPos(chunkPos);
         chunk.setAttached(TheBlockKeepsTicking.LAST_UPDATE_TIME, chunk.getWorld().getTime());
         // System.out.println("Chunk LEFT simulation: " + chunkX + ", " + chunkZ);

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mojang.serialization.Codec;
+import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import net.minecraft.util.Identifier;
 
 public class TheBlockKeepsTicking implements ModInitializer {
@@ -20,5 +21,6 @@ public class TheBlockKeepsTicking implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("The Block Keeps Ticking is initializing!");
 
+		WorldSimulator.Initialize();
 	}
 }
