@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 public class TheBlockKeepsTicking implements ModInitializer {
 	public static final String MOD_ID = "the-block-keeps-ticking";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static final AttachmentType<Long> BLOCK_KEEPS_TICKING_LAST_UPDATE_TIME =
+	public static final AttachmentType<Long> LAST_UPDATE_TIME =
 			AttachmentRegistry.createPersistent(Identifier.of(MOD_ID, "last_update_time"),
 					Codec.LONG);
 

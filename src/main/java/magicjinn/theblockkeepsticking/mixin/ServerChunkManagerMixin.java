@@ -75,6 +75,7 @@ public class ServerChunkManagerMixin {
         int chunkX = (int) chunkPos;
         int chunkZ = (int) (chunkPos >> 32);
         WorldChunk chunk = getChunkFromPos(chunkPos);
+        chunk.setAttached(TheBlockKeepsTicking.LAST_UPDATE_TIME, chunk.getWorld().getTime());
         // System.out.println("Chunk LEFT simulation: " + chunkX + ", " + chunkZ);
         // Your code here
     }
