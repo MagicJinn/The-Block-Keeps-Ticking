@@ -1,10 +1,10 @@
 {
 	"required": true,
-	"package": "magicjinn.blockkeepsticking.mixin",
+	"package": "magicjinn.theblockkeepsticking.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
-	],
+		"ServerChunkManagerMixin"
+		],
 	"injectors": {
 		"defaultRequire": 1
 	},

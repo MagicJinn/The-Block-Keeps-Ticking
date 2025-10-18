@@ -13,25 +13,28 @@
     "icon": "assets/the-block-keeps-ticking/icon.png",
     "environment": "*",
     "entrypoints": {
-        "main": ["magicjinn.the-block-keeps-ticking.TheBlockKeepsTicking"],
-        "client": ["magicjinn.the-block-keeps-ticking.TheBlockKeepsTickingClient"],
-        "modmenu": ["magicjinn.the-block-keeps-ticking.config.ModMenuIntegration"]
+        "main": ["magicjinn.theblockkeepsticking.TheBlockKeepsTicking"],
+        "client": ["magicjinn.theblockkeepsticking.TheBlockKeepsTickingClient"]
     },
-    "mixins": ["the-block-keeps-ticking.mixins.json", {
-        "config": "the-block-keeps-ticking.client.mixins.json",
-        "environment": "client"
-    }],
+    "mixins": [
+        "the-block-keeps-ticking.mixins.json",
+        {
+            "config": "the-block-keeps-ticking.client.mixins.json",
+            "environment": "client"
+        }
+    ],
+    "accessWidener": "the-block-keeps-ticking.accesswidener",
     "depends": {
         "fabricloader": "*",
         "minecraft": ">=1.21.0",
         "java": ">=17",
-		"fabric-api": "*"
+        "fabric-api": "*"
     },
     "suggests": {
         "modmenu": "*",
         "yet-another-config-lib": "*"
     },
-	"custom": {
+    "custom": {
         "modmenu": {
             "links": {
                 "modmenu.discord": "https://discord.gg/bQvtauxXWp",

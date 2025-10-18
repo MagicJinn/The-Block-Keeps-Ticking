@@ -1,4 +1,4 @@
-package magicjinn.blockkeepsticking;
+package magicjinn.theblockkeepsticking;
 
 import net.fabricmc.api.ClientModInitializer;
 

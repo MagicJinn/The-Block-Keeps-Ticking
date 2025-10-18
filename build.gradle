@@ -25,14 +25,13 @@ repositories {
 
 loom {
 	splitEnvironmentSourceSets()
-
 	mods {
-		"the-block-keeps-ticking" {
+		"theblockkeepsticking" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
 	}
-
+	accessWidenerPath = file("src/main/resources/${archives_base_name}.accesswidener")
 }
 
 dependencies {
