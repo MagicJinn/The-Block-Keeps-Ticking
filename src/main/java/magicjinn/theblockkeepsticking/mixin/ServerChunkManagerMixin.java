@@ -34,9 +34,6 @@ public class ServerChunkManagerMixin {
         if (currentSimulationChunks.isEmpty())
             return; // Temp?
 
-        TheBlockKeepsTicking.LOGGER.info("Current simulation chunks count: {}",
-                currentSimulationChunks.size()); // TEMP
-
         // Find chunks that entered simulation distance
         for (long chunkPos : currentSimulationChunks) {
             if (!this.previousSimulationChunks.contains(chunkPos)) {
@@ -64,18 +61,14 @@ public class ServerChunkManagerMixin {
     }
 
     private void onChunkEnterSimulation(long chunkPos) {
-        // int chunkX = (int) chunkPos;
-        // int chunkZ = (int) (chunkPos >> 32);
         WorldChunk chunk = getChunkFromPos(chunkPos);
         WorldSimulator.SimulateWorld(chunk);
     }
 
     private void onChunkLeaveSimulation(long chunkPos) {
-        // int chunkX = (int) chunkPos;
-        // int chunkZ = (int) (chunkPos >> 32);
         WorldChunk chunk = getChunkFromPos(chunkPos);
+        if (chunk == null)
+            return;
         chunk.setAttached(TheBlockKeepsTicking.LAST_UPDATE_TIME, chunk.getWorld().getTime());
-        // System.out.println("Chunk LEFT simulation: " + chunkX + ", " + chunkZ);
-        // Your code here
     }
 }
