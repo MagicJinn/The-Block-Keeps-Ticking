@@ -11,9 +11,14 @@ public abstract class TickingBlock {
      */
     public abstract Class<?> getType();
 
-    public static TickingResult CalculateOperations(long ticks) {
-        int cycles = (int) (ticks / 20);
-        int remainder = (int) (ticks % 20);
+    public static TickingResult CalculateOperations(long ticks, int operationTime) {
+        return CalculateOperations(ticks, operationTime, 0);
+    }
+
+    public static TickingResult CalculateOperations(long ticks, int operationTime, int offset) {
+        operationTime += offset;
+        int cycles = (int) (ticks / operationTime);
+        int remainder = (int) (ticks % operationTime);
         return new TickingResult(cycles, remainder);
     }
 }
