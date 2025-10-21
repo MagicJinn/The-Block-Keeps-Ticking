@@ -49,6 +49,10 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor 
         return litTimeRemaining;
     }
 
+    public void setCurrentlyBurningFuelTimeRemaining(int ticks) {
+        this.litTimeRemaining = Math.max(0, ticks);
+    }
+
     public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> getMatchGetter() {
         return matchGetter;
     }

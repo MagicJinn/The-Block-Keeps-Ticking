@@ -42,15 +42,18 @@ public class WorldSimulator {
     }
 
     public static void SimulateWorld(WorldChunk chunk) {
-        if (chunk == null)
+        if (chunk == null) {
+            // TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
             return;
+        }
         TheBlockKeepsTicking.LOGGER.info("Simulating world chunk at {} , {}", chunk.getPos().x,
                 chunk.getPos().z);
         World world = chunk.getWorld();
         long currentWorldTime = world.getTime();
         long lastTickTime =
                 chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME, currentWorldTime);
-        long ticksToSimulate = currentWorldTime - lastTickTime;
+        // long ticksToSimulate = currentWorldTime - lastTickTime; // TEMP DISABLE
+        long ticksToSimulate = 12000;// TEMP FIX for testing
 
         forEachBlockInChunk(chunk, (block) -> {
             for (ChangingBlock changingBlock : changingBlockInstances) {

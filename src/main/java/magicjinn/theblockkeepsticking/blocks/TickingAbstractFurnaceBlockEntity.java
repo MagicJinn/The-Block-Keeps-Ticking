@@ -28,90 +28,91 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
 
     @Override
     public void Simulate(BlockEntity blockInstance, Long ticksToSimulate) {
-        if (blockInstance == null || !(blockInstance instanceof AbstractFurnaceBlockEntity))
+        if (!(blockInstance instanceof AbstractFurnaceBlockEntity furnace))
             return;
 
-        AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) blockInstance;
         World world = furnace.getWorld();
-        FuelRegistry fuelRegistry = world.getFuelRegistry();
+        if (!(world instanceof ServerWorld serverWorld))
+            return;
+
+        // Accessor magic
         AbstractFurnaceAccessor accessor = (AbstractFurnaceAccessor) furnace;
         DefaultedList<ItemStack> inventory = accessor.getInventory();
 
-        ItemStack inputItemStack = inventory.get(accessor.getInputSlotIndex());
-        ItemStack fuelItemStack = inventory.get(accessor.getFuelSlotIndex());
-        ItemStack outputItemStack = inventory.get(accessor.getOutputSlotIndex());
+        ItemStack input = inventory.get(accessor.getInputSlotIndex());
+        ItemStack fuel = inventory.get(accessor.getFuelSlotIndex());
+        ItemStack output = inventory.get(accessor.getOutputSlotIndex());
 
-        int currentlyBurningFuelTimeRemaining = accessor.getCurrentlyBurningFuelTimeRemaining();
+        FuelRegistry fuelRegistry = world.getFuelRegistry();
+        int remainingBurnTime = accessor.getCurrentlyBurningFuelTimeRemaining();
 
-        // Get the cooking time for the current recipe
-        int recipeCookTime = AbstractFurnaceBlockEntity.getCookTime((ServerWorld) world, furnace);
-
-        if (recipeCookTime <= 0) {
-            return; // No valid recipe
+        // still decrement fuel even if no input, only fair
+        if (input.isEmpty()) {
+            accessor.setCurrentlyBurningFuelTimeRemaining(
+                    remainingBurnTime - ticksToSimulate.intValue());
+            return; // Still exit early
         }
 
-        // Calculate max operations based on fuel availability
-        int totalFuelTicks = currentlyBurningFuelTimeRemaining;
-        int availableFuelItems = fuelItemStack.getCount();
-        int fuelTicksPerItem = 0;
 
+        // Find if there's a matching recipe
+        Optional<? extends RecipeEntry<? extends AbstractCookingRecipe>> matchOpt = accessor
+                .getMatchGetter().getFirstMatch(new SingleStackRecipeInput(input), serverWorld);
+        if (matchOpt.isEmpty())
+            return;
 
-        if (fuelRegistry.isFuel(fuelItemStack)) {
-            fuelTicksPerItem = fuelRegistry.getFuelTicks(fuelItemStack);
-            totalFuelTicks += availableFuelItems * fuelTicksPerItem;
-        }
+        // Copy recipe output
+        ItemStack recipeOutput = matchOpt.get().value().result().copy();
 
-        int maxOperationsByFuel =
+        int recipeCookTime = AbstractFurnaceBlockEntity.getCookTime(serverWorld, furnace);
+        if (recipeCookTime <= 0)
+            return;
+
+        // Compute fuel ticks
+        int fuelTicksPerItem = fuelRegistry.isFuel(fuel) ? fuelRegistry.getFuelTicks(fuel) : 0;
+        int totalFuelTicks = remainingBurnTime + (fuel.getCount() * fuelTicksPerItem);
+
+        int maxByFuel =
                 (int) Math.min(ticksToSimulate / recipeCookTime, totalFuelTicks / recipeCookTime);
+        int maxByInput = input.getCount();
+        int maxByOutput = 0;
 
-        // Calculate max operations based on input items
-        int maxOperationsByInput = inputItemStack.getCount();
-
-        // Calculate max operations based on output space
-        int maxOperationsByOutput = outputItemStack.isEmpty() ? outputItemStack.getMaxCount()
-                : (outputItemStack.getMaxCount() - outputItemStack.getCount());
-
-        // The actual number of operations is the minimum of all constraints
-        int actualOperations = Math.min(Math.min(maxOperationsByFuel, maxOperationsByInput),
-                maxOperationsByOutput);
-
-        if (actualOperations <= 0) {
-            return; // Can't perform any operations
+        if (output.isEmpty()) {
+            maxByOutput = recipeOutput.getMaxCount();
+        } else if (ItemStack.areItemsAndComponentsEqual(output, recipeOutput)) {
+            maxByOutput = output.getMaxCount() - output.getCount();
+        } else { // Different item in output slot, exit early
+            accessor.setCurrentlyBurningFuelTimeRemaining(
+                    remainingBurnTime - ticksToSimulate.intValue());
+            return;
         }
 
-        // Calculate fuel consumption
-        int fuelTicksNeeded = actualOperations * recipeCookTime;
-        int fuelTicksConsumed = Math.max(0, fuelTicksNeeded - currentlyBurningFuelTimeRemaining);
-        int fuelItemsToConsume = 0;
-        if (fuelTicksPerItem > 0) {
-            fuelItemsToConsume = (fuelTicksConsumed + fuelTicksPerItem - 1) / fuelTicksPerItem; // Ceiling
-        }
-        // division
-        // Update fuel state
-        int newBurnTimeRemaining = currentlyBurningFuelTimeRemaining
-                + (fuelItemsToConsume * fuelTicksPerItem) - fuelTicksNeeded;
+        int actualOps = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput);
+        if (actualOps <= 0)
+            return;
 
-        // Apply changes to inventory
-        inputItemStack.decrement(actualOperations);
-        fuelItemStack.decrement(fuelItemsToConsume);
+        // Consume input
+        input.decrement(actualOps);
 
-        // Handle output (you'll need to get the actual recipe result here)
-        // This is a simplified version - you'd need to get the actual output from the recipe
-        if (outputItemStack.isEmpty()) {
-            // Set output to recipe result * actualOperations
-            var recipeMatch = accessor.getMatchGetter()
-                    .getFirstMatch(new SingleStackRecipeInput(inputItemStack), (ServerWorld) world);
-            if (recipeMatch.isPresent()) {
-                AbstractCookingRecipe recipe = recipeMatch.get().value();
-                ItemStack recipeOutput = recipe.result();
-                recipeOutput.setCount(actualOperations);
-                inventory.set(accessor.getOutputSlotIndex(), recipeOutput);
-            }
+        // Consume fuel
+        int ticksNeeded = actualOps * recipeCookTime;
+        int ticksConsumed = Math.max(0, ticksNeeded - remainingBurnTime);
+        int fuelItemsConsumed =
+                (fuelTicksPerItem > 0) ? (int) Math.ceil((double) ticksConsumed / fuelTicksPerItem)
+                        : 0;
+        fuel.decrement(fuelItemsConsumed);
+        int newBurnTime = remainingBurnTime + (fuelItemsConsumed * fuelTicksPerItem) - ticksNeeded;
+
+        // Apply output
+        if (output.isEmpty()) {
+            ItemStack newOut = recipeOutput.copy();
+            newOut.setCount(actualOps);
+            inventory.set(accessor.getOutputSlotIndex(), newOut);
         } else {
-            outputItemStack.increment(actualOperations);
+            output.increment(actualOps);
         }
 
-        // Update the furnace's burn time state
-        accessor.setCurrentlyBurningFuelTimeRemaining(newBurnTimeRemaining);
+        // Set new burn time
+        accessor.setCurrentlyBurningFuelTimeRemaining(newBurnTime);
     }
+
 }

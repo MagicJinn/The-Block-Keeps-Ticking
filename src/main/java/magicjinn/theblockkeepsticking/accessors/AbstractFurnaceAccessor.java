@@ -18,4 +18,6 @@ public interface AbstractFurnaceAccessor extends TickingBlockAccessor {
     public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> getMatchGetter();
 
     public int getCurrentlyBurningFuelTimeRemaining();
+
+    public void setCurrentlyBurningFuelTimeRemaining(int ticks);
 }

@@ -67,8 +67,8 @@ public class ServerChunkManagerMixin {
 
     private void onChunkLeaveSimulation(long chunkPos) {
         WorldChunk chunk = getChunkFromPos(chunkPos);
-        if (chunk == null)
-            return;
+        if (chunk == null) return;
+
         chunk.setAttached(TheBlockKeepsTicking.LAST_UPDATE_TIME, chunk.getWorld().getTime());
     }
 }
