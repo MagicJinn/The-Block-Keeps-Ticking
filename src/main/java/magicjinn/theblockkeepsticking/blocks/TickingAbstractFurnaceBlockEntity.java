@@ -12,6 +12,7 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.ServerRecipeManager;
+import net.minecraft.recipe.ServerRecipeManager.MatchGetter;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.collection.DefaultedList;
@@ -39,15 +40,18 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
         AbstractFurnaceAccessor accessor = (AbstractFurnaceAccessor) furnace;
         DefaultedList<ItemStack> inventory = accessor.getInventory();
 
+        // reference to input slot itemstack
         ItemStack input = inventory.get(accessor.getInputSlotIndex());
+        // reference to fuel slot itemstack
         ItemStack fuel = inventory.get(accessor.getFuelSlotIndex());
+        // reference to output slot itemstack
         ItemStack output = inventory.get(accessor.getOutputSlotIndex());
 
         FuelRegistry fuelRegistry = world.getFuelRegistry();
         int remainingBurnTime = accessor.getCurrentlyBurningFuelTimeRemaining();
 
-        // still decrement fuel even if no input, only fair
         if (input.isEmpty()) {
+            // still decrement fuel even if no input, only fair
             accessor.setCurrentlyBurningFuelTimeRemaining(
                     remainingBurnTime - ticksToSimulate.intValue());
             return; // Still exit early
@@ -55,15 +59,19 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
 
 
         // Find if there's a matching recipe
-        Optional<? extends RecipeEntry<? extends AbstractCookingRecipe>> matchOpt = accessor
-                .getMatchGetter().getFirstMatch(new SingleStackRecipeInput(input), serverWorld);
+        MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter =
+                accessor.getMatchGetter();
+        Optional<? extends RecipeEntry<? extends AbstractCookingRecipe>> matchOpt =
+                matchGetter.getFirstMatch(new SingleStackRecipeInput(input), serverWorld);
         if (matchOpt.isEmpty())
             return;
 
         // Copy recipe output
-        ItemStack recipeOutput = matchOpt.get().value().result().copy();
+        var recipe = matchOpt.get().value();
+        ItemStack recipeOutput = recipe.result().copy();
 
-        int recipeCookTime = AbstractFurnaceBlockEntity.getCookTime(serverWorld, furnace);
+        // Get recipe cook time
+        int recipeCookTime = recipe.getCookingTime();
         if (recipeCookTime <= 0)
             return;
 
@@ -86,15 +94,15 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
             return;
         }
 
-        int actualOps = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput);
-        if (actualOps <= 0)
+        int realisticOperations = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput);
+        if (realisticOperations <= 0)
             return;
 
         // Consume input
-        input.decrement(actualOps);
+        input.decrement(realisticOperations);
 
         // Consume fuel
-        int ticksNeeded = actualOps * recipeCookTime;
+        int ticksNeeded = realisticOperations * recipeCookTime;
         int ticksConsumed = Math.max(0, ticksNeeded - remainingBurnTime);
         int fuelItemsConsumed =
                 (fuelTicksPerItem > 0) ? (int) Math.ceil((double) ticksConsumed / fuelTicksPerItem)
@@ -105,10 +113,10 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
         // Apply output
         if (output.isEmpty()) {
             ItemStack newOut = recipeOutput.copy();
-            newOut.setCount(actualOps);
+            newOut.setCount(realisticOperations);
             inventory.set(accessor.getOutputSlotIndex(), newOut);
         } else {
-            output.increment(actualOps);
+            output.increment(realisticOperations);
         }
 
         // Set new burn time
