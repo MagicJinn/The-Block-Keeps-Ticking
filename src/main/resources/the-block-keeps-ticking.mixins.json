@@ -3,7 +3,6 @@
 	"package": "magicjinn.theblockkeepsticking.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ServerChunkManagerMixin",
 		"AbstractFurnaceBlockEntityMixin"
 		],
 	"injectors": {

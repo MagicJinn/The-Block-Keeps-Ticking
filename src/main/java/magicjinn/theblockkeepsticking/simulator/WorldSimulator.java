@@ -46,14 +46,12 @@ public class WorldSimulator {
             // TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
             return;
         }
-        TheBlockKeepsTicking.LOGGER.info("Simulating world chunk at {} , {}", chunk.getPos().x,
-                chunk.getPos().z);
+
         World world = chunk.getWorld();
         long currentWorldTime = world.getTime();
         long lastTickTime =
                 chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME, currentWorldTime);
-        // long ticksToSimulate = currentWorldTime - lastTickTime; // TEMP DISABLE
-        long ticksToSimulate = 12000;// TEMP FIX for testing
+        long ticksToSimulate = currentWorldTime - lastTickTime;
 
         forEachBlockInChunk(chunk, (block) -> {
             for (ChangingBlock changingBlock : changingBlockInstances) {
@@ -74,12 +72,15 @@ public class WorldSimulator {
 
                     TheBlockKeepsTicking.LOGGER.info("Simulating block entity {} for {} ticks",
                             blockEntity.getType().toString(), ticksToSimulate);
-                    processingBlock.Simulate(blockEntity, ticksToSimulate);
                     return;
                     // return to avoid multiple matches (which is impossible, so this saves time)
                 }
             }
         }
+        // if (hasSimulatable) {
+        // TheBlockKeepsTicking.LOGGER.info("Simulating world chunk at {} , {}", chunk.getPos().x,
+        // chunk.getPos().z);
+        // }
     }
 
     /**
