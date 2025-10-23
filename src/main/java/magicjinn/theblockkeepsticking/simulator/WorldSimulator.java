@@ -43,7 +43,7 @@ public class WorldSimulator {
 
     public static void SimulateWorld(WorldChunk chunk) {
         if (chunk == null) {
-            // TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
+            TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
             return;
         }
 
@@ -53,6 +53,7 @@ public class WorldSimulator {
                 chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME, currentWorldTime);
         long ticksToSimulate = currentWorldTime - lastTickTime;
 
+        try {
         forEachBlockInChunk(chunk, (block) -> {
             for (ChangingBlock changingBlock : changingBlockInstances) {
                 if (checkIfBlockIs(changingBlock, block)) {
@@ -60,27 +61,28 @@ public class WorldSimulator {
                     TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
                             block.toString(), ticksToSimulate);
                     changingBlock.Simulate(block, ticksToSimulate);
-                    return;
-                    // return to avoid multiple matches (which is impossible, so this saves time)
+                    return; // lambda break; equivalent
+                    // break to avoid multiple matches (which is impossible, so this saves time)
                 }
             }
         });
 
         for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
             for (ProcessingBlock processingBlock : processingBlockInstances) {
+                TheBlockKeepsTicking.LOGGER.debug("Checking block entity {} of type {}",
+                        blockEntity.toString(), blockEntity.getType().toString());
                 if (checkIfBlockIs(processingBlock, blockEntity)) {
-
+                    processingBlock.Simulate(blockEntity, ticksToSimulate);
                     TheBlockKeepsTicking.LOGGER.info("Simulating block entity {} for {} ticks",
                             blockEntity.getType().toString(), ticksToSimulate);
-                    return;
-                    // return to avoid multiple matches (which is impossible, so this saves time)
+                    break;
+                    // break to avoid multiple matches (which is impossible, so this saves time)
                 }
             }
         }
-        // if (hasSimulatable) {
-        // TheBlockKeepsTicking.LOGGER.info("Simulating world chunk at {} , {}", chunk.getPos().x,
-        // chunk.getPos().z);
-        // }
+    } catch (Exception e) {
+        TheBlockKeepsTicking.LOGGER.error("Error during world simulation: ", e);
+    }
     }
 
     /**

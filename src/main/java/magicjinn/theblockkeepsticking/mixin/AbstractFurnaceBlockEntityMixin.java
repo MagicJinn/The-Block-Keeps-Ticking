@@ -19,16 +19,12 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor 
     @Shadow @Final private Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed;
     @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
     @Shadow private int litTimeRemaining;
-    // @Shadow private int litTotalTime;
-    @Shadow private int cookingTimeSpent;
-    @Shadow private int cookingTotalTime;
 
     @Shadow protected DefaultedList<ItemStack> inventory;
     @Shadow @Final protected static int INPUT_SLOT_INDEX;
     @Shadow @Final protected static int FUEL_SLOT_INDEX;
     @Shadow @Final protected static int OUTPUT_SLOT_INDEX;
 
-    @Override
     public DefaultedList<ItemStack> getInventory() {
         return inventory;
     }
@@ -45,15 +41,15 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor 
         return OUTPUT_SLOT_INDEX;
     }
 
+    public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> getMatchGetter() {
+        return matchGetter;
+    }
+
     public int getCurrentlyBurningFuelTimeRemaining() {
         return litTimeRemaining;
     }
 
     public void setCurrentlyBurningFuelTimeRemaining(int ticks) {
         this.litTimeRemaining = Math.max(0, ticks);
-    }
-
-    public ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> getMatchGetter() {
-        return matchGetter;
     }
 }

@@ -54,17 +54,16 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
             return; // Still exit early
         }
 
-
         // Find if there's a matching recipe
         MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter =
                 accessor.getMatchGetter();
-        Optional<? extends RecipeEntry<? extends AbstractCookingRecipe>> matchOpt =
+        Optional<? extends RecipeEntry<? extends AbstractCookingRecipe>> recipeMatch =
                 matchGetter.getFirstMatch(new SingleStackRecipeInput(input), serverWorld);
-        if (matchOpt.isEmpty())
+        if (recipeMatch.isEmpty())
             return;
 
         // Copy recipe output
-        var recipe = matchOpt.get().value();
+        AbstractCookingRecipe recipe = recipeMatch.get().value();
         ItemStack recipeOutput = recipe.result().copy();
 
         // Get recipe cook time
@@ -91,7 +90,14 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
             return;
         }
 
-        int realisticOperations = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput);
+        // Cheat. Having to unlight the furnace is too much of a pain. Besides, having a
+        // furnace be
+        // in it's "finished" state when we enter the chunk could possibly cause issues,
+        // so it's
+        // better to let it finish its final operation on its own during tick time.
+        maxByOutput--;
+
+        int realisticOperations = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput - 1);
         if (realisticOperations <= 0)
             return;
 
@@ -116,8 +122,12 @@ public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
             output.increment(realisticOperations);
         }
 
+        RecipeEntry<?> entry = (RecipeEntry<?>) recipeMatch.get();
+        for (int i = 0; i < realisticOperations; i++) {
+            furnace.setLastRecipe(entry);
+        }
+
         // Set new burn time
         accessor.setCurrentlyBurningFuelTimeRemaining(newBurnTime);
     }
-
 }
