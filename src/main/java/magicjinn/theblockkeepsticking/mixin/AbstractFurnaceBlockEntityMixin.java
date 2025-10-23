@@ -16,6 +16,7 @@ import net.minecraft.util.collection.DefaultedList;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor {
+    // Shadowed fields for easy access to private members
     @Shadow @Final private Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed;
     @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
     @Shadow private int litTimeRemaining;

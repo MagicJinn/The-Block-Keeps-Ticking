@@ -16,6 +16,7 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 public class TickingAbstractFurnaceBlockEntity extends ProcessingBlock {
+    // Set an instance to more easily access this class
     public static final TickingAbstractFurnaceBlockEntity INSTANCE =
             new TickingAbstractFurnaceBlockEntity();
 

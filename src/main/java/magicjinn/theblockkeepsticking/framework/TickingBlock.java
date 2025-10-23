@@ -11,6 +11,9 @@ public abstract class TickingBlock {
      */
     public abstract Class<?> getType();
 
+    // Custom simulation logic
+    public abstract void Simulate(net.minecraft.block.entity.BlockEntity blockInstance, Long ticksToSimulate);
+
     public static TickingResult CalculateOperations(long ticks, int operationTime) {
         return CalculateOperations(ticks, operationTime, 0);
     }

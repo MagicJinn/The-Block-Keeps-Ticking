@@ -6,7 +6,7 @@ import net.minecraft.recipe.ServerRecipeManager;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.util.collection.DefaultedList;
 
-public interface AbstractFurnaceAccessor extends TickingBlockAccessor {
+public interface AbstractFurnaceAccessor {
     public DefaultedList<ItemStack> getInventory();
 
     public int getInputSlotIndex();

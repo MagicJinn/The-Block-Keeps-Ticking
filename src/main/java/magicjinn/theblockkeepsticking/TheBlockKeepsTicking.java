@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import net.minecraft.util.Identifier;
-// import net.minecraft.world.chunk.ChunkLevelType;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.server.world.ChunkLevelType;
 
@@ -29,7 +28,7 @@ public class TheBlockKeepsTicking implements ModInitializer {
 
 		// Add listener for CHUNK_LEVEL_TYPE_CHANGE to handle chunks entering/leaving simulation
 		ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register((world, chunk, oldType, newType) -> {
-			// If chunk enters block-ticking/simulation, simulate it immediately
+			// If chunk enters block-ticking/simulation, simulate it
 			if (newType == ChunkLevelType.BLOCK_TICKING) {
 				WorldSimulator.SimulateWorld((WorldChunk) chunk);
 			}
