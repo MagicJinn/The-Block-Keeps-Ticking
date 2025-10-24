@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
-import magicjinn.theblockkeepsticking.framework.ChangingBlock;
-import magicjinn.theblockkeepsticking.framework.ProcessingBlock;
-import magicjinn.theblockkeepsticking.framework.TickingBlock;
+import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -17,8 +15,7 @@ import net.minecraft.world.chunk.WorldChunk;
 
 public class WorldSimulator {
 
-    private static final List<ChangingBlock> changingBlockInstances = new ArrayList<>();
-    private static final List<ProcessingBlock> processingBlockInstances = new ArrayList<>();
+    private static final List<TickingBlock> TickingBlockInstances = new ArrayList<>();
 
     public static void Initialize() {
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
@@ -34,10 +31,8 @@ public class WorldSimulator {
      * @param blockClass
      */
     public static void RegisterTickingBlock(TickingBlock blockClass) {
-        if (blockClass instanceof ProcessingBlock)
-            processingBlockInstances.add((ProcessingBlock) blockClass);
-        else if (blockClass instanceof ChangingBlock)
-            changingBlockInstances.add((ChangingBlock) blockClass);
+        if (blockClass instanceof TickingBlock)
+            TickingBlockInstances.add((TickingBlock) blockClass);
     }
 
     // Simulate the world for the given chunk
@@ -59,11 +54,12 @@ public class WorldSimulator {
 
         try {
         forEachBlockInChunk(chunk, (block) -> {
-            for (ChangingBlock changingBlock : changingBlockInstances) {
-                if (checkIfBlockIs(changingBlock, block)) {
-                    TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
-                            block.toString(), ticksToSimulate);
-                    changingBlock.Simulate(block, ticksToSimulate);
+            for (TickingBlock tickingBlock : TickingBlockInstances) {
+                if (checkIfBlockIs(tickingBlock, block)) {
+                    boolean result = tickingBlock.Simulate(block, ticksToSimulate);
+                    if (result)
+                        TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
+                                block.toString(), ticksToSimulate);
                     return; // lambda break; equivalent
                     // break to avoid multiple matches (which is impossible, so this saves time)
                 }
@@ -71,10 +67,11 @@ public class WorldSimulator {
         });
 
         for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-            for (ProcessingBlock processingBlock : processingBlockInstances) {
-                if (checkIfBlockIs(processingBlock, blockEntity)) {
-                    processingBlock.Simulate(blockEntity, ticksToSimulate);
-                    TheBlockKeepsTicking.LOGGER.info("Simulating block entity {} for {} ticks",
+            for (TickingBlock tickingBlock : TickingBlockInstances) {
+                if (checkIfBlockIs(tickingBlock, blockEntity)) {
+                    boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate);
+                    if (result)
+                        TheBlockKeepsTicking.LOGGER.info("Simulating block entity {} for {} ticks",
                             blockEntity.getType().toString(), ticksToSimulate);
                     break;
                     // break to avoid multiple matches (which is impossible, so this saves time)
