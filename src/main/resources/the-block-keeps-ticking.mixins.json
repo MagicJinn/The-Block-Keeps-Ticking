@@ -4,7 +4,8 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"AbstractFurnaceBlockEntityMixin",
-		"CropBlockMixin"
+		"CropBlockMixin",
+		"StemBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1

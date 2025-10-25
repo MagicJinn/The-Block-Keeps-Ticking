@@ -3,24 +3,24 @@ package magicjinn.theblockkeepsticking.blocks;
 import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CropBlock;
+import net.minecraft.block.StemBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TickingCropBlock extends TickingBlock {
-    public static final TickingBlock INSTANCE = new TickingCropBlock();
+public class TickingStemBlock extends TickingBlock {
+    public static final TickingBlock INSTANCE = new TickingStemBlock();
 
     @Override
-    public Class<CropBlock> getType() {
-        return CropBlock.class;
+    public Class<StemBlock> getType() {
+        return StemBlock.class;
     }
 
     @Override
     public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
-        if (blockInstance instanceof CropBlock crop) {
-            return ((TickingBlockAccessor) crop).Simulate(ticksToSimulate, world, state, pos);
+        if (blockInstance instanceof StemBlock stem) {
+            return ((TickingBlockAccessor) stem).Simulate(ticksToSimulate, world, state, pos);
         }
-        return false; // If not an CropBlock, return false
+        return false;
     }
 }

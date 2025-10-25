@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 
 public class TickingAbstractFurnaceBlockEntity extends TickingBlock {
     // Set an instance to more easily access this class
-    public static final TickingAbstractFurnaceBlockEntity INSTANCE =
+    public static final TickingBlock INSTANCE =
             new TickingAbstractFurnaceBlockEntity();
 
     @Override
