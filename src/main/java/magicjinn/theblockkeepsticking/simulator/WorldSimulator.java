@@ -8,6 +8,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.Block;
@@ -31,6 +32,7 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingStemBlock.INSTANCE);
         RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
+        RegisterTickingBlock(TickingSaplingBlock.INSTANCE);
     }
 
     /**

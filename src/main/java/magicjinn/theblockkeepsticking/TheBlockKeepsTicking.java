@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
+import magicjinn.theblockkeepsticking.util.Timer;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.server.world.ChunkLevelType;
@@ -25,6 +26,7 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		LOGGER.info("The Block Keeps Ticking is initializing!");
 
 		WorldSimulator.Initialize();
+		Timer.Register();
 
 		// Add listener for CHUNK_LEVEL_TYPE_CHANGE to handle chunks entering/leaving simulation
 		ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register((world, chunk, oldType, newType) -> {
