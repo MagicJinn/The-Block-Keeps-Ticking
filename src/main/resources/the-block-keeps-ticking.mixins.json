@@ -5,7 +5,8 @@
 	"mixins": [
 		"AbstractFurnaceBlockEntityMixin",
 		"CropBlockMixin",
-		"StemBlockMixin"
+		"StemBlockMixin",
+		"NetherWartBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1

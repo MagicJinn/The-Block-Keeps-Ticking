@@ -42,6 +42,13 @@ public abstract class TickingBlock {
         public int remainder;
     }
 
+    public static int RandomTickAmount(Long ticksToSimulate, World world) {
+        // Determine the amount of random ticks that would have occurred
+        int randomTickSpeed = ((ServerWorld) world).getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
+        int randomTicks = (int) (ticksToSimulate / (16 * 16 * 16) * randomTickSpeed);
+        return randomTicks;
+    }
+
     public static int CropGrowthAmount(Long ticksToSimulate, Block block, World world,
             BlockState state, BlockPos pos) {
         return CropGrowthAmount(ticksToSimulate, block, world, state, pos, 25f);
@@ -55,10 +62,7 @@ public abstract class TickingBlock {
             return 0;
 
         // Determine the amount of random ticks that would have occurred
-        int randomTickSpeed =
-                ((ServerWorld) world).getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
-        int randomTicks = ticksToSimulate.intValue() / (16 * 16 * 16) * randomTickSpeed;
-
+        int randomTicks = RandomTickAmount(ticksToSimulate, world);
 
         // Simplified growth formula, fakes randomness
         float availableMoisture = CropBlock.getAvailableMoisture(block, world, pos);

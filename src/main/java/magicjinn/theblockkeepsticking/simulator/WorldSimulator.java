@@ -6,6 +6,7 @@ import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.Block;
@@ -28,6 +29,7 @@ public class WorldSimulator {
         // RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingStemBlock.INSTANCE);
+        RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
     }
 
     /**
