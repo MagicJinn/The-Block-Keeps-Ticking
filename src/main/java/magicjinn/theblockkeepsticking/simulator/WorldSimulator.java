@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
+import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
@@ -24,7 +25,7 @@ public class WorldSimulator {
 
     public static void Initialize() {
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
-        // RegisterTickingBlock(TickingCampfire.INSTANCE);
+        RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
         // RegisterTickingBlock(TickingBrewingStand.INSTANCE);
         // RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingCropBlock.INSTANCE);
