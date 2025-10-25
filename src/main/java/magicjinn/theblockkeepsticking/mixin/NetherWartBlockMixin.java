@@ -29,8 +29,9 @@ public class NetherWartBlockMixin implements TickingBlockAccessor {
             int newAge = Math.min(maxAge, age + growth);
             BlockState newState = (BlockState) state.with(NetherWartBlock.AGE, newAge);
             world.setBlockState(pos, newState, 2);
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
