@@ -1,25 +1,25 @@
 package magicjinn.theblockkeepsticking.mixin;
 
-import java.util.Optional;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
-import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.StemBlock;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Direction.Type;
 import net.minecraft.world.World;
+// import java.util.Optional;
+// import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
+// import magicjinn.theblockkeepsticking.util.TickingBlock;
+// import net.minecraft.block.Blocks;
+// import net.minecraft.block.HorizontalFacingBlock;
+// import net.minecraft.registry.Registry;
+// import net.minecraft.registry.RegistryKeys;
+// import net.minecraft.registry.tag.BlockTags;
+// import net.minecraft.util.math.Direction;
+// import net.minecraft.util.math.Direction.Type;
 
 @Mixin(StemBlock.class)
 public class StemBlockMixin implements TickingBlockAccessor {

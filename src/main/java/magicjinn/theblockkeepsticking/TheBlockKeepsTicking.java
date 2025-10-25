@@ -29,11 +29,11 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		// Add listener for CHUNK_LEVEL_TYPE_CHANGE to handle chunks entering/leaving simulation
 		ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register((world, chunk, oldType, newType) -> {
 			// If chunk enters block-ticking/simulation, simulate it
-			if (newType == ChunkLevelType.BLOCK_TICKING) {
+			if (newType == ChunkLevelType.BLOCK_TICKING && oldType != ChunkLevelType.BLOCK_TICKING) {
 				WorldSimulator.SimulateWorld((WorldChunk) chunk);
 			}
 			// If chunk leaves block-ticking/simulation, record the last update time
-			else if (oldType == ChunkLevelType.BLOCK_TICKING) {
+			else if (oldType == ChunkLevelType.BLOCK_TICKING && newType != ChunkLevelType.BLOCK_TICKING) {
 				chunk.setAttached(LAST_UPDATE_TIME, world.getTime());
 			}
 		});
