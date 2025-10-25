@@ -24,6 +24,9 @@ public class CropBlockMixin implements TickingBlockAccessor {
 
         int newAge = Math.min(maxAge, age + growth);
 
+        if (newAge <= age)
+            return false;
+
         // Set the new age
         BlockState newStage = crop.withAge(newAge);
         world.setBlockState(pos, newStage, 2);
