@@ -2,13 +2,16 @@ package magicjinn.theblockkeepsticking.simulator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
+import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
@@ -22,7 +25,7 @@ public class WorldSimulator {
         // RegisterTickingBlock(TickingCampfire.INSTANCE);
         // RegisterTickingBlock(TickingBrewingStand.INSTANCE);
         // RegisterTickingBlock(TickingCropBlock.INSTANCE);
-        //
+        RegisterTickingBlock(TickingCropBlock.INSTANCE);
     }
 
     /**
@@ -53,13 +56,14 @@ public class WorldSimulator {
         }
 
         try {
-        forEachBlockInChunk(chunk, (block) -> {
+            forEachBlockInChunk(chunk, (block, state, pos) -> {
             for (TickingBlock tickingBlock : TickingBlockInstances) {
                 if (checkIfBlockIs(tickingBlock, block)) {
-                    boolean result = tickingBlock.Simulate(block, ticksToSimulate);
-                    if (result)
+                        boolean result =
+                                tickingBlock.Simulate(block, ticksToSimulate, world, state, pos);
+                        if (result)
                         TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
-                                block.toString(), ticksToSimulate);
+                                    block.getName().toString(), ticksToSimulate);
                     return; // lambda break; equivalent
                     // break to avoid multiple matches (which is impossible, so this saves time)
                 }
@@ -69,10 +73,11 @@ public class WorldSimulator {
         for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
             for (TickingBlock tickingBlock : TickingBlockInstances) {
                 if (checkIfBlockIs(tickingBlock, blockEntity)) {
-                    boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate);
+                    boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate, world,
+                            blockEntity.getCachedState(), blockEntity.getPos());
                     if (result)
                         TheBlockKeepsTicking.LOGGER.info("Simulating block entity {} for {} ticks",
-                            blockEntity.getType().toString(), ticksToSimulate);
+                                blockEntity.getNameForReport(), ticksToSimulate);
                     break;
                     // break to avoid multiple matches (which is impossible, so this saves time)
                 }
@@ -100,7 +105,12 @@ public class WorldSimulator {
      * @param chunk The chunk to iterate over
      * @param action The action to perform on each block
      */
-    public static void forEachBlockInChunk(WorldChunk chunk, Consumer<Block> action) {
+    public static void forEachBlockInChunk(WorldChunk chunk,
+            TriConsumer<Block, BlockState, BlockPos> action) {
+        ChunkPos chunkPos = chunk.getPos();
+        int chunkStartX = chunkPos.getStartX();
+        int chunkBottomY = chunk.getBottomY();
+        int chunkStartZ = chunkPos.getStartZ();
         for (int sectionY = 0; sectionY < chunk.getHeight() >> 4; ++sectionY) {
             ChunkSection section = chunk.getSectionArray()[sectionY];
             if (section == null || section.isEmpty())
@@ -110,9 +120,11 @@ public class WorldSimulator {
                 for (int y = 0; y < 16; y++) {
                     for (int z = 0; z < 16; z++) {
                         BlockState state = section.getBlockState(x, y, z);
+                        BlockPos blockPos = new BlockPos(chunkStartX + x,
+                                (sectionY << 4) + chunkBottomY + y, chunkStartZ + z);
                         Block block = state.getBlock();
 
-                        action.accept(block);
+                        action.accept(block, state, blockPos);
                     }
                 }
             }

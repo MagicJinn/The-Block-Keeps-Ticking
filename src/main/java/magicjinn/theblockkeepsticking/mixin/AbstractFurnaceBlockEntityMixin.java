@@ -5,7 +5,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import magicjinn.theblockkeepsticking.accessors.AbstractFurnaceAccessor;
+import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.FuelRegistry;
 import net.minecraft.item.ItemStack;
@@ -17,10 +18,11 @@ import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor {
+public class AbstractFurnaceBlockEntityMixin implements TickingBlockAccessor {
     // Shadowed fields for easy access to private members
     @Shadow @Final private Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed;
     @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
@@ -32,9 +34,8 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor 
     @Shadow @Final protected static int OUTPUT_SLOT_INDEX;
 
     @Override
-    public boolean Simulate(Long ticksToSimulate) {
-        var furnace = (AbstractFurnaceBlockEntity) (Object) this; // what
-        World world = furnace.getWorld();
+    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+        AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) (Object) this; // what
         if (!(world instanceof ServerWorld serverWorld))
             return false;
 
@@ -48,8 +49,6 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor 
         FuelRegistry fuelRegistry = world.getFuelRegistry();
 
         if (input.isEmpty()) {
-            // still decrement fuel even if no input, only fair
-            litTimeRemaining = litTimeRemaining - ticksToSimulate.intValue();
             return false; // Still exit early
         }
 
@@ -82,20 +81,18 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceAccessor 
         } else if (ItemStack.areItemsAndComponentsEqual(output, recipeOutput)) {
             maxByOutput = output.getMaxCount() - output.getCount();
         } else { // Different item in output slot, exit early
-            litTimeRemaining = litTimeRemaining - ticksToSimulate.intValue();
             return false;
         }
 
-        // Cheat. Having to unlight the furnace is too much of a pain. Besides, having a
-        // furnace be
-        // in it's "finished" state when we enter the chunk could possibly cause issues,
-        // so it's
-        // better to let it finish its final operation on its own during tick time.
-        maxByOutput--;
 
         int realisticOperations = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput);
         if (realisticOperations <= 0)
             return false;
+
+        // Cheat. Having to unlight the furnace is too much of a pain. Besides, having a furnace be
+        // in it's "finished" state when we enter the chunk could possibly cause issues, so it's
+        // better to let it finish its final operation on its own during tick time.
+        realisticOperations--;
 
         // Consume input
         input.decrement(realisticOperations);
