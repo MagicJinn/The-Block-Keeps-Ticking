@@ -3,24 +3,24 @@ package magicjinn.theblockkeepsticking.blocks;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CropBlock;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TickingCropBlock extends TickingBlock {
-    public static final TickingBlock INSTANCE = new TickingCropBlock();
+public class TickingLeavesBlock extends TickingBlock {
+    public static final TickingBlock INSTANCE = new TickingLeavesBlock();
 
     @Override
-    public Class<CropBlock> getType() {
-        return CropBlock.class;
+    public Class<LeavesBlock> getType() {
+        return LeavesBlock.class;
     }
 
     @Override
     public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
-        if (blockInstance instanceof CropBlock crop) {
-            return ((TickingBlockAccessor) crop).Simulate(ticksToSimulate, world, state, pos);
+        if (blockInstance instanceof LeavesBlock leaves) {
+            return ((TickingBlockAccessor) leaves).Simulate(ticksToSimulate, world, state, pos);
         }
-        return false; // If not an CropBlock, return false
+        return false;
     }
 }

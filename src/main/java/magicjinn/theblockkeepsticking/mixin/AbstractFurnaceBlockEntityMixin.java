@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.FuelRegistry;

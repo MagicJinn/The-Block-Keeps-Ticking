@@ -7,6 +7,7 @@ import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
@@ -28,11 +29,11 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
         // RegisterTickingBlock(TickingBrewingStand.INSTANCE);
-        // RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingStemBlock.INSTANCE);
         RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
         RegisterTickingBlock(TickingSaplingBlock.INSTANCE);
+        RegisterTickingBlock(TickingLeavesBlock.INSTANCE);
     }
 
     /**
@@ -46,18 +47,14 @@ public class WorldSimulator {
     }
 
     // Simulate the world for the given chunk
-    public static void SimulateWorld(WorldChunk chunk) {
+    public static void SimulateWorld(WorldChunk chunk, Long ticksToSimulate) {
         if (chunk == null) {
             TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
             return;
         }
 
         World world = chunk.getWorld();
-        long currentWorldTime = world.getTime();
-        // Get last update time, or set it to current time if not present
-        long lastTickTime =
-                chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME, currentWorldTime);
-        long ticksToSimulate = currentWorldTime - lastTickTime;
+
         if (ticksToSimulate <= 0){
             return; // Nothing to simulate, abort
         }
@@ -77,16 +74,24 @@ public class WorldSimulator {
             }
         });
 
-        for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-            for (TickingBlock tickingBlock : TickingBlockInstances) {
-                if (checkIfBlockIs(tickingBlock, blockEntity)) {
-                    boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate, world,
-                            blockEntity.getCachedState(), blockEntity.getPos());
-                    if (result)
-                        TheBlockKeepsTicking.LOGGER.info("Simulating block entity {} for {} ticks",
-                                blockEntity.getNameForReport(), ticksToSimulate);
-                    break;
-                    // break to avoid multiple matches (which is impossible, so this saves time)
+            // Safely iterate over block entities
+            if (chunk.getBlockEntities() != null) {
+                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                    if (blockEntity != null) {
+                        for (TickingBlock tickingBlock : TickingBlockInstances) {
+                            if (checkIfBlockIs(tickingBlock, blockEntity)) {
+                                boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate,
+                                        world, blockEntity.getCachedState(), blockEntity.getPos());
+                                if (result)
+                                    TheBlockKeepsTicking.LOGGER.info(
+                                            "Simulating block entity {} for {} ticks",
+                                            blockEntity.getNameForReport(), ticksToSimulate);
+                                break;
+                                // break to avoid multiple matches (which is impossible, so this
+                                // saves
+                                // time)
+                            }
+                        }
                 }
             }
         }

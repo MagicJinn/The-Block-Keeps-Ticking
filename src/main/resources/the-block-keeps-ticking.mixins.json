@@ -8,7 +8,8 @@
 		"StemBlockMixin",
 		"NetherWartBlockMixin",
 		"CampfireBlockEntityMixin",
-		"SaplingBlockMixin"
+		"SaplingBlockMixin",
+		"LeavesBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1

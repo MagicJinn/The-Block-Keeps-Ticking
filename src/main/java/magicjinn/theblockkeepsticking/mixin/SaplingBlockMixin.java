@@ -1,10 +1,8 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-
-import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
-import magicjinn.theblockkeepsticking.util.Timer;
+import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.SaplingBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.block.BlockState;
@@ -24,20 +22,13 @@ public class SaplingBlockMixin implements TickingBlockAccessor {
 
         int stage = (int) state.get(SaplingBlock.STAGE);
 
-        // Instead of immediately generating the tree, schedule it for 20 ticks later
+        // Instead of immediately generating the tree, simulate growth
         for (int i = stage; i < randomTicks && i < 2; i++) {
-            Timer.INSTANCE.Schedule(
-                    "sapling_growth_" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ(),
-                    server -> {
-                        ServerWorld serverWorld = server.getWorld(world.getRegistryKey());
-                        if (serverWorld != null) {
-                            BlockState currentState = serverWorld.getBlockState(pos);
-                            if (currentState.getBlock() instanceof SaplingBlock) {
-                                sapling.generate(serverWorld, pos, currentState,
-                                        serverWorld.random);
-                            }
-                        }
-                    });
+            ServerWorld serverWorld = (ServerWorld) world;
+            BlockState currentState = serverWorld.getBlockState(pos);
+            if (currentState.getBlock() instanceof SaplingBlock) {
+                sapling.generate(serverWorld, pos, currentState, serverWorld.random);
+            }
         }
 
         return true; // Always return true, since saplings are always simulated

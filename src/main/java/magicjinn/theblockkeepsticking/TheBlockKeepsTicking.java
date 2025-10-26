@@ -26,13 +26,24 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		LOGGER.info("The Block Keeps Ticking is initializing!");
 
 		WorldSimulator.Initialize();
-		Timer.Register();
+		Timer.RegisterShutdownEvent();
 
 		// Add listener for CHUNK_LEVEL_TYPE_CHANGE to handle chunks entering/leaving simulation
 		ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register((world, chunk, oldType, newType) -> {
 			// If chunk enters block-ticking/simulation, simulate it
+			long currentWorldTime = world.getTime();
+			// Get last update time, or set it to current time if not present
+			long lastTickTime =
+					chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME, currentWorldTime);
+			long ticksToSimulate = currentWorldTime - lastTickTime;
 			if (newType == ChunkLevelType.BLOCK_TICKING && oldType != ChunkLevelType.BLOCK_TICKING) {
-				WorldSimulator.SimulateWorld((WorldChunk) chunk);
+				// Schedule simulation in the future,
+				// to avoid changing blockstates during chunk loading (BAD!)
+				Timer.INSTANCE.Schedule("chunk_simulation_" + chunk.getPos().toLong(),
+						(server, chunkToSimulate) -> {
+							WorldSimulator.SimulateWorld((WorldChunk) chunkToSimulate,
+									ticksToSimulate);
+						}, (WorldChunk) chunk);
 			}
 			// If chunk leaves block-ticking/simulation, record the last update time
 			else if (oldType == ChunkLevelType.BLOCK_TICKING && newType != ChunkLevelType.BLOCK_TICKING) {

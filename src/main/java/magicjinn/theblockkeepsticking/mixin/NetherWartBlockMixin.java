@@ -1,9 +1,8 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-
-import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
+import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NetherWartBlock;
 import net.minecraft.util.math.BlockPos;

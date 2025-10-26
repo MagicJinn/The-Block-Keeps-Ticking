@@ -6,3 +6,5 @@ accessible method net/minecraft/recipe/SingleStackRecipe result ()Lnet/minecraft
 
 accessible method net/minecraft/block/CropBlock getAvailableMoisture (Lnet/minecraft/block/Block;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F
 
+accessible method net/minecraft/block/LeavesBlock randomTick (Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/random/Random;)V
+

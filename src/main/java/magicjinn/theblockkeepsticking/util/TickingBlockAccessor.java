@@ -1,4 +1,4 @@
-package magicjinn.theblockkeepsticking.accessors;
+package magicjinn.theblockkeepsticking.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;

@@ -3,8 +3,7 @@ package magicjinn.theblockkeepsticking.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
-import magicjinn.theblockkeepsticking.util.Timer;
+import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.StemBlock;
@@ -14,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import java.util.Optional;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
+import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.registry.Registry;
@@ -34,8 +34,10 @@ public class StemBlockMixin implements TickingBlockAccessor {
         int randomTicks = TickingBlock.CropGrowthAmount(ticksToSimulate, stem, world, state, pos);
 
         // Check if the stem is already facing a direction (attached stem)
-        if (state.contains(HorizontalFacingBlock.FACING))
+        if (state.contains(HorizontalFacingBlock.FACING)) { // Unsure if this works
+            TheBlockKeepsTicking.LOGGER.info("Skipped {}", pos);
             return false;
+        }
 
         if (randomTicks <= 0)
             return false;
@@ -45,20 +47,15 @@ public class StemBlockMixin implements TickingBlockAccessor {
         int maxAge = (int) StemBlock.MAX_AGE;
         int ageDiff = maxAge - age; // Difference between age and maxAge
         if (ageDiff > 0) {
-            // Schedule stem growth for 40 ticks later
-            Timer.INSTANCE.Schedule(
-                    "stem_growth_" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ(), server -> {
-                        ServerWorld serverWorld = server.getWorld(world.getRegistryKey());
-                        if (serverWorld != null) {
-                            BlockState currentState = serverWorld.getBlockState(pos);
-                            if (currentState.getBlock() instanceof StemBlock) {
-                                int currentAge = (int) currentState.get(StemBlock.AGE);
-                                int newAge = Math.min(StemBlock.MAX_AGE, currentAge + ageDiff);
-                                BlockState newState = currentState.with(StemBlock.AGE, newAge);
-                                serverWorld.setBlockState(pos, newState, 2);
-                            }
-                        }
-                    });
+            // Simulate stem growth
+            ServerWorld serverWorld = (ServerWorld) world;
+            BlockState currentState = serverWorld.getBlockState(pos);
+            if (currentState.getBlock() instanceof StemBlock) {
+                int currentAge = (int) currentState.get(StemBlock.AGE);
+                int newAge = Math.min(StemBlock.MAX_AGE, currentAge + ageDiff);
+                BlockState newState = currentState.with(StemBlock.AGE, newAge);
+                serverWorld.setBlockState(pos, newState, 2);
+            }
         }
 
         // Calculate how many ticks are left to grow gourds
@@ -67,44 +64,35 @@ public class StemBlockMixin implements TickingBlockAccessor {
         if (gourdTicks <= 0)
             return false; // No gourdTicks
 
-        // Schedule gourd placement for 40 ticks later
-        Timer.INSTANCE.Schedule("stem_gourd_" + pos.getX() + "_" + pos.getY() + "_" + pos.getZ(),
-                40L, server -> {
-                    ServerWorld serverWorld = server.getWorld(world.getRegistryKey());
-                    if (serverWorld != null) {
-                        BlockState currentState = serverWorld.getBlockState(pos);
-                        if (currentState.getBlock() instanceof StemBlock) {
-                            var directions = Type.HORIZONTAL.getShuffled(serverWorld.random);
-                            Registry<Block> registry =
-                                    serverWorld.getRegistryManager().getOrThrow(RegistryKeys.BLOCK);
-                            Optional<Block> optionalGourd = registry.getOptionalValue(gourdBlock);
-                            Optional<Block> optionalStemBlock =
-                                    registry.getOptionalValue(attachedStemBlock);
+        // Simulate gourd placement
+        ServerWorld serverWorld = (ServerWorld) world;
+        BlockState currentState = serverWorld.getBlockState(pos);
+        if (currentState.getBlock() instanceof StemBlock) {
+            var directions = Type.HORIZONTAL.getShuffled(serverWorld.random);
+            Registry<Block> registry =
+                    serverWorld.getRegistryManager().getOrThrow(RegistryKeys.BLOCK);
+            Optional<Block> optionalGourd = registry.getOptionalValue(gourdBlock);
+            Optional<Block> optionalStemBlock = registry.getOptionalValue(attachedStemBlock);
 
-                            if (optionalGourd.isPresent() && optionalStemBlock.isPresent()) {
-                                // Try all 4 directions
-                                for (Direction dir : directions) {
-                                    // Check whether the gourd fits on the block
-                                    BlockPos blockPos = pos.offset(dir);
-                                    BlockState blockGourdWillBeOn =
-                                            serverWorld.getBlockState(blockPos.down());
-                                    if (serverWorld.getBlockState(blockPos).isAir()
-                                            && (blockGourdWillBeOn.isOf(Blocks.FARMLAND)
-                                                    || blockGourdWillBeOn.isIn(BlockTags.DIRT))) {
-                                        serverWorld.setBlockState(blockPos, // Set gourd
-                                                (BlockState) ((Block) optionalGourd.get())
-                                                        .getDefaultState());
-                                        serverWorld.setBlockState(pos,
-                                                (BlockState) ((Block) optionalStemBlock.get())
-                                                        .getDefaultState()
-                                                        .with(HorizontalFacingBlock.FACING, dir));
-                                        break; // Placed gourd, exit
-                                    }
-                                }
-                            }
-                        }
+            if (optionalGourd.isPresent() && optionalStemBlock.isPresent()) {
+                // Try all 4 directions
+                for (Direction dir : directions) {
+                    // Check whether the gourd fits on the block
+                    BlockPos blockPos = pos.offset(dir);
+                    BlockState blockGourdWillBeOn = serverWorld.getBlockState(blockPos.down());
+                    if (serverWorld.getBlockState(blockPos).isAir()
+                            && (blockGourdWillBeOn.isOf(Blocks.FARMLAND)
+                                    || blockGourdWillBeOn.isIn(BlockTags.DIRT))) {
+                        serverWorld.setBlockState(blockPos, // Set gourd
+                                (BlockState) ((Block) optionalGourd.get()).getDefaultState());
+                                serverWorld.setBlockState(pos,
+                                (BlockState) ((Block) optionalStemBlock.get()).getDefaultState()
+                                        .with(HorizontalFacingBlock.FACING, dir));
+                        break; // Placed gourd, exit
                     }
-                });
+                }
+            }
+        }
         return ageDiff > 0 || gourdTicks > 0; // Everything went swell
     }
 }

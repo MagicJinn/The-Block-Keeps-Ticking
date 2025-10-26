@@ -1,7 +1,7 @@
 package magicjinn.theblockkeepsticking.blocks;
 
-import magicjinn.theblockkeepsticking.accessors.TickingBlockAccessor;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
+import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.StemBlock;
 import net.minecraft.util.math.BlockPos;
