@@ -10,7 +10,8 @@
 		"CampfireBlockEntityMixin",
 		"SaplingBlockMixin",
 		"LeavesBlockMixin",
-		"BrewingStandBlockEntityMixin"
+		"BrewingStandBlockEntityMixin",
+		"KelpBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1

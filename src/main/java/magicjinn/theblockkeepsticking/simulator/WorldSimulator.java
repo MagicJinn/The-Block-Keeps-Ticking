@@ -8,6 +8,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingBrewingStandBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
@@ -35,6 +36,7 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
         RegisterTickingBlock(TickingSaplingBlock.INSTANCE);
         RegisterTickingBlock(TickingLeavesBlock.INSTANCE);
+        RegisterTickingBlock(TickingKelpBlock.INSTANCE);
     }
 
     /**
@@ -45,6 +47,10 @@ public class WorldSimulator {
     public static void RegisterTickingBlock(TickingBlock blockClass) {
         if (blockClass instanceof TickingBlock)
             TickingBlockInstances.add((TickingBlock) blockClass);
+        else {
+            TheBlockKeepsTicking.LOGGER.warn(
+                    "Tried to register non-TickingBlock class: " + blockClass.getClass().getName());
+        }
     }
 
     // Simulate the world for the given chunk

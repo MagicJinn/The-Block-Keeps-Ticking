@@ -12,7 +12,7 @@ import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 public class BrewingStandBlockEntityMixin implements TickingBlockAccessor {
     @Shadow private int brewTime;
 
-    static final int MAX_BREWING_TIME = 400;
+    private static final int MAX_BREWING_TIME = 400;
 
     @Override
     public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
@@ -21,7 +21,7 @@ public class BrewingStandBlockEntityMixin implements TickingBlockAccessor {
         // and subtract time from it
 
         if (brewTime < MAX_BREWING_TIME && brewTime > 0) { // This means we're brewing
-            brewTime = Math.max(20, brewTime - ticksToSimulate.intValue());
+            brewTime = Math.max(1, brewTime - ticksToSimulate.intValue());
             return true;
         }
         return false;
