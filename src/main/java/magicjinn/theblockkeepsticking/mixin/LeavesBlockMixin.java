@@ -1,8 +1,8 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.server.world.ServerWorld;
@@ -14,7 +14,7 @@ public class LeavesBlockMixin implements TickingBlockAccessor {
     @Override
     public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         LeavesBlock leavesBlock = (LeavesBlock) (Object) this;
-        int randomTicks = TickingBlock.RandomTickAmount(ticksToSimulate, world);
+        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world);
 
         if (randomTicks <= 0)
             return false;

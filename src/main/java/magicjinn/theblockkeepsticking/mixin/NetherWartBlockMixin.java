@@ -1,8 +1,8 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NetherWartBlock;
 import net.minecraft.util.math.BlockPos;
@@ -22,7 +22,7 @@ public class NetherWartBlockMixin implements TickingBlockAccessor {
             return false;
 
         // 10% chance per random tick
-        int growth = TickingBlock.RandomTickAmount(ticksToSimulate, world) / 10;
+        int growth = TickingCalculator.RandomTickAmount(ticksToSimulate, world, 10);
 
         if (growth > 0) {
             int newAge = Math.min(maxAge, age + growth);

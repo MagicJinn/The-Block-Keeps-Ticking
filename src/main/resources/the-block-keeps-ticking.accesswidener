@@ -8,3 +8,6 @@ accessible method net/minecraft/block/CropBlock getAvailableMoisture (Lnet/minec
 
 accessible method net/minecraft/block/LeavesBlock randomTick (Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/random/Random;)V
 
+# Maybe not needed
+accessible method net/minecraft/block/entity/BlockEntity markDirty (Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V
+

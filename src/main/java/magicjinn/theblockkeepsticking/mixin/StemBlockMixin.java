@@ -12,8 +12,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import java.util.Optional;
-import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.registry.Registry;
@@ -31,7 +31,8 @@ public class StemBlockMixin implements TickingBlockAccessor {
     public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         StemBlock stem = (StemBlock) (Object) this;
 
-        int randomTicks = TickingBlock.CropGrowthAmount(ticksToSimulate, stem, world, state, pos);
+        int randomTicks =
+                TickingCalculator.CropGrowthAmount(ticksToSimulate, stem, world, state, pos);
 
         // Check if the stem is already facing a direction (attached stem)
         if (state.contains(HorizontalFacingBlock.FACING)) { // Unsure if this works

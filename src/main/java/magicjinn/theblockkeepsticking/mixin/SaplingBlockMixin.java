@@ -1,8 +1,8 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.SaplingBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.block.BlockState;
@@ -16,7 +16,7 @@ public class SaplingBlockMixin implements TickingBlockAccessor {
         SaplingBlock sapling = (SaplingBlock) (Object) this;
 
         // 1/7 chance per random tick
-        int randomTicks = TickingBlock.RandomTickAmount(ticksToSimulate, world) / 7;
+        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world, 7);
         if (randomTicks <= 0)
             return false;
 

@@ -1,8 +1,8 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +14,7 @@ public class CropBlockMixin implements TickingBlockAccessor {
     public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         CropBlock crop = (CropBlock) (Object) this;
 
-        int growth = TickingBlock.CropGrowthAmount(ticksToSimulate, crop, world, state, pos);
+        int growth = TickingCalculator.CropGrowthAmount(ticksToSimulate, crop, world, state, pos);
 
         int age = crop.getAge(state);
         int maxAge = crop.getMaxAge();
