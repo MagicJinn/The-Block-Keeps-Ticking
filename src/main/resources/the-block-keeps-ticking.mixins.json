@@ -9,7 +9,8 @@
 		"NetherWartBlockMixin",
 		"CampfireBlockEntityMixin",
 		"SaplingBlockMixin",
-		"LeavesBlockMixin"
+		"LeavesBlockMixin",
+		"BrewingStandBlockEntityMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1
