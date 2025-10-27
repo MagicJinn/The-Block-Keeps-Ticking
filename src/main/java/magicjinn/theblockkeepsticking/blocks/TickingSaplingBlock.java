@@ -16,7 +16,7 @@ public class TickingSaplingBlock extends TickingBlock {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof SaplingBlock sapling) {
             return ((TickingBlockAccessor) sapling).Simulate(ticksToSimulate, world, state, pos);

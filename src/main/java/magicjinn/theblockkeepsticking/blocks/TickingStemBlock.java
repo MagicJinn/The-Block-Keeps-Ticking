@@ -16,7 +16,7 @@ public class TickingStemBlock extends TickingBlock {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof StemBlock stem) {
             return ((TickingBlockAccessor) stem).Simulate(ticksToSimulate, world, state, pos);

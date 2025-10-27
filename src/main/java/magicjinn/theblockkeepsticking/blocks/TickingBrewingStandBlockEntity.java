@@ -16,7 +16,7 @@ public class TickingBrewingStandBlockEntity extends TickingBlock {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof BrewingStandBlockEntity brewingStand) {
             return ((TickingBlockAccessor) brewingStand).Simulate(ticksToSimulate, world, state,

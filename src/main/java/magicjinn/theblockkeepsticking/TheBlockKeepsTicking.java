@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
-
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import magicjinn.theblockkeepsticking.util.Timer;
@@ -17,6 +16,7 @@ import net.minecraft.server.world.ChunkLevelType;
 public class TheBlockKeepsTicking implements ModInitializer {
 	public static final String MOD_ID = "the-block-keeps-ticking";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
 	public static final AttachmentType<Long> LAST_UPDATE_TIME =
 			AttachmentRegistry.createPersistent(Identifier.of(MOD_ID, "last_update_time"),
 					Codec.LONG);

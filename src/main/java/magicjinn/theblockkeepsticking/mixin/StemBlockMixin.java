@@ -28,7 +28,7 @@ public class StemBlockMixin implements TickingBlockAccessor {
     @Shadow @Final private RegistryKey<Block> gourdBlock;
     @Shadow @Final private RegistryKey<Block> attachedStemBlock;
 
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         StemBlock stem = (StemBlock) (Object) this;
 
         int randomTicks =

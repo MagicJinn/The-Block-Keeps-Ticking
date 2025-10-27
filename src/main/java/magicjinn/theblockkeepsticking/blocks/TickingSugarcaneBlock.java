@@ -3,23 +3,23 @@ package magicjinn.theblockkeepsticking.blocks;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.NetherWartBlock;
+import net.minecraft.block.SugarCaneBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TickingNetherWartBlock extends TickingBlock {
-    public static final TickingBlock INSTANCE = new TickingNetherWartBlock();
+public class TickingSugarcaneBlock extends TickingBlock {
+    public static final TickingBlock INSTANCE = new TickingSugarcaneBlock();
 
     @Override
-    public Class<NetherWartBlock> getType() {
-        return NetherWartBlock.class;
+    public Class<SugarCaneBlock> getType() {
+        return SugarCaneBlock.class;
     }
 
     @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
-        if (blockInstance instanceof NetherWartBlock netherWart) {
-            return ((TickingBlockAccessor) netherWart).Simulate(ticksToSimulate, world, state, pos);
+        if (blockInstance instanceof SugarCaneBlock sugarcane) {
+            return ((TickingBlockAccessor) sugarcane).Simulate(ticksToSimulate, world, state, pos);
         }
         return false;
     }

@@ -14,6 +14,6 @@ public abstract class TickingBlock {
     public abstract Class<?> getType();
 
     // Custom simulation logic
-    public abstract boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public abstract boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos);
 }

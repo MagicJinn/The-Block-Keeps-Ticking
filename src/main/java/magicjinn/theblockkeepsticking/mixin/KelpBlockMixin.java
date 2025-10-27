@@ -21,7 +21,7 @@ public class KelpBlockMixin implements TickingBlockAccessor {
 
 
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world,
                 (float) (1.0 / GROWTH_CHANCE));
 

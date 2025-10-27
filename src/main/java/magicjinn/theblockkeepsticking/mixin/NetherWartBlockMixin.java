@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 @Mixin(NetherWartBlock.class)
 public class NetherWartBlockMixin implements TickingBlockAccessor {
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         // NetherWartBlock netherWart = (NetherWartBlock) (Object) this;
 
         // Because mojang is stupid

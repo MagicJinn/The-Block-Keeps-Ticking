@@ -16,7 +16,7 @@ public class TickingCropBlock extends TickingBlock {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof CropBlock crop) {
             return ((TickingBlockAccessor) crop).Simulate(ticksToSimulate, world, state, pos);

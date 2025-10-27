@@ -16,7 +16,7 @@ public class TickingKelpBlock extends TickingBlock {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof KelpBlock kelp) {
             return ((TickingBlockAccessor) kelp).Simulate(ticksToSimulate, world, state, pos);

@@ -5,5 +5,5 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public interface TickingBlockAccessor {
-    boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos);
+    boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos);
 }

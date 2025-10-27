@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 @Mixin(CropBlock.class)
 public class CropBlockMixin implements TickingBlockAccessor {
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         CropBlock crop = (CropBlock) (Object) this;
 
         int growth = TickingCalculator.CropGrowthAmount(ticksToSimulate, crop, world, state, pos);

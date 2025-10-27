@@ -34,7 +34,7 @@ public class AbstractFurnaceBlockEntityMixin implements TickingBlockAccessor {
     @Shadow @Final protected static int OUTPUT_SLOT_INDEX;
 
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) (Object) this; // what
         if (!(world instanceof ServerWorld serverWorld))
             return false;

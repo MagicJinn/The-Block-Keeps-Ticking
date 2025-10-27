@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 @Mixin(SaplingBlock.class)
 public class SaplingBlockMixin implements TickingBlockAccessor {
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         SaplingBlock sapling = (SaplingBlock) (Object) this;
 
         // 1/7 chance per random tick

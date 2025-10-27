@@ -9,11 +9,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class TickingCalculator {
-    public static int RandomTickAmount(Long ticksToSimulate, World world) {
+    public static int RandomTickAmount(long ticksToSimulate, World world) {
         return RandomTickAmount(ticksToSimulate, world, 1);
     }
 
-    public static int RandomTickAmount(Long ticksToSimulate, World world, float divideByAmount) {
+    public static int RandomTickAmount(long ticksToSimulate, World world, float divideByAmount) {
         // Determine the amount of random ticks that would have occurred
         int randomTickSpeed =
                 ((ServerWorld) world).getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
@@ -21,13 +21,13 @@ public class TickingCalculator {
         return (int) (randomTicks / divideByAmount);
     }
 
-    public static int CropGrowthAmount(Long ticksToSimulate, Block block, World world,
+    public static int CropGrowthAmount(long ticksToSimulate, Block block, World world,
             BlockState state, BlockPos pos) {
         return CropGrowthAmount(ticksToSimulate, block, world, state, pos, 25f);
     }
 
     // Base method to be used by both crops and stems
-    public static int CropGrowthAmount(Long ticksToSimulate, Block block, World world,
+    public static int CropGrowthAmount(long ticksToSimulate, Block block, World world,
             BlockState state, BlockPos pos, float growthChance) {
         // Too dark to grow
         if (world.getBaseLightLevel(pos, 0) < 9)

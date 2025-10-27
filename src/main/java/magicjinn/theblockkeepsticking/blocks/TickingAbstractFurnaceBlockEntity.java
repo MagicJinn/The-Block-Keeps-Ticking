@@ -18,7 +18,7 @@ public class TickingAbstractFurnaceBlockEntity extends TickingBlock {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, Long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof AbstractFurnaceBlockEntity furnace) {
             return ((TickingBlockAccessor) furnace).Simulate(ticksToSimulate, world, state, pos);

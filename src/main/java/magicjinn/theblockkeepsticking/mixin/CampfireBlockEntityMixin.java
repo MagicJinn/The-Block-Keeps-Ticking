@@ -19,7 +19,7 @@ public class CampfireBlockEntityMixin implements TickingBlockAccessor {
     @Shadow @Final private int[] cookingTotalTimes;
 
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         // Check if campfire is lit
         if (!state.get(CampfireBlock.LIT))
             return false;
@@ -28,7 +28,7 @@ public class CampfireBlockEntityMixin implements TickingBlockAccessor {
         for (int i = 0; i < itemsBeingCooked.size(); i++) {
             ItemStack item = itemsBeingCooked.get(i);
             if (!item.isEmpty()) {
-                cookingTimes[i] += ticksToSimulate.intValue();
+                cookingTimes[i] += (long) ticksToSimulate;
                 changed = true;
             }
         }

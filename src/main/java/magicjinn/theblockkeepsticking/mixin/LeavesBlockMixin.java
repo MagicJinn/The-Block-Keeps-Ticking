@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 @Mixin(LeavesBlock.class)
 public class LeavesBlockMixin implements TickingBlockAccessor {
     @Override
-    public boolean Simulate(Long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         LeavesBlock leavesBlock = (LeavesBlock) (Object) this;
         int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world);
 
