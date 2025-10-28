@@ -92,7 +92,7 @@ public class AbstractFurnaceBlockEntityMixin implements TickingBlockAccessor {
         // Cheat. Having to unlight the furnace is too much of a pain. Besides, having a furnace be
         // in it's "finished" state when we enter the chunk could possibly cause issues, so it's
         // better to let it finish its final operation on its own during tick time.
-        realisticOperations--;
+        realisticOperations = Math.max(0, realisticOperations - 1);
 
         // Consume input
         input.decrement(realisticOperations);

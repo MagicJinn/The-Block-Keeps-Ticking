@@ -17,7 +17,7 @@ public class TickingCalculator {
         // Determine the amount of random ticks that would have occurred
         int randomTickSpeed =
                 ((ServerWorld) world).getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
-        int randomTicks = (int) (ticksToSimulate / (16 * 16 * 16) * randomTickSpeed);
+        int randomTicks = (int) (ticksToSimulate * randomTickSpeed) / (16 * 16 * 16);
         return (int) (randomTicks / divideByAmount);
     }
 
@@ -26,9 +26,9 @@ public class TickingCalculator {
         return CropGrowthAmount(ticksToSimulate, block, world, state, pos, 25f);
     }
 
-    // Base method to be used by both crops and stems
     public static int CropGrowthAmount(long ticksToSimulate, Block block, World world,
             BlockState state, BlockPos pos, float growthChance) {
+
         // Too dark to grow
         if (world.getBaseLightLevel(pos, 0) < 9)
             return 0;
@@ -36,9 +36,13 @@ public class TickingCalculator {
         // Determine the amount of random ticks that would have occurred
         int randomTicks = RandomTickAmount(ticksToSimulate, world);
 
-        // Simplified growth formula, fakes randomness
+        // Available moisture at the crop position
         float availableMoisture = CropBlock.getAvailableMoisture(block, world, pos);
-        int growth = (int) Math.floor(growthChance / availableMoisture + 1) * randomTicks;
+
+        // Simplified growth formula, fakes randomness
+        float chancePerTick = 1f / ((25f / availableMoisture) + 1f);
+        int growth = (int) (randomTicks * chancePerTick);
+
         return growth;
     }
 }

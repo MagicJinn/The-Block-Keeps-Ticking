@@ -28,7 +28,7 @@ public class CampfireBlockEntityMixin implements TickingBlockAccessor {
         for (int i = 0; i < itemsBeingCooked.size(); i++) {
             ItemStack item = itemsBeingCooked.get(i);
             if (!item.isEmpty()) {
-                cookingTimes[i] += (long) ticksToSimulate;
+                cookingTimes[i] += (int) ticksToSimulate;
                 changed = true;
             }
         }

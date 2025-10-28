@@ -53,7 +53,7 @@ public class StemBlockMixin implements TickingBlockAccessor {
             BlockState currentState = serverWorld.getBlockState(pos);
             if (currentState.getBlock() instanceof StemBlock) {
                 int currentAge = (int) currentState.get(StemBlock.AGE);
-                int newAge = Math.min(StemBlock.MAX_AGE, currentAge + ageDiff);
+                int newAge = Math.min(StemBlock.MAX_AGE, currentAge + randomTicks);
                 BlockState newState = currentState.with(StemBlock.AGE, newAge);
                 serverWorld.setBlockState(pos, newState, 2);
             }
