@@ -51,12 +51,14 @@ public class WorldSimulator {
      * @param blockClass The TickingBlock to register
      */
     public static void RegisterTickingBlock(TickingBlock blockClass) {
-        if (blockClass instanceof TickingBlock)
+        if (blockClass instanceof TickingBlock) {
             TickingBlockInstances.add((TickingBlock) blockClass);
-        else {
+            TheBlockKeepsTicking.LOGGER
+                    .info("Registered TickingBlock: " + blockClass.getClass().getSimpleName());
+        } else
             TheBlockKeepsTicking.LOGGER.warn(
                     "Tried to register non-TickingBlock class: " + blockClass.getClass().getName());
-        }
+
     }
 
     // Simulate the world for the given chunk
