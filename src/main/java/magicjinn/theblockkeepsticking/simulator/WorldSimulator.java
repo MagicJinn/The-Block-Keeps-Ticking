@@ -6,6 +6,7 @@ import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingBambooBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingBambooShootBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingBrewingStandBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCactusBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
@@ -15,7 +16,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
-import magicjinn.theblockkeepsticking.blocks.TickingSugarcaneBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
 import magicjinn.theblockkeepsticking.util.TickingBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -41,7 +42,8 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingLeavesBlock.INSTANCE);
         RegisterTickingBlock(TickingKelpBlock.INSTANCE);
         RegisterTickingBlock(TickingBambooBlock.INSTANCE);
-        RegisterTickingBlock(TickingSugarcaneBlock.INSTANCE);
+        RegisterTickingBlock(TickingBambooShootBlock.INSTANCE);
+        RegisterTickingBlock(TickingSugarCaneBlock.INSTANCE);
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
     }
 

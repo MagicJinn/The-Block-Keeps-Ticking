@@ -35,7 +35,7 @@ public class KelpBlockMixin implements TickingBlockAccessor {
 
         boolean changed = false;
 
-        for (int i = 1; i < ageDiff && i < randomTicks && age < maxAge; i++) {
+        for (int i = 1; i < ageDiff && i <= randomTicks && age < maxAge; i++) {
             BlockPos blockAbove = pos.offset(growthDirection, i);
             BlockState blockAboveState = world.getBlockState(blockAbove);
             if (blockAboveState.isOf(Blocks.WATER)) {

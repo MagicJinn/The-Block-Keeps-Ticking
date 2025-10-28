@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 @Mixin(SugarCaneBlock.class)
-public class SugarcaneBlockMixin implements TickingBlockAccessor {
+public class SugarCaneBlockMixin implements TickingBlockAccessor {
 
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {

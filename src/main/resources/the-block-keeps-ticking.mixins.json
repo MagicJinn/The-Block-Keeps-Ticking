@@ -11,7 +11,11 @@
 		"SaplingBlockMixin",
 		"LeavesBlockMixin",
 		"BrewingStandBlockEntityMixin",
-		"KelpBlockMixin"
+		"KelpBlockMixin",
+		"BambooBlockMixin",
+		"BambooShootBlockMixin",
+		"CactusBlockMixin",
+		"SugarCaneBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1
