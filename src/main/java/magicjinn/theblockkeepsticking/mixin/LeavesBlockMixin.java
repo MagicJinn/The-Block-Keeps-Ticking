@@ -21,6 +21,10 @@ public class LeavesBlockMixin implements TickingBlockAccessor {
 
         // since there is no random chance, we can safely call randomTick
         leavesBlock.randomTick(state, (ServerWorld) world, pos, world.random);
-        return true;
+        // Check if block became empty
+        if (world.getBlockState(pos).isAir()) {
+            return true;
+        }
+        return false;
     }
 }

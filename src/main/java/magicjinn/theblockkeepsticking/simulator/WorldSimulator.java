@@ -39,7 +39,7 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingStemBlock.INSTANCE);
         RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
         RegisterTickingBlock(TickingSaplingBlock.INSTANCE);
-        RegisterTickingBlock(TickingLeavesBlock.INSTANCE);
+        // RegisterTickingBlock(TickingLeavesBlock.INSTANCE); // Laggy?
         RegisterTickingBlock(TickingKelpBlock.INSTANCE);
         RegisterTickingBlock(TickingBambooBlock.INSTANCE);
         RegisterTickingBlock(TickingBambooShootBlock.INSTANCE);
@@ -82,6 +82,7 @@ public class WorldSimulator {
                 if (checkIfBlockIs(tickingBlock, block)) {
                         boolean result =
                                 tickingBlock.Simulate(block, ticksToSimulate, world, state, pos);
+                        result = false;
                         if (result)
                         TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
                                     block.getName().toString(), ticksToSimulate);
@@ -99,6 +100,7 @@ public class WorldSimulator {
                             if (checkIfBlockIs(tickingBlock, blockEntity)) {
                                 boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate,
                                         world, blockEntity.getCachedState(), blockEntity.getPos());
+                                result = false;
                                 if (result)
                                     TheBlockKeepsTicking.LOGGER.info(
                                             "Simulating block entity {} for {} ticks",
