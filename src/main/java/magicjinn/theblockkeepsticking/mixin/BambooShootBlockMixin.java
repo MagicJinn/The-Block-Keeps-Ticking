@@ -23,6 +23,7 @@ public class BambooShootBlockMixin implements TickingBlockAccessor {
         if (randomTicks > 0) {
             world.setBlockState(pos, Blocks.BAMBOO.getDefaultState(), 3);
             BlockState newState = world.getBlockState(pos);
+            // Pass the newly created block onto the next simulate method
             ((TickingBlockAccessor) newState.getBlock()).Simulate(ticksToSimulate, world, newState,
                     pos);
 
