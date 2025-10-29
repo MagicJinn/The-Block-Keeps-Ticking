@@ -12,7 +12,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingCactusBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
-import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock;
+// import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
