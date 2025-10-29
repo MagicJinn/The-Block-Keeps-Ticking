@@ -11,6 +11,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingCactusBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCocoaBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingDriedGhastBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 // import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
@@ -18,6 +19,8 @@ import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
+import magicjinn.theblockkeepsticking.entities.TickingAnimalEntity;
+import magicjinn.theblockkeepsticking.entities.TickingChickenEntity;
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -57,6 +60,10 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
 
         RegisterTickingBlock(TickingPassiveEntity.INSTANCE);
+        RegisterTickingBlock(TickingChickenEntity.INSTANCE);
+        RegisterTickingBlock(TickingAnimalEntity.INSTANCE);
+
+        RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
     }
 
     /**
@@ -111,7 +118,7 @@ public class WorldSimulator {
                     if (checkIfInstanceOf(tickingBlock, block)) {
                         boolean result =
                                 tickingBlock.Simulate(block, ticksToSimulate, world, state, pos);
-                        result = false;
+                        // result = false;
                         if (result)
                         TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
                                     block.getName().toString(), ticksToSimulate);
@@ -127,7 +134,7 @@ public class WorldSimulator {
                             boolean result = tickingBlockEntity.Simulate(blockEntity,
                                     ticksToSimulate,
                                     world, blockEntity.getCachedState(), blockEntity.getPos());
-                            result = false;
+                            // result = false;
                             if (result)
                                 TheBlockKeepsTicking.LOGGER.info(
                                         "Simulating block entity {} for {} ticks",
@@ -152,11 +159,10 @@ public class WorldSimulator {
                     if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
                         boolean result = tickingEntity.Simulate(passiveEntity, ticksToSimulate,
                                 world, null, null);
-                        result = false;
+                        // result = false;
                         if (result)
                             TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
                                     passiveEntity, ticksToSimulate);
-                        // Don't break, because an entity can be multiple types
                     }
                 }
             }
