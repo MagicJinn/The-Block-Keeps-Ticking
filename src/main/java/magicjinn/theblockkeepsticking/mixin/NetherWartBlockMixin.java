@@ -1,7 +1,7 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NetherWartBlock;
@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 @Mixin(NetherWartBlock.class)
-public class NetherWartBlockMixin implements TickingBlockAccessor {
+public class NetherWartBlockMixin implements TickingAccessor {
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         // NetherWartBlock netherWart = (NetherWartBlock) (Object) this;

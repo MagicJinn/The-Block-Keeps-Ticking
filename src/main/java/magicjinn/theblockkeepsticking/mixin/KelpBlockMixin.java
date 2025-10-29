@@ -3,7 +3,7 @@ package magicjinn.theblockkeepsticking.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.AbstractPlantStemBlock;
 import net.minecraft.block.BlockState;
@@ -14,7 +14,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 @Mixin(KelpBlock.class)
-public class KelpBlockMixin implements TickingBlockAccessor {
+public class KelpBlockMixin implements TickingAccessor {
     @Shadow @Final private static double GROWTH_CHANCE;
 
     private static final Direction growthDirection = Direction.UP;

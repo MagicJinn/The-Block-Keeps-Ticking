@@ -1,7 +1,7 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SugarCaneBlock;
@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 import net.minecraft.block.Blocks;
 
 @Mixin(SugarCaneBlock.class)
-public class SugarCaneBlockMixin implements TickingBlockAccessor {
+public class SugarCaneBlockMixin implements TickingAccessor {
     private final static int maxHeight = 3;
     private final static int maxAge = 15;
 

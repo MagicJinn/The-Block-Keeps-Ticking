@@ -3,7 +3,7 @@ package magicjinn.theblockkeepsticking.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +12,7 @@ import net.minecraft.block.CactusBlock;
 import net.minecraft.block.Blocks;
 
 @Mixin(CactusBlock.class)
-public class CactusBlockMixin implements TickingBlockAccessor {
+public class CactusBlockMixin implements TickingAccessor {
     @Shadow @Final static int TALL_THRESHOLD;
 
     @Override

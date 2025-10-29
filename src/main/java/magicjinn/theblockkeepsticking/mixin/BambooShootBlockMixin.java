@@ -1,7 +1,7 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BambooShootBlock;
 import net.minecraft.block.BlockState;
@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 @Mixin(BambooShootBlock.class)
-public class BambooShootBlockMixin implements TickingBlockAccessor {
+public class BambooShootBlockMixin implements TickingAccessor {
 
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
@@ -24,7 +24,7 @@ public class BambooShootBlockMixin implements TickingBlockAccessor {
             world.setBlockState(pos, Blocks.BAMBOO.getDefaultState(), 3);
             BlockState newState = world.getBlockState(pos);
             // Pass the newly created block onto the next simulate method
-            ((TickingBlockAccessor) newState.getBlock()).Simulate(ticksToSimulate, world, newState,
+            ((TickingAccessor) newState.getBlock()).Simulate(ticksToSimulate, world, newState,
                     pos);
 
             return true;

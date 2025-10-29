@@ -12,7 +12,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import java.util.Optional;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
@@ -23,7 +23,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Direction.Type;
 
 @Mixin(StemBlock.class)
-public class StemBlockMixin implements TickingBlockAccessor {
+public class StemBlockMixin implements TickingAccessor {
 
     @Shadow @Final private RegistryKey<Block> gourdBlock;
     @Shadow @Final private RegistryKey<Block> attachedStemBlock;

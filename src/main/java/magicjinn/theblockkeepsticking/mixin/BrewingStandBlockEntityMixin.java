@@ -6,10 +6,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BrewingStandBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import magicjinn.theblockkeepsticking.util.TickingBlockAccessor;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
 
 @Mixin(BrewingStandBlockEntity.class)
-public class BrewingStandBlockEntityMixin implements TickingBlockAccessor {
+public class BrewingStandBlockEntityMixin implements TickingAccessor {
     @Shadow private int brewTime;
 
     private static final int MAX_BREWING_TIME = 400;
