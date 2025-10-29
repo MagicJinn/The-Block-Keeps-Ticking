@@ -19,8 +19,8 @@ import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
-import magicjinn.theblockkeepsticking.entities.TickingAnimalEntity;
-import magicjinn.theblockkeepsticking.entities.TickingChickenEntity;
+// import magicjinn.theblockkeepsticking.entities.TickingAnimalEntity;
+// import magicjinn.theblockkeepsticking.entities.TickingChickenEntity;
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -60,8 +60,8 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
 
         RegisterTickingBlock(TickingPassiveEntity.INSTANCE);
-        RegisterTickingBlock(TickingChickenEntity.INSTANCE);
-        RegisterTickingBlock(TickingAnimalEntity.INSTANCE);
+        // RegisterTickingBlock(TickingAnimalEntity.INSTANCE); // Broken for now due to Java
+        // RegisterTickingBlock(TickingChickenEntity.INSTANCE);
 
         RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
     }
@@ -159,7 +159,7 @@ public class WorldSimulator {
                     if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
                         boolean result = tickingEntity.Simulate(passiveEntity, ticksToSimulate,
                                 world, null, null);
-                        // result = false;
+                        result = false;
                         if (result)
                             TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
                                     passiveEntity, ticksToSimulate);

@@ -26,7 +26,7 @@ public class DriedGhastBlockMixin implements TickingAccessor {
             return false;
 
         int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, serverWorld);
-        if (randomTicks == 0)
+        if (randomTicks <= 0)
             return false;
 
         // How many ticks happen between every random tick
@@ -50,7 +50,8 @@ public class DriedGhastBlockMixin implements TickingAccessor {
         if (changed) {
             if (hydration >= DriedGhastBlock.MAX_HYDRATION) {
                 serverWorld.setBlockState(pos, state.with(Properties.HYDRATION, hydration), 2);
-                serverWorld.scheduleBlockTick(pos, driedGhast, (int) Math.max(1, remainingTicks));
+                serverWorld.scheduleBlockTick(pos, driedGhast, (int) Math.max(1,
+                        DriedGhastBlock.HYDRATION_TICK_TIME - Math.max(0, remainingTicks)));
             }
         }
 

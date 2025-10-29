@@ -4,7 +4,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -12,7 +11,6 @@ import net.minecraft.world.World;
 public class AnimalEntityMixin implements TickingAccessor {
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
-        PassiveEntity passiveEntity = (PassiveEntity) (Object) this;
         AnimalEntity animal = (AnimalEntity) (Object) this;
         int breedingCooldown = animal.getBreedingAge();
         if (breedingCooldown <= 0)
