@@ -1,8 +1,6 @@
 package magicjinn.theblockkeepsticking.simulator;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
@@ -110,7 +108,7 @@ public class WorldSimulator {
         try {
             forEachBlockInChunk(chunk, (block, state, pos) -> {
                 for (TickingObject tickingBlock : TickingBlockInstances) {
-                if (checkIfBlockIs(tickingBlock, block)) {
+                    if (checkIfInstanceOf(tickingBlock, block)) {
                         boolean result =
                                 tickingBlock.Simulate(block, ticksToSimulate, world, state, pos);
                         result = false;
@@ -125,7 +123,7 @@ public class WorldSimulator {
             for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                 if (blockEntity != null) {
                     for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
-                        if (checkIfBlockIs(tickingBlockEntity, blockEntity)) {
+                        if (checkIfInstanceOf(tickingBlockEntity, blockEntity)) {
                             boolean result = tickingBlockEntity.Simulate(blockEntity,
                                     ticksToSimulate,
                                     world, blockEntity.getCachedState(), blockEntity.getPos());
@@ -151,11 +149,18 @@ public class WorldSimulator {
 
             for (PassiveEntity passiveEntity : passiveEntities) {
                 for (TickingObject tickingEntity : TickingEntityInstances) {
-
+                    if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
+                        boolean result = tickingEntity.Simulate(passiveEntity, ticksToSimulate,
+                                world, null, null);
+                        result = false;
+                        if (result)
+                            TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
+                                    passiveEntity, ticksToSimulate);
+                        // Don't break, because an entity can be multiple types
+                    }
                 }
-
             }
-    } catch (Exception e) {
+        } catch (Exception e) {
         TheBlockKeepsTicking.LOGGER.error("Error during world simulation: ", e);
     }
     }
@@ -167,7 +172,7 @@ public class WorldSimulator {
      * @param block
      * @return
      */
-    private static Boolean checkIfBlockIs(TickingObject tickingBlock, Object block) {
+    private static Boolean checkIfInstanceOf(TickingObject tickingBlock, Object block) {
         return tickingBlock.getType().isInstance(block);
     }
 
