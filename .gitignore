@@ -38,3 +38,4 @@ replay_*.log
 *.hprof
 *.jfr
 .vscode/settings.json
+/decomp
