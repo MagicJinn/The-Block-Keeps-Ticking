@@ -19,10 +19,12 @@ import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
+import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -33,7 +35,9 @@ import net.minecraft.world.chunk.WorldChunk;
 
 public class WorldSimulator {
 
-    private static final List<TickingObject> TickingBlockInstances = new ArrayList<>();
+    private static final ArrayList<TickingObject> TickingBlockInstances = new ArrayList<>();
+    private static final ArrayList<TickingObject> TickingBlockEntityInstances = new ArrayList<>();
+    private static final ArrayList<TickingObject> TickingEntityInstances = new ArrayList<>();
 
     public static void Initialize() {
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
@@ -53,22 +57,41 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingBambooShootBlock.INSTANCE);
         RegisterTickingBlock(TickingSugarCaneBlock.INSTANCE);
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
+
+        RegisterTickingBlock(TickingPassiveEntity.INSTANCE);
     }
 
     /**
      * Registers a TickingBlock to be simulated
      * 
-     * @param blockClass The TickingBlock to register
+     * @param instanceClass The TickingBlock to register
      */
-    public static void RegisterTickingBlock(TickingObject blockClass) {
-        if (blockClass instanceof TickingObject) {
-            TickingBlockInstances.add((TickingObject) blockClass);
-            TheBlockKeepsTicking.LOGGER
-                    .info("Registered TickingBlock: " + blockClass.getClass().getSimpleName());
-        } else
-            TheBlockKeepsTicking.LOGGER.warn(
-                    "Tried to register non-TickingBlock class: " + blockClass.getClass().getName());
+    public static void RegisterTickingBlock(TickingObject tickingObject) {
+        if (tickingObject == null) {
+            TheBlockKeepsTicking.LOGGER.warn("Tried to register null TickingObject");
+            return;
+        }
 
+        Class<?> type = tickingObject.getType();
+        if (type == null) {
+            TheBlockKeepsTicking.LOGGER.warn(
+                    "TickingObject returned null type: " + tickingObject.getClass().getName());
+            return;
+        }
+
+        if (Block.class.isAssignableFrom(type)) {
+            TickingBlockInstances.add(tickingObject);
+        } else if (BlockEntity.class.isAssignableFrom(type)) {
+            TickingBlockEntityInstances.add(tickingObject);
+        } else if (Entity.class.isAssignableFrom(type)) {
+            TickingEntityInstances.add(tickingObject);
+        } else {
+            TheBlockKeepsTicking.LOGGER.warn("Unsupported TickingObject type: " + type.getName());
+            return;
+        }
+
+        TheBlockKeepsTicking.LOGGER
+                .info("Registered TickingBlock: " + tickingObject.getClass().getSimpleName());
     }
 
     // Simulate the world for the given chunk
@@ -99,12 +122,12 @@ public class WorldSimulator {
                 }
             }
         });
-            Map<BlockPos, BlockEntity> blockEntities = chunk.getBlockEntities();
-            for (BlockEntity blockEntity : blockEntities.values()) {
+            for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                 if (blockEntity != null) {
-                    for (TickingObject tickingBlock : TickingBlockInstances) {
-                        if (checkIfBlockIs(tickingBlock, blockEntity)) {
-                            boolean result = tickingBlock.Simulate(blockEntity, ticksToSimulate,
+                    for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
+                        if (checkIfBlockIs(tickingBlockEntity, blockEntity)) {
+                            boolean result = tickingBlockEntity.Simulate(blockEntity,
+                                    ticksToSimulate,
                                     world, blockEntity.getCachedState(), blockEntity.getPos());
                             result = false;
                             if (result)
@@ -127,6 +150,9 @@ public class WorldSimulator {
                     world.getEntitiesByClass(PassiveEntity.class, box, PassiveEntity -> true);
 
             for (PassiveEntity passiveEntity : passiveEntities) {
+                for (TickingObject tickingEntity : TickingEntityInstances) {
+
+                }
 
             }
     } catch (Exception e) {
