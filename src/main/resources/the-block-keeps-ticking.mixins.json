@@ -15,7 +15,8 @@
 		"BambooBlockMixin",
 		"BambooShootBlockMixin",
 		"CactusBlockMixin",
-		"SugarCaneBlockMixin"
+		"SugarCaneBlockMixin",
+		"CocoaBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1

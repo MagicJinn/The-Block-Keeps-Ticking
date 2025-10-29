@@ -10,6 +10,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingBambooShootBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingBrewingStandBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCactusBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
+import magicjinn.theblockkeepsticking.blocks.TickingCocoaBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 // import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
@@ -35,11 +36,15 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingBrewingStandBlockEntity.INSTANCE);
+
         RegisterTickingBlock(TickingCropBlock.INSTANCE);
         RegisterTickingBlock(TickingStemBlock.INSTANCE);
         RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
+        RegisterTickingBlock(TickingCocoaBlock.INSTANCE);
+
         RegisterTickingBlock(TickingSaplingBlock.INSTANCE);
         // RegisterTickingBlock(TickingLeavesBlock.INSTANCE); // Laggy?
+
         RegisterTickingBlock(TickingKelpBlock.INSTANCE);
         RegisterTickingBlock(TickingBambooBlock.INSTANCE);
         RegisterTickingBlock(TickingBambooShootBlock.INSTANCE);
