@@ -16,6 +16,11 @@ public class TickingChickenEntity extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Chickens";
+    }
+
+    @Override
     public boolean Simulate(Object entityInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (entityInstance instanceof ChickenEntity chickenEntity) {

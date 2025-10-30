@@ -18,9 +18,9 @@ import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
-import magicjinn.theblockkeepsticking.config.ModConfig;
+// import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
-// import magicjinn.theblockkeepsticking.entities.TickingAnimalEntity;
+import magicjinn.theblockkeepsticking.config.ModConfig;
 // import magicjinn.theblockkeepsticking.entities.TickingChickenEntity;
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.block.Block;
@@ -36,6 +36,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 
 public class WorldSimulator {
+    public static final ArrayList<TickingObject> TickingObjectInstances = new ArrayList<>();
 
     private static final ArrayList<TickingObject> TickingBlockInstances = new ArrayList<>();
     private static final ArrayList<TickingObject> TickingBlockEntityInstances = new ArrayList<>();
@@ -61,7 +62,7 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
 
         RegisterTickingBlock(TickingPassiveEntity.INSTANCE);
-        // RegisterTickingBlock(TickingAnimalEntity.INSTANCE); // Broken for now due to Java
+        // Broken for now due to Java
         // RegisterTickingBlock(TickingChickenEntity.INSTANCE);
 
         RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
@@ -77,6 +78,8 @@ public class WorldSimulator {
             TheBlockKeepsTicking.LOGGER.warn("Tried to register null TickingObject");
             return;
         }
+
+        TickingObjectInstances.add(tickingObject); // Add it to global list
 
         Class<?> type = tickingObject.getType();
         if (type == null) {
@@ -109,14 +112,8 @@ public class WorldSimulator {
 
         World world = chunk.getWorld();
 
-        // Log ticksToSimulate before lazy tax
-        TheBlockKeepsTicking.LOGGER.info("ticksToSimulate before lazy tax: {}", ticksToSimulate);
-
         // Apply lazy tax
-        long ticks = ticksToSimulate * (100 - ModConfig.lazyTax) / 100;
-
-        // Log ticksToSimulate after lazy tax
-        TheBlockKeepsTicking.LOGGER.info("ticksToSimulate after lazy tax: {}", ticksToSimulate);
+        long ticks = ModConfig.applyLazyTax(ticksToSimulate);
 
 
         if (ticksToSimulate <= 0){
@@ -127,6 +124,9 @@ public class WorldSimulator {
             forEachBlockInChunk(chunk, (block, state, pos) -> {
                 for (TickingObject tickingBlock : TickingBlockInstances) {
                     if (checkIfInstanceOf(tickingBlock, block)) {
+                        if (!ModConfig.isEnabled(tickingBlock.getName())) {
+                            return; // skip this block type
+                        }
                         boolean result =
                                 tickingBlock.Simulate(block, ticks, world, state, pos);
                         // result = false;
@@ -142,6 +142,9 @@ public class WorldSimulator {
                 if (blockEntity != null) {
                     for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
                         if (checkIfInstanceOf(tickingBlockEntity, blockEntity)) {
+                            if (!ModConfig.isEnabled(tickingBlockEntity.getName())) {
+                                break; // skip this entity type
+                            }
                             boolean result = tickingBlockEntity.Simulate(blockEntity,
                                     ticks,
                                     world, blockEntity.getCachedState(), blockEntity.getPos());
@@ -168,6 +171,9 @@ public class WorldSimulator {
             for (PassiveEntity passiveEntity : passiveEntities) {
                 for (TickingObject tickingEntity : TickingEntityInstances) {
                     if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
+                        if (!ModConfig.isEnabled(tickingEntity.getName())) {
+                            continue; // skip this entity type
+                        }
                         boolean result =
                                 tickingEntity.Simulate(passiveEntity, ticks,
                                 world, null, null);
@@ -195,7 +201,7 @@ public class WorldSimulator {
     }
 
     /**
-     * Iterates over all blocks in the given chunk
+     * Iterates over all blocks in the given chunk from top to bottom
      * 
      * @param chunk The chunk to iterate over
      * @param action The action to perform on each block
@@ -206,13 +212,16 @@ public class WorldSimulator {
         int chunkStartX = chunkPos.getStartX();
         int chunkBottomY = chunk.getBottomY();
         int chunkStartZ = chunkPos.getStartZ();
-        for (int sectionY = 0; sectionY < chunk.getHeight() >> 4; ++sectionY) {
+        int sections = chunk.getHeight() >> 4;
+
+        // Iterate sections top-down
+        for (int sectionY = sections - 1; sectionY >= 0; sectionY--) {
             ChunkSection section = chunk.getSectionArray()[sectionY];
             if (section == null || section.isEmpty())
                 continue;
 
             for (int x = 0; x < 16; x++) {
-                for (int y = 0; y < 16; y++) {
+                for (int y = 15; y >= 0; y--) { // Count down y because reasons
                     for (int z = 0; z < 16; z++) {
                         BlockState state = section.getBlockState(x, y, z);
                         BlockPos blockPos = new BlockPos(chunkStartX + x,
@@ -225,4 +234,5 @@ public class WorldSimulator {
             }
         }
     }
+
 }

@@ -16,6 +16,11 @@ public class TickingDriedGhastBlock extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Dried Ghast";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof DriedGhastBlock block) {

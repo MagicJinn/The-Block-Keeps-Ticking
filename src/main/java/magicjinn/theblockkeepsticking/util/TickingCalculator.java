@@ -9,13 +9,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class TickingCalculator {
-    public static int RandomTickAmount(long ticksToSimulate, World world) {
-        return RandomTickAmount(ticksToSimulate, world, 1);
-    }
-
     public static int MoveTowardsZero(int input, long ticks) {
         int sign = Integer.signum(input);
         return sign * Integer.max(0, (int) (Math.abs(input) - ticks));
+    }
+
+    public static int RandomTickAmount(long ticksToSimulate, World world) {
+        return RandomTickAmount(ticksToSimulate, world, 1);
     }
 
     public static int RandomTickAmount(long ticksToSimulate, World world, float divideByAmount) {

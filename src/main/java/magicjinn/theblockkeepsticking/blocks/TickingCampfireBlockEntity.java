@@ -16,6 +16,11 @@ public class TickingCampfireBlockEntity extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Campfires";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof CampfireBlockEntity campfire) {

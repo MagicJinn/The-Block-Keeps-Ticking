@@ -16,6 +16,11 @@ public class TickingStemBlock extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Crop Stems";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof StemBlock stem) {

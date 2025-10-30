@@ -16,6 +16,11 @@ public class TickingBambooBlock extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Bamboo";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof BambooBlock bamboo) {

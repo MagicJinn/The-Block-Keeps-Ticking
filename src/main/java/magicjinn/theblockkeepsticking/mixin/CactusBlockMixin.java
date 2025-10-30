@@ -13,61 +13,74 @@ import net.minecraft.block.Blocks;
 
 @Mixin(CactusBlock.class)
 public class CactusBlockMixin implements TickingAccessor {
-    @Shadow @Final static int TALL_THRESHOLD;
+    @Shadow @Final private static int TALL_THRESHOLD;
+    @Shadow @Final private static int FLOWER_GROWTH_AGE;
+    @Shadow @Final static double FLOWER_CHANCE_WHEN_SHORT = 0.1;
+    @Shadow @Final private static double FLOWER_CHANCE_WHEN_TALL = 0.25;
 
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
-        final int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world);
+        // Only simulate if block above is air
+        BlockPos abovePos = pos.up();
+        if (!world.isAir(abovePos))
+            return false;
+
+        // Determine the height of the current cactus tower
+        int height = 1;
+        BlockPos currentPos = pos;
+        while (world.getBlockState(currentPos.down(height)).isOf(Blocks.CACTUS))
+            height++;
+
+        if (height > TALL_THRESHOLD)
+            return false;
+
+        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world);
         if (randomTicks <= 0)
             return false;
 
-        int height = 1; // Check the height of the current cactus
-        final int maxHeight = TALL_THRESHOLD;
-        while (world.getBlockState(pos.down(height)).isOf(Blocks.CACTUS) && height < maxHeight)
-            height++;
-
-        if (height >= maxHeight)
-            return false;
-
-        int age = state.get(CactusBlock.AGE);
-        final int maxAge = CactusBlock.MAX_AGE;
-        if (age >= maxAge)
-            return false;
-
         boolean changed = false;
-        for (int i = 0; i < randomTicks; i++) {
-            BlockPos abovePos = pos.up();
+        int age = state.get(CactusBlock.AGE);
 
-            if (world.isAir(abovePos)) {
-                if (age == 8 && Blocks.CACTUS.getDefaultState().canPlaceAt(world, abovePos)) {
-                    // Whether or not to give the cactus a flower
-                    double chance = height >= maxHeight ? 0.25 : 0.1;
-                    if (world.random.nextDouble() <= chance) {
-                        world.setBlockState(abovePos, Blocks.CACTUS_FLOWER.getDefaultState(), 3);
-                        changed = true;
-                        break; // Cactus has flower, abort
-                    }
-                } else if (age == maxAge && height < maxHeight) {
-                    // We grow and track the new top cactus
-                    height++;
-                    world.setBlockState(abovePos, Blocks.CACTUS.getDefaultState(), 3);
-                    age = 0;
-                    state = state.with(CactusBlock.AGE, 0);
-                    world.setBlockState(pos, state, 3);
+        for (int i = 0; i < randomTicks; i++) {
+            // If age 8, try to place a flower
+            if (age == FLOWER_GROWTH_AGE && world.isAir(currentPos.up())) {
+                double flowerChance = height >= TALL_THRESHOLD ? FLOWER_CHANCE_WHEN_TALL
+                        : FLOWER_CHANCE_WHEN_SHORT;
+                if (world.random.nextDouble() <= flowerChance) {
+                    world.setBlockState(currentPos.up(), Blocks.CACTUS_FLOWER.getDefaultState(), 3);
                     changed = true;
-                    continue;
+                    break; // Stop further ticks for this block
                 }
             }
+            // Try cactus growth at age 15 if tower < max height
+            else if (age == CactusBlock.MAX_AGE && height < TALL_THRESHOLD
+                    && world.isAir(currentPos.up())) {
+                BlockPos newCactusPos = currentPos.up();
+                world.setBlockState(newCactusPos, Blocks.CACTUS.getDefaultState(), 3);
 
-            if (age < maxAge) {
+                age = 0;
+                height++;
+                currentPos = newCactusPos;
+
+                // Set old cactus to age 0
+                state = state.with(CactusBlock.AGE, 0);
+                world.setBlockState(currentPos, state, 260);
+                changed = true;
+                continue;
+            }
+
+            // Increment age if below max
+            if (age < CactusBlock.MAX_AGE) {
                 age++;
-                state = state.with(CactusBlock.AGE, age);
-                world.setBlockState(pos, state, 3);
                 changed = true;
             }
         }
 
+        // Update the age of the current block if it changed
+        if (changed) {
+            world.setBlockState(currentPos, state.with(CactusBlock.AGE, age), 260);
+        }
+
         return changed;
     }
-
 }

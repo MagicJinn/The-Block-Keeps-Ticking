@@ -16,6 +16,11 @@ public class TickingCactusBlock extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Cactus";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof CactusBlock cactus) {

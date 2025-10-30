@@ -16,6 +16,11 @@ public class TickingKelpBlock extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Kelp";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof KelpBlock kelp) {

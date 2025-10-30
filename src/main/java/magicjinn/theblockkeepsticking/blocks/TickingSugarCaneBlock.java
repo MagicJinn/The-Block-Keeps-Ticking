@@ -16,6 +16,11 @@ public class TickingSugarCaneBlock extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Sugar Cane";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof SugarCaneBlock sugarcane) {

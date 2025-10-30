@@ -18,26 +18,34 @@ public class TheBlockKeepsTicking implements ModInitializer {
 	public static final String MOD_ID = "the-block-keeps-ticking";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final AttachmentType<Long> LAST_UPDATE_TIME =
-			AttachmentRegistry.createPersistent(Identifier.of(MOD_ID, "last_update_time"),
-					Codec.LONG);
+	public static final AttachmentType<Long> LAST_UPDATE_TIME = AttachmentRegistry
+			.createPersistent(Identifier.of(MOD_ID, "last_update_time"), Codec.LONG);
+	public static final AttachmentType<Long> LAST_REALTIME_UPDATE_MS = AttachmentRegistry
+			.createPersistent(Identifier.of(MOD_ID, "last_realtime_update_ms"), Codec.LONG);
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("The Block Keeps Ticking is initializing!");
 
-		ModConfig.load();
+		// Ensure ticking objects are registered before config builds UI
 		WorldSimulator.Initialize();
 		Timer.RegisterShutdownEvent();
 
 		// Add listener for CHUNK_LEVEL_TYPE_CHANGE to handle chunks entering/leaving simulation
 		ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register((world, chunk, oldType, newType) -> {
 			// If chunk enters block-ticking/simulation, simulate it
-			long currentWorldTime = world.getTime();
-			// Get last update time, or set it to current time if not present
-			long lastTickTime =
-					chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME, currentWorldTime);
-			long ticksToSimulate = currentWorldTime - lastTickTime;
+			long ticksToSimulate;
+			if (ModConfig.getTimeMode() == ModConfig.TimeMode.REALTIME) {
+				long nowMs = System.currentTimeMillis();
+				long lastMs =
+						chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_REALTIME_UPDATE_MS, nowMs);
+				ticksToSimulate = Math.max(0L, (nowMs - lastMs) / 50L);
+			} else {
+				long currentWorldTime = world.getTime();
+				long lastTickTime = chunk.getAttachedOrSet(TheBlockKeepsTicking.LAST_UPDATE_TIME,
+						currentWorldTime);
+				ticksToSimulate = currentWorldTime - lastTickTime;
+			}
 			if (newType == ChunkLevelType.BLOCK_TICKING && oldType != ChunkLevelType.BLOCK_TICKING) {
 				// Schedule simulation in the future,
 				// to avoid changing blockstates during chunk loading (BAD!)
@@ -49,7 +57,11 @@ public class TheBlockKeepsTicking implements ModInitializer {
 			}
 			// If chunk leaves block-ticking/simulation, record the last update time
 			else if (oldType == ChunkLevelType.BLOCK_TICKING && newType != ChunkLevelType.BLOCK_TICKING) {
-				chunk.setAttached(LAST_UPDATE_TIME, world.getTime());
+				if (ModConfig.getTimeMode() == ModConfig.TimeMode.REALTIME) {
+					chunk.setAttached(LAST_REALTIME_UPDATE_MS, System.currentTimeMillis());
+				} else {
+					chunk.setAttached(LAST_UPDATE_TIME, world.getTime());
+				}
 			}
 		});
 	}

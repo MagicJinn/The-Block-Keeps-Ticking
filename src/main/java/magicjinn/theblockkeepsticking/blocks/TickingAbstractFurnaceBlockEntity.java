@@ -18,6 +18,11 @@ public class TickingAbstractFurnaceBlockEntity extends TickingObject {
     }
 
     @Override
+    public String getName() {
+        return "Furnaces";
+    }
+
+    @Override
     public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof AbstractFurnaceBlockEntity furnace) {

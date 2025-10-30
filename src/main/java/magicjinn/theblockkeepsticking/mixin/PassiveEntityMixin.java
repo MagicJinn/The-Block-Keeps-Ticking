@@ -1,6 +1,5 @@
 package magicjinn.theblockkeepsticking.mixin;
 
-import org.joml.Math;
 import org.spongepowered.asm.mixin.Mixin;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;

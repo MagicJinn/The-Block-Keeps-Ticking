@@ -13,6 +13,8 @@ public abstract class TickingObject {
      */
     public abstract Class<?> getType();
 
+    public abstract String getName();
+
     // Custom simulation logic
     public abstract boolean Simulate(Object objectInstance, long ticksToSimulate, World world,
             BlockState state, BlockPos pos);
