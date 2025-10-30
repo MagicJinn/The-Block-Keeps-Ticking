@@ -19,7 +19,6 @@
 		"CocoaBlockMixin",
 		"PassiveEntityMixin",
 		"ChickenEntityMixin",
-		"AnimalEntityMixin",
 		"DriedGhastBlockMixin"
 		],
 	"injectors": {

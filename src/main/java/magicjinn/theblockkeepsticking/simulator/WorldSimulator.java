@@ -18,6 +18,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
+import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
 // import magicjinn.theblockkeepsticking.entities.TickingAnimalEntity;
 // import magicjinn.theblockkeepsticking.entities.TickingChickenEntity;
@@ -108,6 +109,16 @@ public class WorldSimulator {
 
         World world = chunk.getWorld();
 
+        // Log ticksToSimulate before lazy tax
+        TheBlockKeepsTicking.LOGGER.info("ticksToSimulate before lazy tax: {}", ticksToSimulate);
+
+        // Apply lazy tax
+        long ticks = ticksToSimulate * (100 - ModConfig.lazyTax) / 100;
+
+        // Log ticksToSimulate after lazy tax
+        TheBlockKeepsTicking.LOGGER.info("ticksToSimulate after lazy tax: {}", ticksToSimulate);
+
+
         if (ticksToSimulate <= 0){
             return; // Nothing to simulate, abort
         }
@@ -117,11 +128,11 @@ public class WorldSimulator {
                 for (TickingObject tickingBlock : TickingBlockInstances) {
                     if (checkIfInstanceOf(tickingBlock, block)) {
                         boolean result =
-                                tickingBlock.Simulate(block, ticksToSimulate, world, state, pos);
+                                tickingBlock.Simulate(block, ticks, world, state, pos);
                         // result = false;
                         if (result)
                         TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
-                                    block.getName().toString(), ticksToSimulate);
+                                    block.getName().toString(), ticks);
                     return; // lambda break; equivalent
                     // break to avoid multiple matches (which is impossible, so this saves time)
                 }
@@ -132,13 +143,13 @@ public class WorldSimulator {
                     for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
                         if (checkIfInstanceOf(tickingBlockEntity, blockEntity)) {
                             boolean result = tickingBlockEntity.Simulate(blockEntity,
-                                    ticksToSimulate,
+                                    ticks,
                                     world, blockEntity.getCachedState(), blockEntity.getPos());
                             // result = false;
                             if (result)
                                 TheBlockKeepsTicking.LOGGER.info(
                                         "Simulating block entity {} for {} ticks",
-                                        blockEntity.getNameForReport(), ticksToSimulate);
+                                        blockEntity.getNameForReport(), ticks);
                             break;
                             // break to avoid multiple matches (which is impossible, so this
                             // saves time)
@@ -157,12 +168,13 @@ public class WorldSimulator {
             for (PassiveEntity passiveEntity : passiveEntities) {
                 for (TickingObject tickingEntity : TickingEntityInstances) {
                     if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
-                        boolean result = tickingEntity.Simulate(passiveEntity, ticksToSimulate,
+                        boolean result =
+                                tickingEntity.Simulate(passiveEntity, ticks,
                                 world, null, null);
                         result = false;
                         if (result)
                             TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
-                                    passiveEntity, ticksToSimulate);
+                                    passiveEntity, ticks);
                     }
                 }
             }

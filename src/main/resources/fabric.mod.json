@@ -6,15 +6,16 @@
     "description": "A mod to simulate progress in unloaded chunks.",
     "authors": ["MagicJinn"],
     "contact": {
-        "homepage": "https://github.com/MagicJinn/Beacon-Aura",
-        "issues": "https://github.com/MagicJinn/Beacon-Aura/issues"
+        "homepage": "https://github.com/MagicJinn/The-Block-Keeps-Ticking/",
+        "issues": "https://github.com/MagicJinn/The-Block-Keeps-Ticking/issues"
     },
     "license": "MIT",
     "icon": "assets/the-block-keeps-ticking/icon.png",
     "environment": "*",
     "entrypoints": {
         "main": ["magicjinn.theblockkeepsticking.TheBlockKeepsTicking"],
-        "client": ["magicjinn.theblockkeepsticking.TheBlockKeepsTickingClient"]
+        "client": ["magicjinn.theblockkeepsticking.TheBlockKeepsTickingClient"],
+        "modmenu": ["magicjinn.theblockkeepsticking.config.ModMenuIntegration"]
     },
     "mixins": [
         "the-block-keeps-ticking.mixins.json",

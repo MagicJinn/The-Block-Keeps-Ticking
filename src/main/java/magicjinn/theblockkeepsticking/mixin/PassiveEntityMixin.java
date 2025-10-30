@@ -3,6 +3,7 @@ package magicjinn.theblockkeepsticking.mixin;
 import org.joml.Math;
 import org.spongepowered.asm.mixin.Mixin;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
+import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.util.math.BlockPos;
@@ -14,13 +15,14 @@ public class PassiveEntityMixin implements TickingAccessor {
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
         PassiveEntity entity = (PassiveEntity) (Object) this;
 
-        // Check if the mob is an adult
-        if (!entity.isBaby())
-            return false; // Already an adult, nothing to simulate
-
-        // If not an adult, add ticks to make it grow up
+        // Age up babies, "age" down adults to make their breeding cooldown pass
         int currentAge = entity.getBreedingAge(); // Negative value for babies
-        entity.setBreedingAge(Math.max(0, currentAge + (int) ticksToSimulate));
+
+        if (currentAge == 0)
+            return false;
+
+        // Move age towards zero
+        entity.setBreedingAge(TickingCalculator.MoveTowardsZero(currentAge, ticksToSimulate));
 
         return true; // Entity was aged
     }

@@ -13,12 +13,28 @@ public class TickingCalculator {
         return RandomTickAmount(ticksToSimulate, world, 1);
     }
 
+    public static int MoveTowardsZero(int input, long ticks) {
+        int sign = Integer.signum(input);
+        return sign * Integer.max(0, (int) (Math.abs(input) - ticks));
+    }
+
     public static int RandomTickAmount(long ticksToSimulate, World world, float divideByAmount) {
         // Determine the amount of random ticks that would have occurred
+        int randomTickRatio = RandomTickRatio(world);
+        int randomTicks = (int) (ticksToSimulate / randomTickRatio);
+        return (int) (randomTicks / divideByAmount);
+    }
+
+    public static int RandomTickRatio(World world) {
         int randomTickSpeed =
                 ((ServerWorld) world).getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
-        int randomTicks = (int) (ticksToSimulate * randomTickSpeed) / (16 * 16 * 16);
-        return (int) (randomTicks / divideByAmount);
+
+        if (randomTickSpeed <= 0) // Because its possible
+            return Integer.MAX_VALUE;
+
+        float fraction = (float) randomTickSpeed / (float) (16 * 16 * 16);
+        int ratio = (int) (1.0 / fraction);
+        return ratio;
     }
 
     public static int CropGrowthAmount(long ticksToSimulate, Block block, World world,
