@@ -34,6 +34,7 @@ public final class ModConfig {
     @SerialEntry Map<String, Boolean> enabledByName = new LinkedHashMap<>();
     @SerialEntry int lazyTaxPercent = 0; // 0..99
     @SerialEntry TimeMode timeMode = TimeMode.WORLD_TIME;
+    @SerialEntry boolean debugLogging = false;
 
     public ModConfig() {}
 
@@ -77,6 +78,15 @@ public final class ModConfig {
 
     public static Map<String, Boolean> getEnabledByName() {
         return getInstance().enabledByName;
+    }
+
+    public static boolean isDebugLogging() {
+        return getInstance().debugLogging;
+    }
+
+    public static void setDebugLogging(boolean enabled) {
+        getInstance().debugLogging = enabled;
+        HANDLER.save();
     }
 
     public static void ensureDefaultsPresent() {

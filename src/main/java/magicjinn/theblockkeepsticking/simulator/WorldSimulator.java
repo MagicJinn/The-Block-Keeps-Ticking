@@ -116,9 +116,11 @@ public class WorldSimulator {
         long ticks = ModConfig.applyLazyTax(ticksToSimulate);
 
 
-        if (ticksToSimulate <= 0){
+        if (ticks <= 0) {
             return; // Nothing to simulate, abort
         }
+
+        boolean doDebugLogging = ModConfig.isDebugLogging();
 
         try {
             forEachBlockInChunk(chunk, (block, state, pos) -> {
@@ -129,9 +131,8 @@ public class WorldSimulator {
                         }
                         boolean result =
                                 tickingBlock.Simulate(block, ticks, world, state, pos);
-                        // result = false;
-                        if (result)
-                        TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
+                        if (result && doDebugLogging)
+                                    TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
                                     block.getName().toString(), ticks);
                     return; // lambda break; equivalent
                     // break to avoid multiple matches (which is impossible, so this saves time)
@@ -148,8 +149,7 @@ public class WorldSimulator {
                             boolean result = tickingBlockEntity.Simulate(blockEntity,
                                     ticks,
                                     world, blockEntity.getCachedState(), blockEntity.getPos());
-                            // result = false;
-                            if (result)
+                            if (result && doDebugLogging)
                                 TheBlockKeepsTicking.LOGGER.info(
                                         "Simulating block entity {} for {} ticks",
                                         blockEntity.getNameForReport(), ticks);
@@ -177,10 +177,9 @@ public class WorldSimulator {
                         boolean result =
                                 tickingEntity.Simulate(passiveEntity, ticks,
                                 world, null, null);
-                        result = false;
-                        if (result)
+                        if (result && doDebugLogging)
                             TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
-                                    passiveEntity, ticks);
+                                    passiveEntity.getName(), ticks);
                     }
                 }
             }

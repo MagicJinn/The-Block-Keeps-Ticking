@@ -1,10 +1,12 @@
 package magicjinn.theblockkeepsticking;
 
+import magicjinn.theblockkeepsticking.config.ModConfig;
 import net.fabricmc.api.ClientModInitializer;
 
 public class TheBlockKeepsTickingClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+		// Load the config when the client initializes
+		ModConfig.HANDLER.load();
 	}
 }
