@@ -3,7 +3,7 @@
     "id": "the-block-keeps-ticking",
     "version": "${version}",
     "name": "The Block Keeps Ticking",
-    "description": "A mod to simulate progress in unloaded chunks.",
+    "description": "Simulates block ticking and entity growth in unloaded chunks, so your farms, furnaces, and passive mobs keep growing even when you're far away.",
     "authors": ["MagicJinn"],
     "contact": {
         "homepage": "https://github.com/MagicJinn/The-Block-Keeps-Ticking/",
