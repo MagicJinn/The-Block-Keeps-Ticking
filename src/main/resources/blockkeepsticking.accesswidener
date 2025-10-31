@@ -1,5 +1,0 @@
-accessWidener v2 named
-accessible field net/minecraft/block/entity/CampfireBlockEntity itemsBeingCooked Lnet/minecraft/util/collection/DefaultedList;
-accessible field net/minecraft/block/entity/CampfireBlockEntity cookingTimes [I
-accessible field net/minecraft/block/entity/CampfireBlockEntity cookingTotalTimes [I
-accessible method net/minecraft/world/chunk/Chunk increaseInhabitedTime (J)V

@@ -1,0 +1,31 @@
+package magicjinn.theblockkeepsticking.blocks;
+
+import magicjinn.theblockkeepsticking.util.TickingObject;
+import magicjinn.theblockkeepsticking.util.TickingAccessor;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.CampfireBlockEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+public class TickingCampfireBlockEntity extends TickingObject {
+    public static final TickingObject INSTANCE = new TickingCampfireBlockEntity();
+
+    @Override
+    public Class<CampfireBlockEntity> getType() {
+        return CampfireBlockEntity.class;
+    }
+
+    @Override
+    public String getName() {
+        return "Campfires";
+    }
+
+    @Override
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
+            BlockState state, BlockPos pos) {
+        if (blockInstance instanceof CampfireBlockEntity campfire) {
+            return ((TickingAccessor) campfire).Simulate(ticksToSimulate, world, state, pos);
+        }
+        return false;
+    }
+}

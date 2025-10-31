@@ -1,0 +1,30 @@
+{
+	"required": true,
+	"package": "magicjinn.theblockkeepsticking.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"AbstractFurnaceBlockEntityMixin",
+		"CropBlockMixin",
+		"StemBlockMixin",
+		"NetherWartBlockMixin",
+		"CampfireBlockEntityMixin",
+		"SaplingBlockMixin",
+		"LeavesBlockMixin",
+		"BrewingStandBlockEntityMixin",
+		"KelpBlockMixin",
+		"BambooBlockMixin",
+		"BambooShootBlockMixin",
+		"CactusBlockMixin",
+		"SugarCaneBlockMixin",
+		"CocoaBlockMixin",
+		"PassiveEntityMixin",
+		"ChickenEntityMixin",
+		"DriedGhastBlockMixin"
+		],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
