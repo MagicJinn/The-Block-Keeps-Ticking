@@ -55,16 +55,16 @@ public class CactusBlockMixin implements TickingAccessor {
             // Try cactus growth at age 15 if tower < max height
             else if (age == CactusBlock.MAX_AGE && height < TALL_THRESHOLD
                     && world.isAir(currentPos.up())) {
-                BlockPos newCactusPos = currentPos.up();
-                world.setBlockState(newCactusPos, Blocks.CACTUS.getDefaultState(), 3);
-
                 age = 0;
                 height++;
-                currentPos = newCactusPos;
 
                 // Set old cactus to age 0
                 state = state.with(CactusBlock.AGE, 0);
                 world.setBlockState(currentPos, state, 260);
+
+                // New cactus block
+                currentPos = currentPos.up();
+                world.setBlockState(currentPos, Blocks.CACTUS.getDefaultState(), 3);
                 changed = true;
                 continue;
             }
