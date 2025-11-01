@@ -16,9 +16,9 @@
   * **Block Entities:** Furnaces, Campfires, Brewing Stands
   * **Crops & Stems:** Wheat, Carrots, Potatoes, Beetroots, Torchflowers, Pumpkins and Melons
   * **Nether Wart:** Growth progression
-  * **Cocoa Beans:** Growth stages
+  * **Cocoa Beans:** Growth progression
   * **Trees:** Sapling growth
-  * **Plants:** Kelp, Bamboo, Sugar Cane, Cactus
+  * **Growing Plants:** Kelp, Bamboo, Sugar Cane, Cactus
   * **Dried Ghast & Sniffer Eggs:** Hydration and hatching progression
 
 <sup>*Note: Due to the way Sniffer Eggs and Dried Ghasts are processed, some precision is lost during simulation.</sup>
