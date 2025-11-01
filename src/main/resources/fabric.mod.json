@@ -29,11 +29,11 @@
         "fabricloader": "*",
         "minecraft": ">=1.21.0",
         "java": ">=17",
-        "fabric-api": "*"
+        "fabric-api": "*",
+        "yet_another_config_lib_v3": "*"
     },
     "suggests": {
-        "modmenu": "*",
-        "yet-another-config-lib": "*"
+        "modmenu": "*"
     },
     "custom": {
         "modmenu": {
