@@ -8,7 +8,7 @@
 
 ## Simulate block ticking and entities in unloaded chunks
 
-**The Block Keeps Ticking** is a complete rewrite of Alive World, (which is a fork of Presence Not Required) that allows blocks and entities to continue progressing in unloaded chunks, so your farms, furnaces, and passive mobs keep growing and working even when you're far away.
+**The Block Keeps Ticking** is a complete rewrite of [Alive World](https://github.com/What42Pizza/Alive-World-Mod/forks), (which is a fork of Presence Not Required) that allows blocks and entities to continue progressing in unloaded chunks, so your farms, furnaces, and passive mobs keep growing and working even when you're far away.
 
 ### Features
 
