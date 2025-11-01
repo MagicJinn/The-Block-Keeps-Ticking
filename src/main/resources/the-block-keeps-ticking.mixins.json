@@ -10,7 +10,6 @@
 		"CampfireBlockEntityMixin",
 		"SaplingBlockMixin",
 		"SnifferEggBlockMixin",
-		"LeavesBlockMixin",
 		"BrewingStandBlockEntityMixin",
 		"KelpBlockMixin",
 		"BambooBlockMixin",
@@ -19,7 +18,6 @@
 		"SugarCaneBlockMixin",
 		"CocoaBlockMixin",
 		"PassiveEntityMixin",
-		"ChickenEntityMixin",
 		"DriedGhastBlockMixin"
 		],
 	"injectors": {
