@@ -29,7 +29,6 @@ public class TheBlockKeepsTicking implements ModInitializer {
 
 		// Load the config from file
 		ModConfig.HANDLER.load();
-
 		WorldSimulator.Initialize();
 		Timer.RegisterShutdownEvent();
 
