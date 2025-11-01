@@ -1,6 +1,6 @@
 # The Block Keeps Ticking
 
-[![icon.png](icon.png)](https://twitter.com/Sulmino_/status/1979955766074261928)
+[![icon.png](icon.png)](https://x.com/Sulmino_/status/1979955766074261928)
 
 <sup>This wonderful mod icon was created by [Sulmino_ on Twitter/X](https://x.com/Sulmino_).</sup>
 
