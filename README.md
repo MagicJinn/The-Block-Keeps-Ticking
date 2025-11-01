@@ -12,11 +12,9 @@
 
 ### Features
 
-* **Unloaded Chunk Simulation:** Blocks and entities in unloaded chunks are simulated when chunks are loaded, catching them up to the current time.
-
 * **Block Support:**
   * **Block Entities:** Furnaces, Campfires, Brewing Stands
-  * **Crops & Stems:** Wheat, Carrots, Potatoes, Beetroots, Pumpkins, Melons, and all other crop blocks
+  * **Crops & Stems:** Wheat, Carrots, Potatoes, Beetroots, Torchflowers, Pumpkins and Melons
   * **Nether Wart:** Growth progression
   * **Cocoa Beans:** Growth stages
   * **Trees:** Sapling growth
@@ -25,13 +23,11 @@
 
 <sup>*Note: Due to the way Sniffer Eggs and Dried Ghasts are processed, some precision is lost during simulation.</sup>
 
-* **Entity Simulation:** Passive entities continue their growth and breeding cycles.
+* **Time Modes:** Choose between world time (only progresses when playing) or real time (progresses even when offline).
 
-* **Flexible Time Modes:** Choose between world time (only progresses when playing) or real time (progresses even when offline).
+* **Lazy Tax setting:** Configure a percentage reduction of simulated ticks to slow down simulation for your prefered balance level.
 
-* **Lazy Tax System:** Configure a percentage reduction of simulated ticks to slow down simulation for balance or performance.
-
-* **Per-Object Configuration:** Enable or disable simulation for specific block types and entities individually.
+* **Per-Object Configuration:** Enable or disable simulation for specific blocks and entities individually.
 
 * **Serverside:** When installed on a server, players do not need to install the mod. Can also be installed in singleplayer worlds.
 
