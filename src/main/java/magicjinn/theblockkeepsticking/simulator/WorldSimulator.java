@@ -16,6 +16,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 // import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingSnifferEggBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
 // import magicjinn.theblockkeepsticking.config.ModConfig;
@@ -66,6 +67,7 @@ public class WorldSimulator {
         // RegisterTickingBlock(TickingChickenEntity.INSTANCE);
 
         RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
+        RegisterTickingBlock(TickingSnifferEggBlock.INSTANCE);
     }
 
     /**
@@ -100,7 +102,8 @@ public class WorldSimulator {
         }
 
         TheBlockKeepsTicking.LOGGER
-                .info("Registered TickingBlock: " + tickingObject.getClass().getSimpleName());
+                .info("Registered TickingBlock: " + tickingObject.getName() + " by "
+                        + tickingObject.getModId());
     }
 
     // Simulate the world for the given chunk

@@ -9,6 +9,7 @@
 		"NetherWartBlockMixin",
 		"CampfireBlockEntityMixin",
 		"SaplingBlockMixin",
+		"SnifferEggBlockMixin",
 		"LeavesBlockMixin",
 		"BrewingStandBlockEntityMixin",
 		"KelpBlockMixin",

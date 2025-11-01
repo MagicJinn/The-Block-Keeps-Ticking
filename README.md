@@ -1,27 +1,29 @@
 # The Block Keeps Ticking
 
-![icon.png](icon.png)
+[![icon.png](icon.png)](https://twitter.com/Sulmino_/status/1979955766074261928)
 
-<sup>This wonderful [mod icon](https://x.com/Sulmino_/status/1979955766074261928) was created by [Sulmino_](https://x.com/Sulmino_) on Twitter/X .</sup>
+<sup>This wonderful mod icon was created by [Sulmino_ on Twitter/X](https://x.com/Sulmino_).</sup>
 
 [![Modrinth: The Block Keeps Ticking](https://img.shields.io/badge/Modrinth-The_Block_Keeps_Ticking-00ae5d?logo=modrinth)](https://modrinth.com/mod/the-block-keeps-ticking) [![CurseForge: The Block Keeps Ticking](https://img.shields.io/badge/CurseForge-The_Block_Keeps_Ticking-f16437?logo=curseforge)](https://www.curseforge.com/minecraft/mc-mods/the-block-keeps-ticking)
 
 ## Simulate block ticking and entities in unloaded chunks
 
-**The Block Keeps Ticking** is a complete rewrite of Alive World, (which is a fork of Presence Not Required) that allows blocks and entities to continue progressing in unloaded chunks, so your farms, furnaces, and passive mobs keep growing even when you're far away.
+**The Block Keeps Ticking** is a complete rewrite of Alive World, (which is a fork of Presence Not Required) that allows blocks and entities to continue progressing in unloaded chunks, so your farms, furnaces, and passive mobs keep growing and working even when you're far away.
 
 ### Features
 
 * **Unloaded Chunk Simulation:** Blocks and entities in unloaded chunks are simulated when chunks are loaded, catching them up to the current time.
 
-* **Comprehensive Block Support:**
+* **Block Support:**
   * **Block Entities:** Furnaces, Campfires, Brewing Stands
   * **Crops & Stems:** Wheat, Carrots, Potatoes, Beetroots, Pumpkins, Melons, and all other crop blocks
   * **Nether Wart:** Growth progression
   * **Cocoa Beans:** Growth stages
   * **Trees:** Sapling growth
   * **Plants:** Kelp, Bamboo, Sugar Cane, Cactus
-  * **Dried Ghast:** Hydration progression
+  * **Dried Ghast & Sniffer Eggs:** Hydration and hatching progression
+
+<sup>*Note: Due to the way Sniffer Eggs and Dried Ghasts are processed, some precision is lost during simulation.</sup>
 
 * **Entity Simulation:** Passive entities continue their growth and breeding cycles.
 

@@ -1,0 +1,8 @@
+{
+    "MD013": false, // Ignore maximum line length
+    "MD024": false, // Allow duplicate headings
+    "MD026": false, // Allow trailing punctuation
+    "MD033": false, // Allow inline HTML
+    "MD041": false, // Allow first line in file to not be a top level heading
+    "MD056": false // Allow missing collums in tables
+}

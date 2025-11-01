@@ -15,8 +15,8 @@ import net.minecraft.block.Blocks;
 public class CactusBlockMixin implements TickingAccessor {
     @Shadow @Final private static int TALL_THRESHOLD;
     @Shadow @Final private static int FLOWER_GROWTH_AGE;
-    @Shadow @Final static double FLOWER_CHANCE_WHEN_SHORT = 0.1;
-    @Shadow @Final private static double FLOWER_CHANCE_WHEN_TALL = 0.25;
+    @Shadow @Final private static final double FLOWER_CHANCE_WHEN_SHORT = 0.1;
+    @Shadow @Final private static final double FLOWER_CHANCE_WHEN_TALL = 0.25;
 
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {

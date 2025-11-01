@@ -11,6 +11,8 @@ import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
+import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
+import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -68,12 +70,15 @@ public class ModMenuIntegration implements ModMenuApi {
         OptionGroup.Builder objectsGroupBuilder =
                 OptionGroup.createBuilder().name(Text.literal("Ticking Objects"));
 
-        ModConfig.getEnabledByName().forEach((name, val) -> {
+        for (TickingObject tickingObject : WorldSimulator.TickingObjectInstances) {
+                String name = tickingObject.getName();
+                String modId = tickingObject.getModId();
             Option<Boolean> objOpt = Option.<Boolean>createBuilder().name(Text.literal(name))
                                 .description(OptionDescription.of(Text
                                                 .literal("Enables/disables simulation for "
                                                                 + name.toLowerCase() + ".\n\n\n")
-                                                .append(Text.literal("(auto generated setting)")
+                                            .append(Text.literal(
+                                                            "(setting added by mod: " + modId + ")")
                                                                 .formatted(Formatting.GRAY))))
                     .binding(ModConfig.getEnabledByName().getOrDefault(name, true),
                             () -> ModConfig.getEnabledByName().getOrDefault(name, true), newVal -> {
@@ -82,7 +87,7 @@ public class ModMenuIntegration implements ModMenuApi {
                             })
                     .controller(BooleanControllerBuilder::create).build();
             objectsGroupBuilder.option(objOpt);
-        });
+    }
 
         // Dummy "Coming Soon" settings
         String[] dummySettings = {"Chicken eggs", "Beehives", "Villager breeding", "Leaf Decay",

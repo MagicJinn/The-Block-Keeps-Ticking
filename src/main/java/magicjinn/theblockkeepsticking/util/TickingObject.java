@@ -1,5 +1,6 @@
 package magicjinn.theblockkeepsticking.util;
 
+import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -14,6 +15,10 @@ public abstract class TickingObject {
     public abstract Class<?> getType();
 
     public abstract String getName();
+
+    public String getModId() {
+        return TheBlockKeepsTicking.class.getSimpleName();
+    }
 
     // Custom simulation logic
     public abstract boolean Simulate(Object objectInstance, long ticksToSimulate, World world,
