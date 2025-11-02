@@ -3,6 +3,7 @@ package magicjinn.theblockkeepsticking.simulator;
 import java.util.ArrayList;
 import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
+import magicjinn.theblockkeepsticking.blocks.TickingAbstractCauldronBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingBambooBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingBambooShootBlock;
@@ -19,10 +20,8 @@ import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSnifferEggBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
-// import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
 import magicjinn.theblockkeepsticking.config.ModConfig;
-// import magicjinn.theblockkeepsticking.entities.TickingChickenEntity;
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -44,6 +43,7 @@ public class WorldSimulator {
     private static final ArrayList<TickingObject> TickingEntityInstances = new ArrayList<>();
 
     public static void Initialize() {
+        RegisterTickingBlock(TickingAbstractCauldronBlock.INSTANCE);
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingBrewingStandBlockEntity.INSTANCE);

@@ -17,7 +17,7 @@ public class TickingAbstractCauldronBlock extends TickingObject {
 
     @Override
     public String getName() {
-        return "Leveled Cauldron";
+        return "Cauldrons";
     }
 
     @Override
