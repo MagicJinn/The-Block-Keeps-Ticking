@@ -18,7 +18,11 @@
 		"SugarCaneBlockMixin",
 		"CocoaBlockMixin",
 		"PassiveEntityMixin",
-		"DriedGhastBlockMixin"
+		"DriedGhastBlockMixin",
+		"SweetBerryBushBlockMixin",
+		"BuddingAmethystBlockMixin",
+		"PointedDripstoneBlockMixin",
+		"AbstractCauldronBlockMixin"
 		],
 	"injectors": {
 		"defaultRequire": 1
