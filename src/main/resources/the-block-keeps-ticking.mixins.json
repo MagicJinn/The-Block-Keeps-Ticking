@@ -1,33 +1,32 @@
 {
-	"required": true,
-	"package": "magicjinn.theblockkeepsticking.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"AbstractFurnaceBlockEntityMixin",
-		"CropBlockMixin",
-		"StemBlockMixin",
-		"NetherWartBlockMixin",
-		"CampfireBlockEntityMixin",
-		"SaplingBlockMixin",
-		"SnifferEggBlockMixin",
-		"BrewingStandBlockEntityMixin",
-		"KelpBlockMixin",
-		"BambooBlockMixin",
-		"BambooShootBlockMixin",
-		"CactusBlockMixin",
-		"SugarCaneBlockMixin",
-		"CocoaBlockMixin",
-		"PassiveEntityMixin",
-		"DriedGhastBlockMixin",
-		"SweetBerryBushBlockMixin",
-		"BuddingAmethystBlockMixin",
-		"PointedDripstoneBlockMixin",
-		"AbstractCauldronBlockMixin"
-		],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+    "required": true,
+    "package": "magicjinn.theblockkeepsticking.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "AbstractFurnaceBlockEntityMixin",
+        "CropBlockMixin",
+        "StemBlockMixin",
+        "NetherWartBlockMixin",
+        "CampfireBlockEntityMixin",
+        "SaplingBlockMixin",
+        "SnifferEggBlockMixin",
+        "BrewingStandBlockEntityMixin",
+        "KelpBlockMixin",
+        "BambooBlockMixin",
+        "BambooShootBlockMixin",
+        "CactusBlockMixin",
+        "SugarCaneBlockMixin",
+        "CocoaBlockMixin",
+        "PassiveEntityMixin",
+        "DriedGhastBlockMixin",
+        "SweetBerryBushBlockMixin",
+        "BuddingAmethystBlockMixin",
+        "PointedDripstoneBlockMixin"
+	],
+        "injectors": {
+            "defaultRequire": 1
+        },
+        "overwrites": {
+            "requireAnnotations": true
+        }
 }

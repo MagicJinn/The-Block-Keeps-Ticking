@@ -3,11 +3,11 @@ package magicjinn.theblockkeepsticking.simulator;
 import java.util.ArrayList;
 import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
-import magicjinn.theblockkeepsticking.blocks.TickingAbstractCauldronBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingBambooBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingBambooShootBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingBrewingStandBlockEntity;
+import magicjinn.theblockkeepsticking.blocks.TickingBuddingAmethystBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCactusBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCocoaBlock;
@@ -16,10 +16,12 @@ import magicjinn.theblockkeepsticking.blocks.TickingDriedGhastBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 // import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingPointedDripstoneBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSnifferEggBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingSweetBerryBushBlock;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
 import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.util.TickingObject;
@@ -43,7 +45,6 @@ public class WorldSimulator {
     private static final ArrayList<TickingObject> TickingEntityInstances = new ArrayList<>();
 
     public static void Initialize() {
-        RegisterTickingBlock(TickingAbstractCauldronBlock.INSTANCE);
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingBrewingStandBlockEntity.INSTANCE);
@@ -62,12 +63,15 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingSugarCaneBlock.INSTANCE);
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
 
-        RegisterTickingBlock(TickingPassiveEntity.INSTANCE);
-        // Broken for now due to Java
-        // RegisterTickingBlock(TickingChickenEntity.INSTANCE);
+        RegisterTickingBlock(TickingPassiveEntity.INSTANCE); // Includes chickens
 
         RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
         RegisterTickingBlock(TickingSnifferEggBlock.INSTANCE);
+
+
+        RegisterTickingBlock(TickingPointedDripstoneBlock.INSTANCE); // Includes cauldrons
+        RegisterTickingBlock(TickingSweetBerryBushBlock.INSTANCE);
+        RegisterTickingBlock(TickingBuddingAmethystBlock.INSTANCE);
     }
 
     /**
