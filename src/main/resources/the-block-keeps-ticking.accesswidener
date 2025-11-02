@@ -18,3 +18,10 @@ accessible method net/minecraft/block/BambooBlock countBambooBelow (Lnet/minecra
 
 # Pointed dripstone helper
 accessible method net/minecraft/block/PointedDripstoneBlock isHeldByPointedDripstone (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;)Z
+accessible method net/minecraft/block/PointedDripstoneBlock canDripThrough (Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z
+accessible method net/minecraft/block/PointedDripstoneBlock getTipPos (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;IZ)Lnet/minecraft/util/math/BlockPos;
+accessible method net/minecraft/block/PointedDripstoneBlock canGrow (Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;)Z
+accessible method net/minecraft/block/PointedDripstoneBlock canGrow (Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)Z
+accessible method net/minecraft/block/PointedDripstoneBlock canPlaceAtWithDirection (Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)Z
+accessible method net/minecraft/block/PointedDripstoneBlock growMerged (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;)V
+accessible method net/minecraft/block/PointedDripstoneBlock getCauldronPos (Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/fluid/Fluid;)Lnet/minecraft/util/math/BlockPos;
