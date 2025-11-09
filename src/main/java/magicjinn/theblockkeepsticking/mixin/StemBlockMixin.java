@@ -11,6 +11,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import java.util.List;
 import java.util.Optional;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
@@ -69,7 +70,7 @@ public class StemBlockMixin implements TickingAccessor {
         ServerWorld serverWorld = (ServerWorld) world;
         BlockState currentState = serverWorld.getBlockState(pos);
         if (currentState.getBlock() instanceof StemBlock) {
-            var directions = Type.HORIZONTAL.getShuffled(serverWorld.random);
+            List<Direction> directions = Type.HORIZONTAL.getShuffled(serverWorld.random);
             Registry<Block> registry =
                     serverWorld.getRegistryManager().getOrThrow(RegistryKeys.BLOCK);
             Optional<Block> optionalGourd = registry.getOptionalValue(gourdBlock);

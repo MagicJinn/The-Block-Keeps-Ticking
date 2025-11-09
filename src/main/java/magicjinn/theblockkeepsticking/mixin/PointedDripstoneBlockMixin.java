@@ -3,7 +3,6 @@ package magicjinn.theblockkeepsticking.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.PointedDripstoneBlock;
@@ -62,7 +61,6 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
             cycleAmountGrowthInt = (int) cycleAmountGrowth;
             final float cycleAmountLeftover = cycleAmountGrowth % 1.0f;
             cycleAmountGrowthInt += randomFloat < cycleAmountLeftover ? 1 : 0;
-            TheBlockKeepsTicking.LOGGER.info("Cycle amount growth int: {}", cycleAmountGrowthInt);
         }
 
         // Same here for water and lava
@@ -186,7 +184,6 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
                 break;
             }
         }
-
 
         return changed;
     }
