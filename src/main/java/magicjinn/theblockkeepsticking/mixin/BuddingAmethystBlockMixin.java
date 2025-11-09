@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.spongepowered.asm.mixin.Mixin;
-import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.block.BuddingAmethystBlock;
@@ -21,7 +20,7 @@ import net.minecraft.world.World;
 
 @Mixin(BuddingAmethystBlock.class)
 public class BuddingAmethystBlockMixin implements TickingAccessor {
-    private final static int MAX_AGE = 3;
+    private static final int MAX_AGE = 3;
 
     private static final Map<Integer, Block> indexToBlock = new HashMap<>();
     private static final Map<Block, Integer> blockToIndex = new HashMap<>();
@@ -42,8 +41,8 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
     }
 
     private static int getIndexByBlock(Block block) {
-        int index = blockToIndex.getOrDefault(block, 0);
-        return Math.max(0, Math.min(MAX_AGE, index));
+        int index = blockToIndex.getOrDefault(block, -1);
+        return Math.max(-1, Math.min(MAX_AGE, index));
     }
 
     @Override
@@ -60,29 +59,26 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
         Collections.shuffle(directions);
 
         boolean[] isAmethystBlock = new boolean[directions.size()];
+        int[] states = new int[directions.size()];
 
         // Check if ageing is required by checking if any of the blocks are not fully grown
         boolean ageingRequired = false;
-        int[] states = new int[directions.size()];
         for (int i = 0; i < directions.size(); i++) {
-            BlockPos blockPos = pos.offset(directions.get(i));
-            BlockState blockState = world.getBlockState(blockPos);
+            Direction direction = directions.get(i);
+            BlockState blockState = world.getBlockState(pos.offset(direction));
             Block block = blockState.getBlock();
 
-            for (int c = 0; c < MAX_AGE; c++) {
-                if (block == getBlockByIndex(states[c])
-                        || BuddingAmethystBlock.canGrowIn(blockState)) {
-                    isAmethystBlock[i] = true;
-                    break;
-                }
-            }
+            // Check if it's an amethyst block OR can grow in
+            isAmethystBlock[i] = ((block instanceof AmethystClusterBlock)
+                    && blockState.get(AmethystClusterBlock.FACING) == direction)
+                    || BuddingAmethystBlock.canGrowIn(blockState);
 
             int index = getIndexByBlock(block);
             if (index < MAX_AGE)
                 ageingRequired = true;
             states[i] = index;
-            isAmethystBlock[i] = true;
         }
+
         if (!ageingRequired)
             return false;
 
@@ -114,33 +110,32 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
             if (states[directionIndex] >= MAX_AGE || !isAmethystBlock[directionIndex])
                 continue;
 
-            if (BuddingAmethystBlock.canGrowIn(blockState) && states[directionIndex] == 0) {
+            if (BuddingAmethystBlock.canGrowIn(blockState) && states[directionIndex] == -1) {
                 // Small bud
                 states[directionIndex] = getIndexByBlock(Blocks.SMALL_AMETHYST_BUD);
-                TheBlockKeepsTicking.LOGGER.info("Growing small bud at {}", blockPos);
-            } else if (blockState.get(AmethystClusterBlock.FACING) == direction) {
+                isAmethystBlock[directionIndex] = true;
+
+            } else if (isAmethystBlock[directionIndex]) {
                 // Grow existing bud
-                TheBlockKeepsTicking.LOGGER.info("Growing existing bud at {}", blockPos);
                 states[directionIndex] = Math.min(states[directionIndex] + 1, MAX_AGE);
             }
         }
 
         for (int i = 0; i < directions.size(); i++) {
-            Direction direction = directions.get(i);
-
-            if (!isAmethystBlock[i])
-                continue;
-
-            Block block = getBlockByIndex(states[i]);
-            BlockState blockState = world.getBlockState(pos.offset(direction));
-
-            BlockState newState = (BlockState) block.getDefaultState()
-                    .with(AmethystClusterBlock.FACING, direction)
-                    .with(AmethystClusterBlock.WATERLOGGED,
-                            blockState.getFluidState().getFluid() == Fluids.WATER);
-            world.setBlockState(pos.offset(direction), newState);
+            setAmethistCluster(directions.get(i), states[i], world, pos);
         }
 
         return true;
+    }
+
+    private static void setAmethistCluster(Direction direction, int state, World world,
+            BlockPos pos) {
+        Block block = getBlockByIndex(state);
+        BlockState blockState = world.getBlockState(pos.offset(direction));
+
+        BlockState newState = (BlockState) block.getDefaultState()
+                .with(AmethystClusterBlock.FACING, direction).with(AmethystClusterBlock.WATERLOGGED,
+                        blockState.getFluidState().getFluid() == Fluids.WATER);
+        world.setBlockState(pos.offset(direction), newState);
     }
 }
