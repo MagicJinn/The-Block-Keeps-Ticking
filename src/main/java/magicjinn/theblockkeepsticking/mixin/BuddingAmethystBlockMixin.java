@@ -25,7 +25,7 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
     private static final Map<Integer, Block> indexToBlock = new HashMap<>();
     private static final Map<Block, Integer> blockToIndex = new HashMap<>();
 
-    private static void initialize() {
+    private static void Initialize() {
         Block[] blocks = {Blocks.SMALL_AMETHYST_BUD, Blocks.MEDIUM_AMETHYST_BUD,
                 Blocks.LARGE_AMETHYST_BUD, Blocks.AMETHYST_CLUSTER};
         for (int i = 0; i < blocks.length; i++) {
@@ -47,9 +47,9 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
 
     @Override
     public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
-        initialize();
+        Initialize();
 
-        final int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world, 5) * 100;
+        final int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world, 5);
 
         if (randomTicks <= 0)
             return false;
