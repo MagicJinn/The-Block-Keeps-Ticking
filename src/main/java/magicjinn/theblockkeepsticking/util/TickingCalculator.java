@@ -21,6 +21,8 @@ public class TickingCalculator {
     public static int RandomTickAmount(long ticksToSimulate, World world, float divideByAmount) {
         // Determine the amount of random ticks that would have occurred
         int randomTickRatio = RandomTickRatio(world);
+        if (randomTickRatio <= 0 || divideByAmount <= 0)
+            return 0;
         int randomTicks = (int) (ticksToSimulate / randomTickRatio);
         return (int) (randomTicks / divideByAmount);
     }
@@ -33,6 +35,9 @@ public class TickingCalculator {
             return Integer.MAX_VALUE;
 
         float fraction = (float) randomTickSpeed / (float) (16 * 16 * 16);
+        if (fraction <= 0)
+            return Integer.MAX_VALUE;
+
         int ratio = (int) (1.0 / fraction);
         return ratio;
     }
