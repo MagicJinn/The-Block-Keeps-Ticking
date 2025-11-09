@@ -10,7 +10,7 @@ import net.minecraft.block.BuddingAmethystBlock;
 import net.minecraft.util.math.Direction;
 
 public class AmethystClusterTracker {
-    public static final int MAX_AGE = getIndexByBlock(Blocks.AMETHYST_CLUSTER);
+    public static final int MAX_AGE = 3;
     public int age;
     public Direction direction;
 

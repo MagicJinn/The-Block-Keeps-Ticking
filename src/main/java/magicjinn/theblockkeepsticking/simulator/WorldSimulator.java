@@ -16,7 +16,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingDriedGhastBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 // import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
-// import magicjinn.theblockkeepsticking.blocks.TickingPointedDripstoneBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingPointedDripstoneBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSnifferEggBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
@@ -69,8 +69,7 @@ public class WorldSimulator {
         RegisterTickingBlock(TickingSnifferEggBlock.INSTANCE);
 
         // Growing broken for now
-        // #TODO: Fix growing
-        // RegisterTickingBlock(TickingPointedDripstoneBlock.INSTANCE); // Includes cauldrons
+        RegisterTickingBlock(TickingPointedDripstoneBlock.INSTANCE); // Includes cauldrons
         RegisterTickingBlock(TickingSweetBerryBushBlock.INSTANCE);
         RegisterTickingBlock(TickingBuddingAmethystBlock.INSTANCE);
     }

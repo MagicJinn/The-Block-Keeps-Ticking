@@ -36,6 +36,7 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
 
         // Prepare random values for the simulation
         float randomFloat = world.random.nextFloat();
+        @SuppressWarnings("unused")
         int randomInt = world.random.nextInt(2); // 0 or 1
 
         // Check if the block above is a dripstone block and the block above that is fluid
@@ -54,6 +55,7 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
 
         // Because dripstone grows so incredibly slowly, we need to use random to account for
         // the situations where it wouldn't grow at all if fully strict-deterministic
+        @SuppressWarnings("unused")
         int cycleAmountGrowthInt = 0;
         if (canGrowDripstone) {
             final float growthChance = field_33567;
@@ -129,8 +131,34 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
             }
         }
 
+        // Convert mud to clay if the water is dripping
+        if (cycleAmountWaterInt > 0 && blockAboveThatIsMud && !world.getDimension().ultrawarm()) {
+            BlockPos mudPos = pos.up(2);
+            BlockState mudState = world.getBlockState(mudPos);
+            BlockState clayState = Blocks.CLAY.getDefaultState();
+            world.setBlockState(mudPos, clayState, 3);
+            Block.pushEntitiesUpBeforeBlockChange(mudState, clayState, world, mudPos);
+            world.syncWorldEvent(1504, tipPos, 0);
+            changed = true;
+        }
+
+        // #TODO: Fix growth
+        boolean growthSucceeded = false;
+        // simulateGrowth(cycleAmountGrowthInt, randomInt, tipPos, world, state, pos);
+        return growthSucceeded || changed;
+    }
+
+    private static boolean isStillFluid(Block fluid, BlockState state) {
+        return state.getFluidState().isStill() && state.isOf(fluid);
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean simulateGrowth(int cycleAmountGrowthInt, int randomInt, BlockPos tipPos,
+            World world, BlockState state, BlockPos pos) {
         // Simulate growth attempts deterministically
         // Each attempt alternates between stalactite (down) and stalagmite (up)
+
+        boolean changed = false;
 
         // Refresh tipPos for growth
         tipPos = PointedDripstoneBlock.getTipPos(state, world, pos, MAX_STALACTITE_GROWTH, false);
@@ -186,9 +214,5 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
         }
 
         return changed;
-    }
-
-    private boolean isStillFluid(Block fluid, BlockState state) {
-        return state.getFluidState().isStill() && state.isOf(fluid);
     }
 }
