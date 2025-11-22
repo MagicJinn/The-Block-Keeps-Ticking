@@ -20,6 +20,10 @@
   * **Trees:** Sapling growth
   * **Growing Plants:** Kelp, Bamboo, Sugar Cane, Cactus
   * **Dried Ghast & Sniffer Eggs:** Hydration and hatching progression
+  * **Budding Amethyst:** Growth progression
+  * **Cauldrons:** Water and lava dripping
+  * **Mud:** Mud above Dripstone conversion to clay
+  * **Sweet Berry Bushes:** Growth progression
 
 <sup>*Note: Due to the way Sniffer Eggs and Dried Ghasts are processed, some precision is lost during simulation.</sup>
 
