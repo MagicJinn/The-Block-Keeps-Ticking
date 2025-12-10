@@ -4,7 +4,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -29,7 +30,7 @@ public class TickingCalculator {
 
     public static int RandomTickRatio(World world) {
         int randomTickSpeed =
-                ((ServerWorld) world).getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
+                ((ServerWorld) world).getGameRules().getValue(GameRules.RANDOM_TICK_SPEED);
 
         if (randomTickSpeed <= 0) // Because its possible
             return Integer.MAX_VALUE;

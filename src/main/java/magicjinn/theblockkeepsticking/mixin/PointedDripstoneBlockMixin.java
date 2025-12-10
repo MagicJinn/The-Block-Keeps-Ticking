@@ -14,6 +14,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.server.world.ServerWorld;
 
 @Mixin(PointedDripstoneBlock.class)
@@ -132,8 +133,9 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
         }
 
         // Convert mud to clay if the water is dripping
-        if (cycleAmountWaterInt > 0 && blockAboveThatIsMud && !world.getDimension().ultrawarm()) {
-            BlockPos mudPos = pos.up(2);
+        BlockPos mudPos = pos.up(2);
+        if (cycleAmountWaterInt > 0 && blockAboveThatIsMud && !world.getEnvironmentAttributes()
+                .getAttributeValue(EnvironmentAttributes.WATER_EVAPORATES_GAMEPLAY, mudPos)) {
             BlockState mudState = world.getBlockState(mudPos);
             BlockState clayState = Blocks.CLAY.getDefaultState();
             world.setBlockState(mudPos, clayState, 3);
