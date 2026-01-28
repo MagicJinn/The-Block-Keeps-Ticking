@@ -1,0 +1,42 @@
+{
+	"schemaVersion": 1,
+	"id": "api-example",
+	"version": "${version}",
+	"name": "TBKT API Example",
+	"description": "Example mod demonstrating the The Block Keeps Ticking API. Adds a behavior to NoteBlocks that makes them grow upward to 10 blocks high when simulated in unloaded chunks.",
+	"authors": [
+		"MagicJinn"
+	],
+	"contact": {
+		"homepage": "https://github.com/MagicJinn/The-Block-Keeps-Ticking",
+		"sources": "https://github.com/MagicJinn/The-Block-Keeps-Ticking"
+	},
+	"license": "MIT",
+	"icon": "assets/api-example/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"magicjinn.apiexample.APIExample"
+		],
+		"client": [
+			"magicjinn.apiexample.APIExampleClient"
+		],
+		"theblockkeepsticking": [
+			"magicjinn.apiexample.APIExampleTickingBlocks"
+		]
+	},
+	"mixins": [
+		"api-example.mixins.json",
+		{
+			"config": "api-example.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"the-block-keeps-ticking": "*"
+	}
+}
