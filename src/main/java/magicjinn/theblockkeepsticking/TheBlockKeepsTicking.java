@@ -1,12 +1,16 @@
 package magicjinn.theblockkeepsticking;
 
+import java.util.List;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import com.mojang.serialization.Codec;
+import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
 import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import magicjinn.theblockkeepsticking.util.Timer;
@@ -17,6 +21,7 @@ import net.minecraft.server.world.ChunkLevelType;
 public class TheBlockKeepsTicking implements ModInitializer {
 	public static final String MOD_ID = "the-block-keeps-ticking";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static final String ENTRYPOINT_KEY = "theblockkeepsticking";
 
 	public static final AttachmentType<Long> LAST_UPDATE_TIME = AttachmentRegistry
 			.createPersistent(Identifier.of(MOD_ID, "last_update_time"), Codec.LONG);
@@ -29,7 +34,8 @@ public class TheBlockKeepsTicking implements ModInitializer {
 
 		// Load the config from file
 		ModConfig.HANDLER.load();
-		WorldSimulator.Initialize();
+		WorldSimulator.InitializeTickingBlocks();
+		InitializeEntrypointTickingBlocks();
 		Timer.RegisterShutdownEvent();
 
 		// Add listener for CHUNK_LEVEL_TYPE_CHANGE to handle chunks entering/leaving simulation
@@ -68,5 +74,24 @@ public class TheBlockKeepsTicking implements ModInitializer {
 				chunk.setAttached(LAST_REALTIME_UPDATE_MS, nowMs);
 			}
 		});
+	}
+
+	/**
+	 * Loads and invokes all InitializeTickingBlocks entrypoints from other mods.
+	 */
+	private void InitializeEntrypointTickingBlocks() {
+		List<EntrypointContainer<InitializeTickingBlocks>> entrypoints = FabricLoader.getInstance()
+				.getEntrypointContainers(ENTRYPOINT_KEY, InitializeTickingBlocks.class);
+
+		for (EntrypointContainer<InitializeTickingBlocks> container : entrypoints) {
+			String modId = container.getProvider().getMetadata().getId();
+			try {
+				LOGGER.info("Loading ticking blocks from mod: {}", modId);
+				InitializeTickingBlocks initializer = container.getEntrypoint();
+				initializer.registerTickingBlocks(WorldSimulator::RegisterTickingBlock);
+			} catch (Throwable e) {
+				LOGGER.error("Failed to load ticking blocks from mod {}: {}", modId, e.getMessage(), e);
+			}
+		}
 	}
 }

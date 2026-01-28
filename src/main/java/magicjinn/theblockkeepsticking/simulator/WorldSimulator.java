@@ -44,7 +44,8 @@ public class WorldSimulator {
     private static final ArrayList<TickingObject> TickingBlockEntityInstances = new ArrayList<>();
     private static final ArrayList<TickingObject> TickingEntityInstances = new ArrayList<>();
 
-    public static void Initialize() {
+    public static void InitializeTickingBlocks() {
+        // Register built-in ticking blocks
         RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
         RegisterTickingBlock(TickingBrewingStandBlockEntity.INSTANCE);
@@ -163,8 +164,8 @@ public class WorldSimulator {
                             break;
                             // break to avoid multiple matches (which is impossible, so this
                             // saves time)
-                            }
                         }
+                    }
                 }
             }
             ChunkPos chunkPos = chunk.getPos();
