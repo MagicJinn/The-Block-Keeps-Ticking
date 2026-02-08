@@ -124,9 +124,8 @@ public class WorldSimulator {
         long ticks = ModConfig.applyLazyTax(ticksToSimulate);
 
 
-        if (ticks <= 0) {
+        if (ticks <= 0)
             return; // Nothing to simulate, abort
-        }
 
         boolean doDebugLogging = ModConfig.isDebugLogging();
 

@@ -31,10 +31,16 @@ public final class ModConfig {
                             .build())
                     .build();
 
-    @SerialEntry Map<String, Boolean> enabledByName = new LinkedHashMap<>();
-    @SerialEntry int lazyTaxPercent = 0; // 0..99
-    @SerialEntry TimeMode timeMode = TimeMode.WORLD_TIME;
-    @SerialEntry boolean debugLogging = false;
+    @SerialEntry
+    Map<String, Boolean> enabledByName = new LinkedHashMap<>();
+    @SerialEntry
+    int lazyTaxPercent = 0; // 0..99
+    @SerialEntry
+    TimeMode timeMode = TimeMode.WORLD_TIME;
+    @SerialEntry
+    boolean simulateChunksWhenSleeping = false;
+    @SerialEntry
+    boolean debugLogging = false;
 
     public ModConfig() {}
 
@@ -78,6 +84,15 @@ public final class ModConfig {
 
     public static Map<String, Boolean> getEnabledByName() {
         return getInstance().enabledByName;
+    }
+
+    public static boolean isSimulateChunksWhenSleeping() {
+        return getInstance().simulateChunksWhenSleeping;
+    }
+
+    public static void setSimulateChunksWhenSleeping(boolean enabled) {
+        getInstance().simulateChunksWhenSleeping = enabled;
+        HANDLER.save();
     }
 
     public static boolean isDebugLogging() {

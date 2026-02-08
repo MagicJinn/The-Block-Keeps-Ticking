@@ -1,5 +1,8 @@
 accessWidener v2 named
 
+# Access a list of loaded chunks in a world
+accessible method net/minecraft/server/world/ServerChunkLoadingManager forEachBlockTickingChunk (Ljava/util/function/Consumer;)V
+
 # Furnace
 accessible method net/minecraft/block/entity/AbstractFurnaceBlockEntity getCookTime (Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/block/entity/AbstractFurnaceBlockEntity;)I
 

@@ -54,6 +54,16 @@ public class ModMenuIntegration implements ModMenuApi {
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 99).step(1))
                 .build();
 
+        // Simulate chunks when sleeping option
+        Option<Boolean> simulateChunksWhenSleepingOpt = Option.<Boolean>createBuilder()
+                        .name(Text.literal("Simulate After Sleeping"))
+                        .description(OptionDescription.of(Text.literal(
+                                        "When enabled, time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip.")))
+                        .binding(ModConfig.isSimulateChunksWhenSleeping(), ModConfig::isSimulateChunksWhenSleeping,
+                                        ModConfig::setSimulateChunksWhenSleeping)
+                        .controller(BooleanControllerBuilder::create)
+                        .build();
+
         // Debug logging option
         Option<Boolean> debugLoggingOpt = Option.<Boolean>createBuilder()
                         .name(Text.literal("Debug Logging"))
@@ -64,7 +74,8 @@ public class ModMenuIntegration implements ModMenuApi {
                         }).controller(BooleanControllerBuilder::create).build();
 
         OptionGroup general = OptionGroup.createBuilder().name(Text.literal("General"))
-                        .option(timeModeOpt).option(lazyTaxOpt).option(debugLoggingOpt).build();
+                        .option(timeModeOpt).option(lazyTaxOpt).option(simulateChunksWhenSleepingOpt)
+                        .option(debugLoggingOpt).build();
 
         // Per-object toggles
         OptionGroup.Builder objectsGroupBuilder =

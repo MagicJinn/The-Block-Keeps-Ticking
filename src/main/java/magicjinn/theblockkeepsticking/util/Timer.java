@@ -41,7 +41,7 @@ public class Timer implements ServerTickEvents.EndTick {
 
     public void Schedule(String id, BiConsumer<MinecraftServer, WorldChunk> callback,
             WorldChunk chunk) {
-        Schedule(id, 20L, callback, chunk);
+        Schedule(id, 1L, callback, chunk);
     }
 
     public void Schedule(String id, long ticksUntilAction,
