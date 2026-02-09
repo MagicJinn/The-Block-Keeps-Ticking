@@ -38,7 +38,7 @@ public final class ModConfig {
     @SerialEntry
     TimeMode timeMode = TimeMode.WORLD_TIME;
     @SerialEntry
-    boolean simulateChunksWhenSleeping = false;
+    boolean simulateChunksWhenSleeping = true;
     @SerialEntry
     boolean debugLogging = false;
 

@@ -12,6 +12,8 @@
 
 ### Features
 
+* **Simulate When Away:** Simulate blocks and entities in unloaded chunks when you are away from those chunks.
+
 * **Block Support:**
   * **Block Entities:** Furnaces, Campfires, Brewing Stands
   * **Crops & Stems:** Wheat, Carrots, Potatoes, Beetroots, Torchflowers, Pumpkins and Melons
@@ -29,6 +31,8 @@
 
 * **Time Modes:** Choose between world time (only progresses when playing) or real time (progresses even when offline).
 
+* **Simulate After Sleeping:** Time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip.
+
 * **Lazy Tax setting:** Configure a percentage reduction of simulated ticks to slow down simulation for your prefered balance level.
 
 * **Per-Object Configuration:** Enable or disable simulation for specific blocks and entities individually.
@@ -40,6 +44,8 @@
 You can configure the following values with [ModMenu](https://github.com/TerraformersMC/ModMenu) and [YetAnotherConfigLib](https://github.com/isXander/YetAnotherConfigLib), or by editing `config\the-block-keeps-ticking.json`.
 
 * **Time Source:** Choose between "World Time" (only progresses when playing) or "Real Time" (progresses even when offline). Real Time works well with lazy tax. (Default: World Time)
+
+* **Simulate After Sleeping:** When enabled, time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip. (Default: false)
 
 * **Lazy Tax (%):** Simulated ticks are reduced by this percentage. Increasing this value slows down simulation in unloaded chunks. Range: 0-99. (Default: 0)
 
