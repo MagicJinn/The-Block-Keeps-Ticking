@@ -24,6 +24,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSweetBerryBushBlock;
 import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
 import magicjinn.theblockkeepsticking.config.ModConfig;
+import magicjinn.theblockkeepsticking.util.Benchmarker;
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -123,76 +124,90 @@ public class WorldSimulator {
         // Apply lazy tax
         long ticks = ModConfig.applyLazyTax(ticksToSimulate);
 
-
         if (ticks <= 0)
             return; // Nothing to simulate, abort
 
         boolean doDebugLogging = ModConfig.isDebugLogging();
 
+        Benchmarker.StartBenchmark("SimulateWorld");
         try {
-            forEachBlockInChunk(chunk, (block, state, pos) -> {
-                for (TickingObject tickingBlock : TickingBlockInstances) {
-                    if (checkIfInstanceOf(tickingBlock, block)) {
-                        if (!ModConfig.isEnabled(tickingBlock.getName())) {
-                            return; // skip this block type
-                        }
-                        boolean result =
-                                tickingBlock.Simulate(block, ticks, world, state, pos);
-                        if (result && doDebugLogging)
-                                    TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
-                                    block.getName().toString(), ticks);
-                    return; // lambda break; equivalent
-                    // break to avoid multiple matches (which is impossible, so this saves time)
-                }
-            }
-        });
-            for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                if (blockEntity != null) {
-                    for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
-                        if (checkIfInstanceOf(tickingBlockEntity, blockEntity)) {
-                            if (!ModConfig.isEnabled(tickingBlockEntity.getName())) {
-                                break; // skip this entity type
+            Benchmarker.StartBenchmark("SimulateWorld.blocks");
+            try {
+                forEachBlockInChunk(chunk, (block, state, pos) -> {
+                    for (TickingObject tickingBlock : TickingBlockInstances) {
+                        if (checkIfInstanceOf(tickingBlock, block)) {
+                            if (!ModConfig.isEnabled(tickingBlock.getName())) {
+                                return; // skip this block type
                             }
-                            boolean result = tickingBlockEntity.Simulate(blockEntity,
-                                    ticks,
-                                    world, blockEntity.getCachedState(), blockEntity.getPos());
+                            boolean result = tickingBlock.Simulate(block, ticks, world, state, pos);
                             if (result && doDebugLogging)
-                                TheBlockKeepsTicking.LOGGER.info(
-                                        "Simulating block entity {} for {} ticks",
-                                        blockEntity.getNameForReport(), ticks);
-                            break;
-                            // break to avoid multiple matches (which is impossible, so this
-                            // saves time)
+                                TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
+                                        block.getName().toString(), ticks);
+                            return; // lambda break; equivalent
+                            // break to avoid multiple matches (which is impossible, so this saves time)
                         }
                     }
-                }
+                });
+            } finally {
+                Benchmarker.EndBenchmark("SimulateWorld.blocks");
             }
-            ChunkPos chunkPos = chunk.getPos();
-            Box box = new Box(chunkPos.getStartX(), world.getBottomY(), chunkPos.getStartZ(),
-                    chunkPos.getEndX(), world.getHeight(), chunkPos.getEndZ());
-
-            // Get all passive entities within chunk
-            var passiveEntities =
-                    world.getEntitiesByClass(PassiveEntity.class, box, PassiveEntity -> true);
-
-            for (PassiveEntity passiveEntity : passiveEntities) {
-                for (TickingObject tickingEntity : TickingEntityInstances) {
-                    if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
-                        if (!ModConfig.isEnabled(tickingEntity.getName())) {
-                            continue; // skip this entity type
+            Benchmarker.StartBenchmark("SimulateWorld.blockEntities");
+            try {
+                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                    if (blockEntity != null) {
+                        for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
+                            if (checkIfInstanceOf(tickingBlockEntity, blockEntity)) {
+                                if (!ModConfig.isEnabled(tickingBlockEntity.getName())) {
+                                    break; // skip this entity type
+                                }
+                                boolean result = tickingBlockEntity.Simulate(blockEntity,
+                                        ticks,
+                                        world, blockEntity.getCachedState(), blockEntity.getPos());
+                                if (result && doDebugLogging)
+                                    TheBlockKeepsTicking.LOGGER.info(
+                                            "Simulating block entity {} for {} ticks",
+                                            blockEntity.getNameForReport(), ticks);
+                                break;
+                                // break to avoid multiple matches (which is impossible, so this
+                                // saves time)
+                            }
                         }
-                        boolean result =
-                                tickingEntity.Simulate(passiveEntity, ticks,
-                                world, null, null);
-                        if (result && doDebugLogging)
-                            TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
-                                    passiveEntity.getName(), ticks);
                     }
                 }
+            } finally {
+                Benchmarker.EndBenchmark("SimulateWorld.blockEntities");
+            }
+            Benchmarker.StartBenchmark("SimulateWorld.entities");
+            try {
+                ChunkPos chunkPos = chunk.getPos();
+                Box box = new Box(chunkPos.getStartX(), world.getBottomY(), chunkPos.getStartZ(),
+                        chunkPos.getEndX(), world.getHeight(), chunkPos.getEndZ());
+
+                // Get all passive entities within chunk
+                var passiveEntities = world.getEntitiesByClass(PassiveEntity.class, box, PassiveEntity -> true);
+
+                for (PassiveEntity passiveEntity : passiveEntities) {
+                    for (TickingObject tickingEntity : TickingEntityInstances) {
+                        if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
+                            if (!ModConfig.isEnabled(tickingEntity.getName())) {
+                                continue; // skip this entity type
+                            }
+                            boolean result = tickingEntity.Simulate(passiveEntity, ticks,
+                                    world, null, null);
+                            if (result && doDebugLogging)
+                                TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
+                                        passiveEntity.getName(), ticks);
+                        }
+                    }
+                }
+            } finally {
+                Benchmarker.EndBenchmark("SimulateWorld.entities");
             }
         } catch (Exception e) {
-        TheBlockKeepsTicking.LOGGER.error("Error during world simulation: ", e);
-    }
+            TheBlockKeepsTicking.LOGGER.error("Error during world simulation: ", e);
+        } finally {
+            Benchmarker.EndBenchmark("SimulateWorld");
+        }
     }
 
     /**
@@ -209,7 +224,7 @@ public class WorldSimulator {
     /**
      * Iterates over all blocks in the given chunk from top to bottom
      * 
-     * @param chunk The chunk to iterate over
+     * @param chunk  The chunk to iterate over
      * @param action The action to perform on each block
      */
     public static void forEachBlockInChunk(WorldChunk chunk,

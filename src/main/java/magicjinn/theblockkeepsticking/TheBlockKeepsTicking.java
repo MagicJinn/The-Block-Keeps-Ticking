@@ -15,6 +15,7 @@ import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
 import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
+import magicjinn.theblockkeepsticking.util.Benchmarker;
 import magicjinn.theblockkeepsticking.util.ChunkUtil;
 import magicjinn.theblockkeepsticking.util.Timer;
 import net.minecraft.util.Identifier;
@@ -34,7 +35,10 @@ public class TheBlockKeepsTicking implements ModInitializer {
 			.createPersistent(Identifier.of(MOD_ID, "last_realtime_update_ms"), Codec.LONG);
 
 	// Used to detect time skips (e.g. sleeping)
-	private long lastWorldTime = -1;
+	private static long lastWorldTime = -1;
+	// Minimum world-time jump (ticks) to trigger sleep-style simulation. Small
+	// jumps (e.g. from TT20) are ignored to avoid lag.
+	private static final long MIN_TIME_SKIP_FOR_SLEEP_SIMULATION = 200L;
 
 	@Override
 	public void onInitialize() {
@@ -65,10 +69,19 @@ public class TheBlockKeepsTicking implements ModInitializer {
 
 		if (lastWorldTime != -1) {
 			long timeDiff = worldTime - lastWorldTime;
-
-			if (timeDiff > 1) {
-				for (Chunk chunk : ChunkUtil.getLoadedChunks(world)) {
-					ScheduleSimulation(chunk, timeDiff);
+			// Only simulate on large time skips (e.g. sleeping: 1000+ ticks).
+			// Small jumps (e.g. 2–20 per tick) can be caused by mods like TT20 that add
+			// "missed" ticks to getTimeOfDay(); treating those as sleep would schedule
+			// simulation for every chunk every tick and cause severe lag or a feedback
+			// loop.
+			if (timeDiff > MIN_TIME_SKIP_FOR_SLEEP_SIMULATION) {
+				Benchmarker.StartBenchmark("onWorldTick.sleepSimulation");
+				try {
+					for (Chunk chunk : ChunkUtil.getLoadedChunks(world)) {
+						ScheduleSimulation(chunk, timeDiff);
+					}
+				} finally {
+					Benchmarker.EndBenchmark("onWorldTick.sleepSimulation");
 				}
 			}
 		}

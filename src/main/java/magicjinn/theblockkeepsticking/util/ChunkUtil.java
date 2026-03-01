@@ -20,11 +20,16 @@ public final class ChunkUtil {
 	 *         manager is not a {@link ServerChunkManager}
 	 */
 	public static List<WorldChunk> getLoadedChunks(ServerWorld world) {
-		if (!(world.getChunkManager() instanceof ServerChunkManager manager)) {
-			return Collections.emptyList();
+		Benchmarker.StartBenchmark("getLoadedChunks");
+		try {
+			if (!(world.getChunkManager() instanceof ServerChunkManager manager)) {
+				return Collections.emptyList();
+			}
+			List<WorldChunk> list = new ArrayList<>();
+			manager.chunkLoadingManager.forEachBlockTickingChunk(list::add);
+			return list;
+		} finally {
+			Benchmarker.EndBenchmark("getLoadedChunks");
 		}
-		List<WorldChunk> list = new ArrayList<>();
-		manager.chunkLoadingManager.forEachBlockTickingChunk(list::add);
-		return list;
 	}
 }
