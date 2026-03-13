@@ -1,6 +1,8 @@
 package magicjinn.theblockkeepsticking;
 
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -34,8 +36,8 @@ public class TheBlockKeepsTicking implements ModInitializer {
 	public static final AttachmentType<Long> LAST_REALTIME_UPDATE_MS = AttachmentRegistry
 			.createPersistent(Identifier.of(MOD_ID, "last_realtime_update_ms"), Codec.LONG);
 
-	// Used to detect time skips (e.g. sleeping)
-	private static long lastWorldTime = -1;
+	// Used to detect time skips (e.g. sleeping), tracked per world
+	private static final Map<ServerWorld, Long> lastWorldTimes = new WeakHashMap<>();
 	// Minimum world-time jump (ticks) to trigger sleep-style simulation. Small
 	// jumps (e.g. from TT20) are ignored to avoid lag.
 	private static final long MIN_TIME_SKIP_FOR_SLEEP_SIMULATION = 200L;
@@ -67,7 +69,15 @@ public class TheBlockKeepsTicking implements ModInitializer {
 
 		long worldTime = world.getTimeOfDay();
 
-		if (lastWorldTime != -1) {
+		Long lastWorldTime = lastWorldTimes.get(world);
+
+		if (lastWorldTime != null) {
+			// Als de tijd "achteruit" gaat (nieuwe wereld of tijdreset), beschouw dit als reset
+			if (worldTime < lastWorldTime) {
+				lastWorldTimes.put(world, worldTime);
+				return;
+			}
+
 			long timeDiff = worldTime - lastWorldTime;
 			// Only simulate on large time skips (e.g. sleeping: 1000+ ticks).
 			// Small jumps (e.g. 2–20 per tick) can be caused by mods like TT20 that add
@@ -86,7 +96,7 @@ public class TheBlockKeepsTicking implements ModInitializer {
 			}
 		}
 
-		lastWorldTime = worldTime;
+		lastWorldTimes.put(world, worldTime);
 	}
 
 	private void onChunkLevelTypeChange(ServerWorld world, Chunk chunk, ChunkLevelType oldType,
@@ -100,7 +110,7 @@ public class TheBlockKeepsTicking implements ModInitializer {
 				&& oldType != ChunkLevelType.BLOCK_TICKING) {
 			// Calculate ticksToSimulate based on config time mode
 			long ticksToSimulate;
-			if (ModConfig.getTimeMode() == ModConfig.TimeMode.REALTIME) {
+			if (ModConfig.getTimeMode() == ModConfig.TimeMode.REAL_TIME) {
 				long lastMs = chunk
 						.getAttachedOrSet(TheBlockKeepsTicking.LAST_REALTIME_UPDATE_MS, nowMs);
 				ticksToSimulate = Math.max(0L, (nowMs - lastMs) / 50L); // convert to ticks

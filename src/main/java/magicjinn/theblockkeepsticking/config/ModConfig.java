@@ -2,6 +2,12 @@ package magicjinn.theblockkeepsticking.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
@@ -11,23 +17,57 @@ import net.fabricmc.loader.api.FabricLoader;
 
 public final class ModConfig {
 
+    // WORLD_TIME, REAL_TIME. Legacy "REALTIME" in JSON is accepted and
+    // autocorrected
     public enum TimeMode {
-        WORLD_TIME, REALTIME;
+        WORLD_TIME,
+        REAL_TIME;
 
         @Override
         public String toString() {
             return switch (this) {
                 case WORLD_TIME -> "World Time";
-                case REALTIME -> "Real Time";
+                case REAL_TIME -> "Real Time";
+            };
+        }
+
+        static TimeMode fromJsonString(String value) {
+            if (value == null)
+                return WORLD_TIME;
+            return switch (value) {
+                case "REALTIME" -> REAL_TIME; // legacy
+                case "REAL_TIME" -> REAL_TIME;
+                case "WORLD_TIME" -> WORLD_TIME;
+                default -> WORLD_TIME;
             };
         }
     }
+
+    private static final TypeAdapter<TimeMode> TIME_MODE_ADAPTER = new TypeAdapter<>() {
+        @Override
+        public void write(JsonWriter out, TimeMode value) throws java.io.IOException {
+            if (value == null)
+                out.nullValue();
+            else
+                out.value(value.name());
+        }
+
+        @Override
+        public TimeMode read(JsonReader in) throws java.io.IOException {
+            if (in.peek() == JsonToken.NULL) {
+                in.nextNull();
+                return TimeMode.WORLD_TIME;
+            }
+            return TimeMode.fromJsonString(in.nextString());
+        }
+    };
 
     public static final ConfigClassHandler<ModConfig> HANDLER =
             ConfigClassHandler.createBuilder(ModConfig.class)
                     .serializer(config -> GsonConfigSerializerBuilder.create(config)
                             .setPath(FabricLoader.getInstance().getConfigDir()
                                     .resolve(TheBlockKeepsTicking.MOD_ID + ".json"))
+                            .appendGsonBuilder(b -> b.registerTypeAdapter(TimeMode.class, TIME_MODE_ADAPTER))
                             .build())
                     .build();
 
