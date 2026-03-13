@@ -53,6 +53,8 @@ You can configure the following values with [ModMenu](https://github.com/Terrafo
 
 * **Ticking Objects:** Individual toggles to enable or disable simulation for each supported block type and entity. All are enabled by default.
 
+### ⚠️ Warning: This mod stores Fabric chunk attachments. Removing it may cause harmless log spam about unknown attachment types. This is a Fabric limitation, not a bug in the mod.
+---
 ### API usage
 
 **The Block Keeps Ticking** exposes a small API so other mods can register their own ticking objects to be simulated in unloaded chunks.
