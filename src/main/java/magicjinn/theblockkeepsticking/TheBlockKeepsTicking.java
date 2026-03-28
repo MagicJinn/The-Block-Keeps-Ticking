@@ -72,7 +72,6 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		Long lastWorldTime = lastWorldTimes.get(world);
 
 		if (lastWorldTime != null) {
-			// Als de tijd "achteruit" gaat (nieuwe wereld of tijdreset), beschouw dit als reset
 			if (worldTime < lastWorldTime) {
 				lastWorldTimes.put(world, worldTime);
 				return;
