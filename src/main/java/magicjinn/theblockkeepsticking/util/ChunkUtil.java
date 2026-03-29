@@ -1,11 +1,10 @@
 package magicjinn.theblockkeepsticking.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import net.minecraft.server.world.ServerChunkManager;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public final class ChunkUtil {
 
@@ -13,20 +12,18 @@ public final class ChunkUtil {
 	}
 
 	/**
-	 * Returns the list of chunks that are currently loaded in the given world.
-	 * 
-	 * @param world the server world (e.g. overworld)
-	 * @return list of block-ticking {@link WorldChunk}s, or empty list if the chunk
-	 *         manager is not a {@link ServerChunkManager}
+	 * Returns the list of chunks that are currently block-ticking in the given
+	 * level.
+	 *
+	 * @param level the server world (e.g. overworld)
+	 * @return list of block-ticking {@link LevelChunk}s
 	 */
-	public static List<WorldChunk> getLoadedChunks(ServerWorld world) {
+	public static List<LevelChunk> getLoadedChunks(ServerLevel level) {
 		Benchmarker.StartBenchmark("getLoadedChunks");
 		try {
-			if (!(world.getChunkManager() instanceof ServerChunkManager manager)) {
-				return Collections.emptyList();
-			}
-			List<WorldChunk> list = new ArrayList<>();
-			manager.chunkLoadingManager.forEachBlockTickingChunk(list::add);
+			ServerChunkCache chunkSource = level.getChunkSource();
+			List<LevelChunk> list = new ArrayList<>();
+			chunkSource.chunkMap.forEachBlockTickingChunk(list::add);
 			return list;
 		} finally {
 			Benchmarker.EndBenchmark("getLoadedChunks");

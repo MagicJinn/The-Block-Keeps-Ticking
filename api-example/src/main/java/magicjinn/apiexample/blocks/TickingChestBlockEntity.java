@@ -3,10 +3,10 @@ package magicjinn.apiexample.blocks;
 import magicjinn.apiexample.APIExample;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingObject;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 // Example TickingObject that gives us access to the Simulate method of the ChestBlockEntity
 public class TickingChestBlockEntity extends TickingObject {
@@ -36,10 +36,10 @@ public class TickingChestBlockEntity extends TickingObject {
     // so we can safely cast it and call the Simulate method using the
     // TickingAccessor interface
     @Override
-    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, Level level,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof ChestBlockEntity chestEntity) {
-            return ((TickingAccessor) chestEntity).Simulate(ticksToSimulate, world, state, pos);
+            return ((TickingAccessor) chestEntity).Simulate(ticksToSimulate, level, state, pos);
         }
         return false;
     }

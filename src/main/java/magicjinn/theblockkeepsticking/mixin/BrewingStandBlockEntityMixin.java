@@ -2,10 +2,10 @@ package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BrewingStandBlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 
 @Mixin(BrewingStandBlockEntity.class)
@@ -15,7 +15,7 @@ public class BrewingStandBlockEntityMixin implements TickingAccessor {
     private static final int MAX_BREWING_TIME = 400;
 
     @Override
-    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
         // Since a brewing stand can only process 1 item at a time, and we don't support hoppers,
         // we only need to check whether there is already a recipe in progress,
         // and subtract time from it

@@ -2,10 +2,10 @@ package magicjinn.theblockkeepsticking.blocks;
 
 import magicjinn.theblockkeepsticking.util.TickingObject;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CactusBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public class TickingCactusBlock extends TickingObject {
     public static final TickingObject INSTANCE = new TickingCactusBlock();
@@ -21,10 +21,10 @@ public class TickingCactusBlock extends TickingObject {
     }
 
     @Override
-    public boolean Simulate(Object blockInstance, long ticksToSimulate, World world,
+    public boolean Simulate(Object blockInstance, long ticksToSimulate, Level level,
             BlockState state, BlockPos pos) {
         if (blockInstance instanceof CactusBlock cactus) {
-            return ((TickingAccessor) cactus).Simulate(ticksToSimulate, world, state, pos);
+            return ((TickingAccessor) cactus).Simulate(ticksToSimulate, level, state, pos);
         }
         return false;
     }

@@ -2,12 +2,12 @@ package magicjinn.theblockkeepsticking.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.block.AmethystClusterBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BuddingAmethystBlock;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BuddingAmethystBlock;
+import net.minecraft.core.Direction;
 
 public class AmethystClusterTracker {
     public static final int MAX_AGE = 3;
@@ -57,8 +57,8 @@ public class AmethystClusterTracker {
     public static boolean isOrCanBeAmethystCluster(Block block, BlockState blockState,
             Direction direction) {
         return (((block instanceof AmethystClusterBlock)
-                && blockState.get(AmethystClusterBlock.FACING) == direction && !isFullGrown(block)))
-                || BuddingAmethystBlock.canGrowIn(blockState);
+                && blockState.getValue(AmethystClusterBlock.FACING) == direction && !isFullGrown(block)))
+                || BuddingAmethystBlock.canClusterGrowAtState(blockState);
     }
 }
 

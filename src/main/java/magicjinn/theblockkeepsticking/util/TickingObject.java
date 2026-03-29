@@ -1,9 +1,9 @@
 package magicjinn.theblockkeepsticking.util;
 
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Base class for objects that can be simulated in unloaded chunks.
@@ -43,7 +43,7 @@ import net.minecraft.world.World;
  *         }
  * 
  *         @Override
- *         public boolean Simulate(Object obj, long ticks, World world, BlockState state, BlockPos pos) {
+ *         public boolean Simulate(Object obj, long ticks, Level level, BlockState state, BlockPos pos) {
  *             // If your block is a vanilla block, from another mod, or simply requires a
  *             // mixin,
  *             // add the TickingAccessor interface to your mixin implementation.
@@ -51,7 +51,7 @@ import net.minecraft.world.World;
  *             // interface.
  *             // You can then access the simulation function as follows:
  *             if (objectInstance instanceof MyBlock myBlock) {
- *                 return ((TickingAccessor) myBlock).Simulate(ticksToSimulate, world, state, pos);
+ *                 return ((TickingAccessor) myBlock).Simulate(ticksToSimulate, level, state, pos);
  *             }
  * 
  *             // Else, if the block is simple enough to simulate it without "native" access
@@ -107,6 +107,6 @@ public abstract class TickingObject {
      * @param pos             The block position (null for entities)
      * @return true if simulation was performed, false otherwise
      */
-    public abstract boolean Simulate(Object objectInstance, long ticksToSimulate, World world,
-            BlockState state, BlockPos pos);
+    public abstract boolean Simulate(Object objectInstance, long ticksToSimulate, Level level,
+                    BlockState state, BlockPos pos);
 }

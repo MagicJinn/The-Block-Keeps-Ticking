@@ -1,9 +1,9 @@
 package magicjinn.theblockkeepsticking.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public interface TickingAccessor {
-    boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos);
+    boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos);
 }
