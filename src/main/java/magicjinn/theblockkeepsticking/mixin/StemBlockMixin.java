@@ -3,98 +3,104 @@ package magicjinn.theblockkeepsticking.mixin;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.StemBlock;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.Optional;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Direction.Type;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 
 @Mixin(StemBlock.class)
 public class StemBlockMixin implements TickingAccessor {
+    @Shadow
+    @Final
+    private ResourceKey<Block> fruit;
+    @Shadow
+    @Final
+    private ResourceKey<Block> attachedStem;
 
-    @Shadow @Final private RegistryKey<Block> gourdBlock;
-    @Shadow @Final private RegistryKey<Block> attachedStemBlock;
+    @Shadow
+    @Final
+    private TagKey<Block> stemSupportBlocks;
+    @Shadow
+    @Final
+    private TagKey<Block> fruitSupportBlocks;
 
-    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
         StemBlock stem = (StemBlock) (Object) this;
 
         int randomTicks =
-                TickingCalculator.CropGrowthAmount(ticksToSimulate, stem, world, state, pos);
+                TickingCalculator.CropGrowthAmount(ticksToSimulate, stem, level, state, pos);
 
         // Check if the stem is already facing a direction (attached stem)
-        if (state.contains(HorizontalFacingBlock.FACING)) { // Unsure if this works
-            TheBlockKeepsTicking.LOGGER.info("Skipped {}", pos);
+        if (state.hasProperty(HorizontalDirectionalBlock.FACING)) // Unsure if this works
             return false;
-        }
 
         if (randomTicks <= 0)
             return false;
 
         // Because mojang is stupid
-        int age = (int) state.get(StemBlock.AGE);
+        int age = (int) state.getValue(StemBlock.AGE);
         int maxAge = (int) StemBlock.MAX_AGE;
         int ageDiff = maxAge - age; // Difference between age and maxAge
         if (ageDiff > 0) {
             // Simulate stem growth
-            ServerWorld serverWorld = (ServerWorld) world;
-            BlockState currentState = serverWorld.getBlockState(pos);
+            ServerLevel serverLevel = (ServerLevel) level;
+            BlockState currentState = serverLevel.getBlockState(pos);
             if (currentState.getBlock() instanceof StemBlock) {
-                int currentAge = (int) currentState.get(StemBlock.AGE);
+                int currentAge = (int) currentState.getValue(StemBlock.AGE);
                 int newAge = Math.min(StemBlock.MAX_AGE, currentAge + randomTicks);
-                BlockState newState = currentState.with(StemBlock.AGE, newAge);
-                serverWorld.setBlockState(pos, newState, 2);
+                BlockState newState = currentState.setValue(StemBlock.AGE, newAge);
+                serverLevel.setBlock(pos, newState, 2);
             }
         }
 
-        // Calculate how many ticks are left to grow gourds
-        int gourdTicks = randomTicks - ageDiff;
+        // Calculate how many ticks are left to grow fruits
+        int fruitTicks = randomTicks - ageDiff;
 
-        if (gourdTicks <= 0)
-            return false; // No gourdTicks
+        if (fruitTicks <= 0)
+            return false; // No fruitTicks
 
-        // Simulate gourd placement
-        ServerWorld serverWorld = (ServerWorld) world;
-        BlockState currentState = serverWorld.getBlockState(pos);
+        // Simulate fruit placement
+        ServerLevel serverLevel = (ServerLevel) level;
+        BlockState currentState = serverLevel.getBlockState(pos);
         if (currentState.getBlock() instanceof StemBlock) {
-            List<Direction> directions = Type.HORIZONTAL.getShuffled(serverWorld.random);
-            Registry<Block> registry =
-                    serverWorld.getRegistryManager().getOrThrow(RegistryKeys.BLOCK);
-            Optional<Block> optionalGourd = registry.getOptionalValue(gourdBlock);
-            Optional<Block> optionalStemBlock = registry.getOptionalValue(attachedStemBlock);
+            List<Direction> directions = Direction.Plane.HORIZONTAL.shuffledCopy(level.getRandom());
+            RegistryAccess registryAccess = serverLevel.registryAccess();
+            Registry<Block> registry = registryAccess.lookupOrThrow(Registries.BLOCK);
+            Optional<Block> optionalfruit = registry.getOptional(fruit);
+            Optional<Block> optionalStemBlock = registry.getOptional(attachedStem);
 
-            if (optionalGourd.isPresent() && optionalStemBlock.isPresent()) {
+            if (optionalfruit.isPresent() && optionalStemBlock.isPresent()) {
                 // Try all 4 directions
                 for (Direction dir : directions) {
-                    // Check whether the gourd fits on the block
-                    BlockPos blockPos = pos.offset(dir);
-                    BlockState blockGourdWillBeOn = serverWorld.getBlockState(blockPos.down());
-                    if (serverWorld.getBlockState(blockPos).isAir()
-                            && (blockGourdWillBeOn.isOf(Blocks.FARMLAND)
-                                    || blockGourdWillBeOn.isIn(BlockTags.DIRT))) {
-                        serverWorld.setBlockState(blockPos, // Set gourd
-                                (BlockState) ((Block) optionalGourd.get()).getDefaultState());
-                                serverWorld.setBlockState(pos,
-                                (BlockState) ((Block) optionalStemBlock.get()).getDefaultState()
-                                        .with(HorizontalFacingBlock.FACING, dir));
-                        break; // Placed gourd, exit
+                    // Check whether the fruit fits on the block
+                    BlockPos blockPos = pos.relative(dir);
+                    BlockState blockfruitWillBeOn = serverLevel.getBlockState(blockPos.below());
+
+                    if (serverLevel.isEmptyBlock(blockPos)
+                            && blockfruitWillBeOn.is(fruitSupportBlocks)) {
+                        serverLevel.setBlockAndUpdate(blockPos, // Set fruit
+                                (BlockState) ((Block) optionalfruit.get()).defaultBlockState());
+                        serverLevel.setBlockAndUpdate(pos,
+                                (BlockState) ((Block) optionalStemBlock.get()).defaultBlockState()
+                                        .setValue(HorizontalDirectionalBlock.FACING, dir));
+                        break; // Placed fruit, exit
                     }
                 }
             }
         }
-        return ageDiff > 0 || gourdTicks > 0; // Everything went swell
+        return ageDiff > 0 || fruitTicks > 0; // Everything went swell
     }
 }

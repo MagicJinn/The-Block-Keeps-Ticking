@@ -5,66 +5,67 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.block.CactusBlock;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.Blocks;
 
 @Mixin(CactusBlock.class)
 public class CactusBlockMixin implements TickingAccessor {
-    @Shadow @Final private static int TALL_THRESHOLD;
-    @Shadow @Final private static int FLOWER_GROWTH_AGE;
-    @Shadow @Final private static final double FLOWER_CHANCE_WHEN_SHORT = 0.1;
-    @Shadow @Final private static final double FLOWER_CHANCE_WHEN_TALL = 0.25;
+    @Shadow @Final private static int MAX_CACTUS_GROWING_HEIGHT;
+    @Shadow @Final private static int ATTEMPT_GROW_CACTUS_FLOWER_AGE;
+    @Shadow @Final private static double ATTEMPT_GROW_CACTUS_FLOWER_SMALL_CACTUS_CHANCE;
+    @Shadow @Final private static double ATTEMPT_GROW_CACTUS_FLOWER_TALL_CACTUS_CHANCE;
 
     @Override
-    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
         // Only simulate if block above is air
-        BlockPos abovePos = pos.up();
-        if (!world.isAir(abovePos))
+        BlockPos abovePos = pos.above();
+        if (!level.isEmptyBlock(abovePos))
             return false;
 
         // Determine the height of the current cactus tower
         int height = 1;
         BlockPos currentPos = pos;
-        while (world.getBlockState(currentPos.down(height)).isOf(Blocks.CACTUS))
+        while (level.getBlockState(currentPos.below(height)).is(Blocks.CACTUS))
             height++;
 
-        if (height > TALL_THRESHOLD)
+        if (height > MAX_CACTUS_GROWING_HEIGHT)
             return false;
 
-        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world);
+        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, level);
         if (randomTicks <= 0)
             return false;
 
         boolean changed = false;
-        int age = state.get(CactusBlock.AGE);
+        int age = state.getValue(CactusBlock.AGE);
 
         for (int i = 0; i < randomTicks; i++) {
             // If age 8, try to place a flower
-            if (age == FLOWER_GROWTH_AGE && world.isAir(currentPos.up())) {
-                double flowerChance = height >= TALL_THRESHOLD ? FLOWER_CHANCE_WHEN_TALL
-                        : FLOWER_CHANCE_WHEN_SHORT;
-                if (world.random.nextDouble() <= flowerChance) {
-                    world.setBlockState(currentPos.up(), Blocks.CACTUS_FLOWER.getDefaultState(), 3);
+            if (age == ATTEMPT_GROW_CACTUS_FLOWER_AGE && level.isEmptyBlock(currentPos.above())) {
+                double flowerChance = height >= MAX_CACTUS_GROWING_HEIGHT
+                        ? ATTEMPT_GROW_CACTUS_FLOWER_TALL_CACTUS_CHANCE
+                        : ATTEMPT_GROW_CACTUS_FLOWER_SMALL_CACTUS_CHANCE;
+                if (level.getRandom().nextDouble() <= flowerChance) {
+                    level.setBlock(currentPos.above(), Blocks.CACTUS_FLOWER.defaultBlockState(), 3);
                     changed = true;
                     break; // Stop further ticks for this block
                 }
             }
             // Try cactus growth at age 15 if tower < max height
-            else if (age == CactusBlock.MAX_AGE && height < TALL_THRESHOLD
-                    && world.isAir(currentPos.up())) {
+            else if (age == CactusBlock.MAX_AGE && height < MAX_CACTUS_GROWING_HEIGHT
+                    && level.isEmptyBlock(currentPos.above())) {
                 age = 0;
                 height++;
 
                 // Set old cactus to age 0
-                state = state.with(CactusBlock.AGE, 0);
-                world.setBlockState(currentPos, state, 260);
+                state = state.setValue(CactusBlock.AGE, 0);
+                level.setBlock(currentPos, state, 260);
 
                 // New cactus block
-                currentPos = currentPos.up();
-                world.setBlockState(currentPos, Blocks.CACTUS.getDefaultState(), 3);
+                currentPos = currentPos.above();
+                level.setBlock(currentPos, Blocks.CACTUS.defaultBlockState(), 3);
                 changed = true;
                 continue;
             }
@@ -78,7 +79,7 @@ public class CactusBlockMixin implements TickingAccessor {
 
         // Update the age of the current block if it changed
         if (changed) {
-            world.setBlockState(currentPos, state.with(CactusBlock.AGE, age), 260);
+            level.setBlock(currentPos, state.setValue(CactusBlock.AGE, age), 260);
         }
 
         return changed;

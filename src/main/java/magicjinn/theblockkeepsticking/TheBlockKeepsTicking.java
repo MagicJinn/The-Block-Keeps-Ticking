@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
 
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
@@ -20,11 +21,10 @@ import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import magicjinn.theblockkeepsticking.util.Benchmarker;
 import magicjinn.theblockkeepsticking.util.ChunkUtil;
 import magicjinn.theblockkeepsticking.util.Timer;
-import net.minecraft.util.Identifier;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.server.world.ChunkLevelType;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.FullChunkStatus;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public class TheBlockKeepsTicking implements ModInitializer {
 	public static final String MOD_ID = "the-block-keeps-ticking";
@@ -32,12 +32,12 @@ public class TheBlockKeepsTicking implements ModInitializer {
 	public static final String ENTRYPOINT_KEY = "theblockkeepsticking";
 
 	public static final AttachmentType<Long> LAST_UPDATE_TIME = AttachmentRegistry
-			.createPersistent(Identifier.of(MOD_ID, "last_update_time"), Codec.LONG);
+			.createPersistent(Identifier.fromNamespaceAndPath(MOD_ID, "last_update_time"), Codec.LONG);
 	public static final AttachmentType<Long> LAST_REALTIME_UPDATE_MS = AttachmentRegistry
-			.createPersistent(Identifier.of(MOD_ID, "last_realtime_update_ms"), Codec.LONG);
+			.createPersistent(Identifier.fromNamespaceAndPath(MOD_ID, "last_realtime_update_ms"), Codec.LONG);
 
 	// Used to detect time skips (e.g. sleeping), tracked per world
-	private static final Map<ServerWorld, Long> lastWorldTimes = new WeakHashMap<>();
+	private static final Map<ServerLevel, Long> lastWorldTimes = new WeakHashMap<>();
 	// Minimum world-time jump (ticks) to trigger sleep-style simulation. Small
 	// jumps (e.g. from TT20) are ignored to avoid lag.
 	private static final long MIN_TIME_SKIP_FOR_SLEEP_SIMULATION = 200L;
@@ -56,37 +56,44 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		ModConfig.HANDLER.save();
 		Timer.RegisterShutdownEvent();
 
-		ServerChunkEvents.CHUNK_LEVEL_TYPE_CHANGE.register(this::onChunkLevelTypeChange);
+		ServerChunkEvents.FULL_CHUNK_STATUS_CHANGE.register(this::onChunkLevelTypeChange);
 
-		ServerTickEvents.END_WORLD_TICK.register(this::onWorldTick);
+		ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
 	}
 
-	private void onWorldTick(ServerWorld world) {
+	private void onServerTick(MinecraftServer server) {
+		for (ServerLevel level : server.getAllLevels()) {
+			onWorldTick(level);
+		}
+	}
+
+	private void onWorldTick(ServerLevel level) {
 		// Exit if disabled in the config, or if this dimension has fixed time
 		// (no day/night -> no sleep time skip)
-		if (!ModConfig.isSimulateChunksWhenSleeping() || world.getDimension().hasFixedTime())
+		if (!ModConfig.isSimulateChunksWhenSleeping() || level.dimensionType().hasFixedTime())
 			return;
 
-		long worldTime = world.getTimeOfDay();
+		long worldTime = level.getOverworldClockTime();
 
-		Long lastWorldTime = lastWorldTimes.get(world);
+		Long lastWorldTime = lastWorldTimes.get(level);
 
 		if (lastWorldTime != null) {
 			if (worldTime < lastWorldTime) {
-				lastWorldTimes.put(world, worldTime);
+				lastWorldTimes.put(level, worldTime);
 				return;
 			}
 
 			long timeDiff = worldTime - lastWorldTime;
 			// Only simulate on large time skips (e.g. sleeping: 1000+ ticks).
 			// Small jumps (e.g. 2–20 per tick) can be caused by mods like TT20 that add
-			// "missed" ticks to getTimeOfDay(); treating those as sleep would schedule
+			// "missed" ticks to getOverworldClockTime(); treating those as sleep would
+			// schedule
 			// simulation for every chunk every tick and cause severe lag or a feedback
 			// loop.
 			if (timeDiff > MIN_TIME_SKIP_FOR_SLEEP_SIMULATION) {
 				Benchmarker.StartBenchmark("onWorldTick.sleepSimulation");
 				try {
-					for (Chunk chunk : ChunkUtil.getLoadedChunks(world)) {
+					for (LevelChunk chunk : ChunkUtil.getLoadedChunks(level)) {
 						ScheduleSimulation(chunk, timeDiff);
 					}
 				} finally {
@@ -95,18 +102,18 @@ public class TheBlockKeepsTicking implements ModInitializer {
 			}
 		}
 
-		lastWorldTimes.put(world, worldTime);
+		lastWorldTimes.put(level, worldTime);
 	}
 
-	private void onChunkLevelTypeChange(ServerWorld world, Chunk chunk, ChunkLevelType oldType,
-			ChunkLevelType newType) {
+	private void onChunkLevelTypeChange(ServerLevel level, LevelChunk chunk, FullChunkStatus oldType,
+			FullChunkStatus newType) {
 		// Always set both tags regardless of config setting
-		long currentWorldTime = world.getTime();
+		long currentWorldTime = level.getGameTime();
 		long nowMs = System.currentTimeMillis();
 
 		// If chunk enters block-ticking/simulation, simulate it
-		if (newType == ChunkLevelType.BLOCK_TICKING
-				&& oldType != ChunkLevelType.BLOCK_TICKING) {
+		if (newType == FullChunkStatus.BLOCK_TICKING
+				&& oldType != FullChunkStatus.BLOCK_TICKING) {
 			// Calculate ticksToSimulate based on config time mode
 			long ticksToSimulate;
 			if (ModConfig.getTimeMode() == ModConfig.TimeMode.REAL_TIME) {
@@ -124,21 +131,21 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		}
 
 		// If chunk leaves block-ticking/simulation, record the last update time
-		else if (oldType == ChunkLevelType.BLOCK_TICKING && newType != ChunkLevelType.BLOCK_TICKING) {
+		else if (oldType == FullChunkStatus.BLOCK_TICKING && newType != FullChunkStatus.BLOCK_TICKING) {
 			// Always set both tags
 			chunk.setAttached(LAST_UPDATE_TIME, currentWorldTime);
 			chunk.setAttached(LAST_REALTIME_UPDATE_MS, nowMs);
 		}
 	}
 
-	private void ScheduleSimulation(Chunk chunk, long ticksToSimulate) {
+	private void ScheduleSimulation(LevelChunk chunk, long ticksToSimulate) {
 		// Schedule simulation in the future,
 		// to avoid changing blockstates during chunk loading (BAD!)
-		Timer.INSTANCE.Schedule("chunk_simulation_" + chunk.getPos().toLong(),
+		Timer.INSTANCE.Schedule("chunk_simulation_" + chunk.getPos().pack(),
 				(server, chunkToSimulate) -> {
-					WorldSimulator.SimulateWorld((WorldChunk) chunkToSimulate,
+					WorldSimulator.SimulateWorld((LevelChunk) chunkToSimulate,
 							ticksToSimulate);
-				}, (WorldChunk) chunk);
+				}, (LevelChunk) chunk);
 	}
 
 	/**

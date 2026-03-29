@@ -3,11 +3,13 @@ package magicjinn.theblockkeepsticking.util;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+
+import org.jspecify.annotations.NonNull;
 
 // Changing blockstates during chunk loading is VERY bad,
 // so we use a timer to schedule the changes for later.
@@ -17,11 +19,11 @@ public class Timer implements ServerTickEvents.EndTick {
 
     private static class TimerEntry {
         private long ticksRemaining;
-        private final BiConsumer<MinecraftServer, WorldChunk> callback;
-        private final WorldChunk chunk;
+        private final BiConsumer<MinecraftServer, LevelChunk> callback;
+        private final LevelChunk chunk;
 
-        public TimerEntry(long ticksRemaining, BiConsumer<MinecraftServer, WorldChunk> callback,
-                WorldChunk chunk) {
+        public TimerEntry(long ticksRemaining, BiConsumer<MinecraftServer, LevelChunk> callback,
+                LevelChunk chunk) {
             this.ticksRemaining = ticksRemaining;
             this.callback = callback;
             this.chunk = chunk;
@@ -39,13 +41,13 @@ public class Timer implements ServerTickEvents.EndTick {
         }
     }
 
-    public void Schedule(String id, BiConsumer<MinecraftServer, WorldChunk> callback,
-            WorldChunk chunk) {
+    public void Schedule(String id, BiConsumer<MinecraftServer, LevelChunk> callback,
+            LevelChunk chunk) {
         Schedule(id, 1L, callback, chunk);
     }
 
     public void Schedule(String id, long ticksUntilAction,
-            BiConsumer<MinecraftServer, WorldChunk> callback, WorldChunk chunk) {
+            BiConsumer<MinecraftServer, LevelChunk> callback, LevelChunk chunk) {
         this.pendingActions.put(id, new TimerEntry(ticksUntilAction, callback, chunk));
     }
 
@@ -54,7 +56,7 @@ public class Timer implements ServerTickEvents.EndTick {
     }
 
     @Override
-    public void onEndTick(MinecraftServer server) {
+    public void onEndTick(@NonNull MinecraftServer server) {
         // Process all pending actions
         pendingActions.entrySet().removeIf(entry -> {
             TimerEntry timerEntry = entry.getValue();

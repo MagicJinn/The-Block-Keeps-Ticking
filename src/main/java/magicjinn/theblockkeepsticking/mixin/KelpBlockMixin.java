@@ -5,42 +5,44 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
-import net.minecraft.block.AbstractPlantStemBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.KelpBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.GrowingPlantHeadBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.KelpBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 
 @Mixin(KelpBlock.class)
 public class KelpBlockMixin implements TickingAccessor {
-    @Shadow @Final private static double GROWTH_CHANCE;
+    @Shadow
+    @Final
+    private static double GROW_PER_TICK_PROBABILITY;
 
     private static final Direction growthDirection = Direction.UP;
 
 
     @Override
-    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
-        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, world,
-                (float) (1.0 / GROWTH_CHANCE));
+    public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
+        int randomTicks = TickingCalculator.RandomTickAmount(ticksToSimulate, level,
+                (float) (1.0 / GROW_PER_TICK_PROBABILITY));
 
         if (randomTicks <= 0)
             return false;
 
-        int age = state.get(AbstractPlantStemBlock.AGE);
-        int maxAge = AbstractPlantStemBlock.MAX_AGE;
+        int age = state.getValue(GrowingPlantHeadBlock.AGE);
+        int maxAge = GrowingPlantHeadBlock.MAX_AGE;
 
         int ageDiff = maxAge - age;
 
         boolean changed = false;
 
         for (int i = 1; i < ageDiff && i <= randomTicks && age < maxAge; i++) {
-            BlockPos blockAbove = pos.offset(growthDirection, i);
-            BlockState blockAboveState = world.getBlockState(blockAbove);
-            if (blockAboveState.isOf(Blocks.WATER)) {
+            BlockPos blockAbove = pos.relative(growthDirection, i);
+            BlockState blockAboveState = level.getBlockState(blockAbove);
+            if (blockAboveState.is(Blocks.WATER)) {
                 age++;
-                world.setBlockState(blockAbove, state.with(AbstractPlantStemBlock.AGE, age), 3);
+                level.setBlock(blockAbove, state.setValue(GrowingPlantHeadBlock.AGE, age), 3);
                 changed = true;
             } else
                 break;

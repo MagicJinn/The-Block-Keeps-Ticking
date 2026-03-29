@@ -1,101 +1,109 @@
 package magicjinn.theblockkeepsticking.mixin;
 
-import java.util.Optional;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.item.FuelRegistry;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.ServerRecipeManager;
-import net.minecraft.recipe.input.SingleStackRecipeInput;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
+
+    // Mirrors AbstractFurnaceBlockEntity slot indices (protected in vanilla; not
+    // visible from this package).
+    private static final int SLOT_INPUT = 0;
+    private static final int SLOT_FUEL = 1;
+    private static final int SLOT_RESULT = 2;
+
     // Shadowed fields for easy access to private members
-    @Shadow @Final private Reference2IntOpenHashMap<RegistryKey<Recipe<?>>> recipesUsed;
-    @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
+    @Shadow
+    @Final
+    private RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
     @Shadow private int litTimeRemaining;
 
-    @Shadow protected DefaultedList<ItemStack> inventory;
-    @Shadow @Final protected static int INPUT_SLOT_INDEX;
-    @Shadow @Final protected static int FUEL_SLOT_INDEX;
-    @Shadow @Final protected static int OUTPUT_SLOT_INDEX;
+    @Shadow
+    protected NonNullList<ItemStack> items;
 
     @Override
-    public boolean Simulate(long ticksToSimulate, World world, BlockState state, BlockPos pos) {
+    public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
         AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) (Object) this;
-        if (!(world instanceof ServerWorld serverWorld)) // convert to serverworld
+        if (!(level instanceof ServerLevel serverLevel)) { // Need ServerLevel for recipes and fuel values
             return false;
+        }
 
-        // reference to input slot itemstack
-        ItemStack input = inventory.get(INPUT_SLOT_INDEX);
-        // reference to fuel slot itemstack
-        ItemStack fuel = inventory.get(FUEL_SLOT_INDEX);
-        // reference to output slot itemstack
-        ItemStack output = inventory.get(OUTPUT_SLOT_INDEX);
-
-        FuelRegistry fuelRegistry = world.getFuelRegistry();
+        // Reference to input slot stack
+        ItemStack input = items.get(SLOT_INPUT);
+        // Reference to fuel slot stack
+        ItemStack fuel = items.get(SLOT_FUEL);
+        // Reference to output slot stack
+        ItemStack output = items.get(SLOT_RESULT);
 
         if (input.isEmpty()) {
             return false; // Still exit early
         }
 
         // Find if there's a matching recipe
-        Optional<? extends RecipeEntry<? extends AbstractCookingRecipe>> recipeMatch =
-                matchGetter.getFirstMatch(new SingleStackRecipeInput(input), serverWorld);
-        if (recipeMatch.isEmpty())
+        SingleRecipeInput recipeInput = new SingleRecipeInput(input);
+        RecipeHolder<? extends AbstractCookingRecipe> recipeHolder = quickCheck.getRecipeFor(recipeInput, serverLevel)
+                .orElse(null);
+        if (recipeHolder == null)
             return false;
 
-        // Copy recipe output
-        AbstractCookingRecipe recipe = recipeMatch.get().value();
-        ItemStack recipeOutput = recipe.result().copy();
+        AbstractCookingRecipe recipe = recipeHolder.value();
+        if (recipe == null)
+            return false;
+        // Recipe output for one craft (same idea as vanilla burnResult)
+        ItemStack recipeOutput = recipe.assemble(recipeInput);
+
+        if (recipeOutput.isEmpty())
+            return false;
 
         // Get recipe cook time
-        int recipeCookTime = recipe.getCookingTime();
+        int recipeCookTime = recipe.cookingTime();
         if (recipeCookTime <= 0)
             return false;
 
-        // Compute fuel ticks
-        int fuelTicksPerItem = fuelRegistry.isFuel(fuel) ? fuelRegistry.getFuelTicks(fuel) : 0;
+        // Compute fuel ticks (vanilla: getBurnDuration / fuelValues.burnDuration)
+        int fuelTicksPerItem = serverLevel.fuelValues().burnDuration(fuel);
         int totalFuelTicks = litTimeRemaining + (fuel.getCount() * fuelTicksPerItem);
 
         int maxByFuel =
                 (int) Math.min(ticksToSimulate / recipeCookTime, totalFuelTicks / recipeCookTime);
         int maxByInput = input.getCount();
-        int maxByOutput = 0;
 
+        int maxStackSize = furnace.getMaxStackSize();
+        int perCraft = Math.max(1, recipeOutput.getCount());
+        int maxResultCount = Math.min(maxStackSize, recipeOutput.getMaxStackSize());
+        int maxByOutput;
         if (output.isEmpty()) {
-            maxByOutput = recipeOutput.getMaxCount();
-        } else if (ItemStack.areItemsAndComponentsEqual(output, recipeOutput)) {
-            maxByOutput = output.getMaxCount() - output.getCount();
-        } else { // Different item in output slot, exit early
+            maxByOutput = maxResultCount / perCraft;
+        } else if (ItemStack.isSameItemSameComponents(output, recipeOutput)) {
+            maxByOutput = (maxResultCount - output.getCount()) / perCraft;
+        } else // Different item in output slot, exit early
             return false;
-        }
-
 
         int realisticOperations = Math.min(Math.min(maxByFuel, maxByInput), maxByOutput);
         if (realisticOperations <= 0)
             return false;
 
-        // Cheat. Having to unlight the furnace is too much of a pain. Besides, having a furnace be
-        // in it's "finished" state when we enter the chunk could possibly cause issues, so it's
-        // better to let it finish its final operation on its own during tick time.
+        // Cheat: having to unlight the furnace is too much of a pain. Besides, having a
+        // furnace in its "finished" state when we enter the chunk could cause issues,
+        // so it's better to let it finish its final operation on its own during tick
+        // time.
         realisticOperations = Math.max(0, realisticOperations - 1);
 
         // Consume input
-        input.decrement(realisticOperations);
+        input.shrink(realisticOperations);
 
         // Consume fuel
         int ticksNeeded = realisticOperations * recipeCookTime;
@@ -103,21 +111,23 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
         int fuelItemsConsumed =
                 (fuelTicksPerItem > 0) ? (int) Math.ceil((double) ticksConsumed / fuelTicksPerItem)
                         : 0;
-        fuel.decrement(fuelItemsConsumed);
+        fuel.shrink(fuelItemsConsumed);
         int newBurnTime = litTimeRemaining + (fuelItemsConsumed * fuelTicksPerItem) - ticksNeeded;
 
         // Apply output
+        int outputDelta = realisticOperations * recipeOutput.getCount();
         if (output.isEmpty()) {
             ItemStack newOut = recipeOutput.copy();
-            newOut.setCount(realisticOperations);
-            inventory.set(OUTPUT_SLOT_INDEX, newOut);
+            newOut.setCount(outputDelta);
+            items.set(SLOT_RESULT, newOut);
         } else {
-            output.increment(realisticOperations);
+            output.grow(outputDelta);
         }
 
-        RecipeEntry<?> entry = (RecipeEntry<?>) recipeMatch.get();
+        // Track recipes used (XP when the player takes items), same as vanilla
+        // setRecipeUsed per craft
         for (int i = 0; i < realisticOperations; i++) {
-            furnace.setLastRecipe(entry);
+            furnace.setRecipeUsed(recipeHolder);
         }
 
         // Set new burn time
@@ -126,4 +136,3 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
         return true; // Successfully simulated
     }
 }
-

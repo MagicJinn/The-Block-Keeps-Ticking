@@ -1,11 +1,14 @@
 package magicjinn.theblockkeepsticking.simulator;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
 import magicjinn.theblockkeepsticking.blocks.TickingAbstractFurnaceBlockEntity;
-import magicjinn.theblockkeepsticking.blocks.TickingBambooBlock;
-import magicjinn.theblockkeepsticking.blocks.TickingBambooShootBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingBambooSaplingBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingBambooStalkBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingBrewingStandBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingBuddingAmethystBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCactusBlock;
@@ -22,21 +25,22 @@ import magicjinn.theblockkeepsticking.blocks.TickingSnifferEggBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingStemBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSugarCaneBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSweetBerryBushBlock;
-import magicjinn.theblockkeepsticking.entities.TickingPassiveEntity;
 import magicjinn.theblockkeepsticking.config.ModConfig;
+import magicjinn.theblockkeepsticking.entities.TickingAgeableMob;
 import magicjinn.theblockkeepsticking.util.Benchmarker;
 import magicjinn.theblockkeepsticking.util.TickingObject;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 public class WorldSimulator {
     public static final ArrayList<TickingObject> TickingObjectInstances = new ArrayList<>();
@@ -60,12 +64,12 @@ public class WorldSimulator {
         // RegisterTickingBlock(TickingLeavesBlock.INSTANCE); // Laggy?
 
         RegisterTickingBlock(TickingKelpBlock.INSTANCE);
-        RegisterTickingBlock(TickingBambooBlock.INSTANCE);
-        RegisterTickingBlock(TickingBambooShootBlock.INSTANCE);
+        RegisterTickingBlock(TickingBambooSaplingBlock.INSTANCE);
+        RegisterTickingBlock(TickingBambooStalkBlock.INSTANCE);
         RegisterTickingBlock(TickingSugarCaneBlock.INSTANCE);
         RegisterTickingBlock(TickingCactusBlock.INSTANCE);
 
-        RegisterTickingBlock(TickingPassiveEntity.INSTANCE); // Includes chickens
+        RegisterTickingBlock(TickingAgeableMob.INSTANCE); // Includes chickens
 
         RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
         RegisterTickingBlock(TickingSnifferEggBlock.INSTANCE);
@@ -113,13 +117,13 @@ public class WorldSimulator {
     }
 
     // Simulate the world for the given chunk
-    public static void SimulateWorld(WorldChunk chunk, long ticksToSimulate) {
+    public static void SimulateWorld(LevelChunk chunk, long ticksToSimulate) {
         if (chunk == null) {
             TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
             return;
         }
 
-        World world = chunk.getWorld();
+        Level level = chunk.getLevel();
 
         // Apply lazy tax
         long ticks = ModConfig.applyLazyTax(ticksToSimulate);
@@ -139,10 +143,11 @@ public class WorldSimulator {
                             if (!ModConfig.isEnabled(tickingBlock.getName())) {
                                 return; // skip this block type
                             }
-                            boolean result = tickingBlock.Simulate(block, ticks, world, state, pos);
+                            boolean result = tickingBlock.Simulate(block, ticks, level, state, pos);
                             if (result && doDebugLogging)
                                 TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
-                                        block.getName().toString(), ticks);
+                                        BuiltInRegistries.BLOCK.getKey(block),
+                                        String.format(Locale.ROOT, "%,d", ticks));
                             return; // lambda break; equivalent
                             // break to avoid multiple matches (which is impossible, so this saves time)
                         }
@@ -162,11 +167,12 @@ public class WorldSimulator {
                                 }
                                 boolean result = tickingBlockEntity.Simulate(blockEntity,
                                         ticks,
-                                        world, blockEntity.getCachedState(), blockEntity.getPos());
+                                        level, blockEntity.getBlockState(), blockEntity.getBlockPos());
                                 if (result && doDebugLogging)
                                     TheBlockKeepsTicking.LOGGER.info(
                                             "Simulating block entity {} for {} ticks",
-                                            blockEntity.getNameForReport(), ticks);
+                                            blockEntity.getNameForReporting(),
+                                            String.format(Locale.ROOT, "%,d", ticks));
                                 break;
                                 // break to avoid multiple matches (which is impossible, so this
                                 // saves time)
@@ -180,23 +186,24 @@ public class WorldSimulator {
             Benchmarker.StartBenchmark("SimulateWorld.entities");
             try {
                 ChunkPos chunkPos = chunk.getPos();
-                Box box = new Box(chunkPos.getStartX(), world.getBottomY(), chunkPos.getStartZ(),
-                        chunkPos.getEndX(), world.getHeight(), chunkPos.getEndZ());
+                AABB box = new AABB(chunkPos.getMinBlockX(), level.getMinY(), chunkPos.getMinBlockZ(),
+                        chunkPos.getMaxBlockX(), level.getMaxY(), chunkPos.getMaxBlockZ());
 
                 // Get all passive entities within chunk
-                var passiveEntities = world.getEntitiesByClass(PassiveEntity.class, box, PassiveEntity -> true);
+                List<AgeableMob> ageableMobs = level.getEntitiesOfClass(AgeableMob.class, box, AgeableMob -> true);
 
-                for (PassiveEntity passiveEntity : passiveEntities) {
+                for (AgeableMob ageableMob : ageableMobs) {
                     for (TickingObject tickingEntity : TickingEntityInstances) {
-                        if (checkIfInstanceOf(tickingEntity, passiveEntity)) {
+                        if (checkIfInstanceOf(tickingEntity, ageableMob)) {
                             if (!ModConfig.isEnabled(tickingEntity.getName())) {
                                 continue; // skip this entity type
                             }
-                            boolean result = tickingEntity.Simulate(passiveEntity, ticks,
-                                    world, null, null);
+                            boolean result = tickingEntity.Simulate(ageableMob, ticks,
+                                    level, null, null);
                             if (result && doDebugLogging)
                                 TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
-                                        passiveEntity.getName(), ticks);
+                                        ageableMob.getName(),
+                                        String.format(Locale.ROOT, "%,d", ticks));
                         }
                     }
                 }
@@ -227,18 +234,18 @@ public class WorldSimulator {
      * @param chunk  The chunk to iterate over
      * @param action The action to perform on each block
      */
-    public static void forEachBlockInChunk(WorldChunk chunk,
+    public static void forEachBlockInChunk(LevelChunk chunk,
             TriConsumer<Block, BlockState, BlockPos> action) {
         ChunkPos chunkPos = chunk.getPos();
-        int chunkStartX = chunkPos.getStartX();
-        int chunkBottomY = chunk.getBottomY();
-        int chunkStartZ = chunkPos.getStartZ();
+        int chunkStartX = chunkPos.getMinBlockX();
+        int chunkBottomY = chunk.getMinY();
+        int chunkStartZ = chunkPos.getMinBlockZ();
         int sections = chunk.getHeight() >> 4;
 
         // Iterate sections top-down
         for (int sectionY = sections - 1; sectionY >= 0; sectionY--) {
-            ChunkSection section = chunk.getSectionArray()[sectionY];
-            if (section == null || section.isEmpty())
+            LevelChunkSection section = chunk.getSection(sectionY);
+            if (section == null || section.hasOnlyAir())
                 continue;
 
             for (int x = 0; x < 16; x++) {

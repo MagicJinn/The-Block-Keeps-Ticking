@@ -1,10 +1,8 @@
 {
 	"required": true,
 	"package": "magicjinn.apiexample.mixin.client",
-	"compatibilityLevel": "JAVA_21",
-	"client": [
-		"ExampleClientMixin"
-	],
+	"compatibilityLevel": "JAVA_25",
+	"client": [],
 	"injectors": {
 		"defaultRequire": 1
 	}
