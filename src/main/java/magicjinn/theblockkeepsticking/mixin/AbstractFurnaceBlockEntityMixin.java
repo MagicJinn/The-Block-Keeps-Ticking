@@ -19,17 +19,21 @@ import net.minecraft.world.level.block.state.BlockState;
 @Mixin(AbstractFurnaceBlockEntity.class)
 public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
 
-    // Mirrors AbstractFurnaceBlockEntity slot indices (protected in vanilla; not
-    // visible from this package).
-    private static final int SLOT_INPUT = 0;
-    private static final int SLOT_FUEL = 1;
-    private static final int SLOT_RESULT = 2;
+    @Shadow
+    @Final
+    protected static int SLOT_INPUT = 0;
+    @Shadow
+    @Final
+    protected static int SLOT_FUEL = 1;
+    @Shadow
+    @Final
+    protected static int SLOT_RESULT = 2;
 
-    // Shadowed fields for easy access to private members
     @Shadow
     @Final
     private RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
-    @Shadow private int litTimeRemaining;
+    @Shadow
+    private int litTimeRemaining;
 
     @Shadow
     protected NonNullList<ItemStack> items;
@@ -73,12 +77,11 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
         if (recipeCookTime <= 0)
             return false;
 
-        // Compute fuel ticks (vanilla: getBurnDuration / fuelValues.burnDuration)
+        // Compute fuel ticks
         int fuelTicksPerItem = serverLevel.fuelValues().burnDuration(fuel);
         int totalFuelTicks = litTimeRemaining + (fuel.getCount() * fuelTicksPerItem);
 
-        int maxByFuel =
-                (int) Math.min(ticksToSimulate / recipeCookTime, totalFuelTicks / recipeCookTime);
+        int maxByFuel = (int) Math.min(ticksToSimulate / recipeCookTime, totalFuelTicks / recipeCookTime);
         int maxByInput = input.getCount();
 
         int maxStackSize = furnace.getMaxStackSize();
@@ -108,9 +111,8 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
         // Consume fuel
         int ticksNeeded = realisticOperations * recipeCookTime;
         int ticksConsumed = Math.max(0, ticksNeeded - litTimeRemaining);
-        int fuelItemsConsumed =
-                (fuelTicksPerItem > 0) ? (int) Math.ceil((double) ticksConsumed / fuelTicksPerItem)
-                        : 0;
+        int fuelItemsConsumed = (fuelTicksPerItem > 0) ? (int) Math.ceil((double) ticksConsumed / fuelTicksPerItem)
+                : 0;
         fuel.shrink(fuelItemsConsumed);
         int newBurnTime = litTimeRemaining + (fuelItemsConsumed * fuelTicksPerItem) - ticksNeeded;
 

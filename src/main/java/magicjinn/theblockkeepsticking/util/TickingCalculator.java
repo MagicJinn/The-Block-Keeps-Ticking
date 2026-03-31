@@ -29,28 +29,8 @@ public class TickingCalculator {
         return (int) (randomTicks / divideByAmount);
     }
 
-    /**
-     * Expected random-tick count as a double, then one Bernoulli trial on the fractional part so
-     * short skips (where the integer estimate is 0) still sometimes produce attempts.
-     */
-    public static int RandomTickAmountStochastic(long ticksToSimulate, Level level,
-            float divideByAmount, RandomSource random) {
-        int randomTickRatio = RandomTickRatio(level);
-        if (randomTickRatio <= 0 || divideByAmount <= 0)
-            return 0;
-        double expected =
-                (double) ticksToSimulate / (double) randomTickRatio / (double) divideByAmount;
-        int base = (int) Math.floor(expected);
-        double frac = expected - base;
-        if (frac > 0.0 && random.nextDouble() < frac) {
-            return base + 1;
-        }
-        return base;
-    }
-
     public static int RandomTickRatio(Level level) {
-        int randomTickSpeed =
-                ((ServerLevel) level).getGameRules().get(GameRules.RANDOM_TICK_SPEED);
+        int randomTickSpeed = ((ServerLevel) level).getGameRules().get(GameRules.RANDOM_TICK_SPEED);
 
         if (randomTickSpeed <= 0) // Because its possible
             return Integer.MAX_VALUE;
