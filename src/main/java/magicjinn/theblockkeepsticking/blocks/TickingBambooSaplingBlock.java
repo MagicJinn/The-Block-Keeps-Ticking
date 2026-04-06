@@ -17,7 +17,7 @@ public class TickingBambooSaplingBlock extends TickingObject {
 
     @Override
     public String getName() {
-        return "Bamboo";
+        return "Bamboo Sapling";
     }
 
     @Override

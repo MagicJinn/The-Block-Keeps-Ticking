@@ -17,6 +17,12 @@ import net.fabricmc.loader.api.FabricLoader;
 
 public final class ModConfig {
 
+    /**
+     * Key in {@link #enabledByName} for whether adult chickens advance their egg
+     * timer when chunks are simulated while unloaded.
+     */
+    public static final String CHICKEN_EGG_LAYING_IN_UNLOADED = "Chicken Egg Laying";
+
     // WORLD_TIME, REAL_TIME. Legacy "REALTIME" in JSON is accepted and
     // autocorrected
     public enum TimeMode {
@@ -148,5 +154,6 @@ public final class ModConfig {
         for (var tickingObject : WorldSimulator.TickingObjectInstances) {
             getInstance().enabledByName.putIfAbsent(tickingObject.getName(), Boolean.TRUE);
         }
+        getInstance().enabledByName.putIfAbsent(CHICKEN_EGG_LAYING_IN_UNLOADED, Boolean.TRUE);
     }
 }

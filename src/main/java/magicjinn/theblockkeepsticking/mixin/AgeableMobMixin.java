@@ -1,6 +1,7 @@
 package magicjinn.theblockkeepsticking.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,9 +21,13 @@ public class AgeableMobMixin implements TickingAccessor {
 
         // This sucks
         if (ageableMob instanceof Chicken chickenEntity && currentAge >= 0) {
-            // We can safely subtract, the check is <=
-            chickenEntity.eggTime -= (int) ticksToSimulate;
-            changed = true;
+            if (ModConfig.isEnabled(ModConfig.CHICKEN_EGG_LAYING_IN_UNLOADED)) {
+                // We can safely subtract, the check is <=
+                // 6000 + anywhere between 0 and 6000 is default egg laying time
+                // averages out to 9000
+                chickenEntity.eggTime -= (int) (ticksToSimulate % 9000);
+                changed = true;
+            }
         } else if (currentAge == 0)
             return false;
 
