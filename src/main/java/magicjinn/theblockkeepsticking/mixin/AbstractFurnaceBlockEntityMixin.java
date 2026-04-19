@@ -21,13 +21,13 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
 
     @Shadow
     @Final
-    protected static int SLOT_INPUT = 0;
+    protected static final int SLOT_INPUT = 0;
     @Shadow
     @Final
-    protected static int SLOT_FUEL = 1;
+    protected static final int SLOT_FUEL = 1;
     @Shadow
     @Final
-    protected static int SLOT_RESULT = 2;
+    protected static final int SLOT_RESULT = 2;
 
     @Shadow
     @Final
