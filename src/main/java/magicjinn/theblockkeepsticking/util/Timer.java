@@ -86,7 +86,7 @@ public class Timer implements ServerTickEvents.EndTick {
         ServerTickEvents.END_SERVER_TICK.register(INSTANCE);
 
         // Register server shutdown event to clear pending actions
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
             INSTANCE.clearAllPendingActions();
         });
     }
