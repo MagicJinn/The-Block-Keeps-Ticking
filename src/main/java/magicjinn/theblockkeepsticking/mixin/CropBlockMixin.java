@@ -13,6 +13,8 @@ public class CropBlockMixin implements TickingAccessor {
     @Override
     public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
         CropBlock crop = (CropBlock) (Object) this;
+        if (pos == null || state == null)
+            return false;
 
         int growth = TickingCalculator.CropGrowthAmount(ticksToSimulate, crop, level, state, pos);
 

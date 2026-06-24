@@ -5,9 +5,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.block.CropBlock;
 
+import org.jspecify.annotations.NonNull;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 
 public class TickingCalculator {
@@ -43,13 +44,13 @@ public class TickingCalculator {
         return ratio;
     }
 
-    public static int CropGrowthAmount(long ticksToSimulate, Block block, Level level,
-            BlockState state, BlockPos pos) {
+    public static int CropGrowthAmount(long ticksToSimulate, @NonNull Block block, Level level,
+            BlockState state, @NonNull BlockPos pos) {
         return CropGrowthAmount(ticksToSimulate, block, level, state, pos, 25f);
     }
 
-    public static int CropGrowthAmount(long ticksToSimulate, Block block, Level level,
-            BlockState state, BlockPos pos, float growthChance) {
+    public static int CropGrowthAmount(long ticksToSimulate, @NonNull Block block, Level level,
+            BlockState state, @NonNull BlockPos pos, float growthChance) {
 
         // Too dark to grow
         if (level.getRawBrightness(pos, 0) < 9)

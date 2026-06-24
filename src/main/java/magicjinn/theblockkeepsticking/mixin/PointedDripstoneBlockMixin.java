@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
 import magicjinn.theblockkeepsticking.util.TickingCalculator;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.SpeleothemBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
@@ -24,12 +25,6 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
     @Shadow
     @Final
     private static int MAX_SEARCH_LENGTH_BETWEEN_STALACTITE_TIP_AND_CAULDRON;
-    @Shadow
-    @Final
-    private static int MAX_GROWTH_LENGTH;
-    @Shadow
-    @Final
-    private static float GROWTH_PROBABILITY_PER_RANDOM_TICK;
     @Shadow
     @Final
     private static float WATER_TRANSFER_PROBABILITY_PER_RANDOM_TICK;
@@ -60,7 +55,7 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
         // This disqualifies any middle/tip blocks, as well as upward growing dripstone
         BlockState blockAbove = level.getBlockState(pos.above());
         BlockState blockAboveThat = level.getBlockState(pos.above(2));
-        boolean canGrowDripstone = PointedDripstoneBlock.canGrow(blockAbove, blockAboveThat);
+        boolean canGrowDripstone = blockAbove.is(Blocks.DRIPSTONE_BLOCK) && blockAboveThat.getFluidState().isSource();
         boolean blockAboveThatIsMud = blockAboveThat.is(Blocks.MUD);
         boolean blockAboveThatIsAnythingElse =
                 !canGrowDripstone && !blockAboveThatIsMud && !hasCauldronDripFluid;
@@ -74,7 +69,7 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
         @SuppressWarnings("unused")
         int cycleAmountGrowthInt = 0;
         if (canGrowDripstone) {
-            final float growthChance = GROWTH_PROBABILITY_PER_RANDOM_TICK;
+            final float growthChance = SpeleothemBlockAccessor.getGrowthProbabilityPerRandomTick();
             final float cycleAmountGrowth = randomTicks * growthChance;
             cycleAmountGrowthInt = (int) cycleAmountGrowth;
             final float cycleAmountLeftover = cycleAmountGrowth % 1.0f;
@@ -99,7 +94,7 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
 
         boolean changed = false;
 
-        BlockPos tipPos = PointedDripstoneBlock.findTip(state, serverLevel, pos,
+        BlockPos tipPos = SpeleothemBlock.findTip(state, serverLevel, pos,
                 MAX_SEARCH_LENGTH_BETWEEN_STALACTITE_TIP_AND_CAULDRON, false);
         if (tipPos == null)
             return false;
@@ -175,10 +170,12 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
         // Simulate growth attempts deterministically
         // Each attempt alternates between stalactite (down) and stalagmite (up)
 
+        SpeleothemBlock speleothem = (SpeleothemBlock) state.getBlock();
         boolean changed = false;
 
         // Refresh tipPos for growth
-        tipPos = PointedDripstoneBlock.findTip(state, level, pos, MAX_GROWTH_LENGTH, false);
+        tipPos = SpeleothemBlock.findTip(state, level, pos,
+                SpeleothemBlockAccessor.getMaxGrowthLength(), false);
         BlockState tipState = level.getBlockState(tipPos);
 
         for (int i = 0; i < cycleAmountGrowthInt; i++) {
@@ -189,7 +186,7 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
             // canTipGrow checks if the block in the growth direction is air or a tip
             // This works for both stalactites and stalagmites, and for merged tips
 
-            boolean canGrow = PointedDripstoneBlock.canTipGrow(tipState, (ServerLevel) level, tipPos);
+            boolean canGrow = speleothem.canTipGrow(tipState, (ServerLevel) level, tipPos);
             if (!canGrow)
                 break; // Can't grow anymore, stop attempting
 
@@ -199,9 +196,9 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
             BlockState oldTipState = tipState;
 
             if (growStalactite) {
-                PointedDripstoneBlock.grow((ServerLevel) level, tipPos, Direction.DOWN);
+                speleothem.grow((ServerLevel) level, tipPos, Direction.DOWN);
             } else {
-                PointedDripstoneBlock.growStalagmiteBelow((ServerLevel) level, tipPos);
+                speleothem.growStalagmiteBelow((ServerLevel) level, tipPos);
             }
 
             // Refresh tipState from serverLevel after growth attempt
@@ -209,8 +206,8 @@ public class PointedDripstoneBlockMixin implements TickingAccessor {
 
             // Check if growth occurred by verifying tip position or state changed
             // After growth, search from current tip position to find the new tip
-            BlockPos newTipPos = PointedDripstoneBlock.findTip(tipState, level, tipPos,
-                    MAX_GROWTH_LENGTH, false);
+            BlockPos newTipPos = SpeleothemBlock.findTip(tipState, level, tipPos,
+                    SpeleothemBlockAccessor.getMaxGrowthLength(), false);
             if (newTipPos != null && !newTipPos.equals(oldTipPos)) {
                 // Growth succeeded
                 changed = true;

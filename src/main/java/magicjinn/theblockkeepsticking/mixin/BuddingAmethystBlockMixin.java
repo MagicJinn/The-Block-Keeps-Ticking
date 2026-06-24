@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import magicjinn.theblockkeepsticking.util.AmethystClusterTracker;
 import magicjinn.theblockkeepsticking.util.TickingAccessor;
@@ -80,14 +82,14 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
             if (amethystClusterTracker.age == -1)
                 continue;
 
-            setAmethistCluster(amethystClusterTracker.direction, amethystClusterTracker.age, level,
-                    pos);
+            if (amethystClusterTracker.direction != null)
+                setAmethistCluster(amethystClusterTracker.direction, amethystClusterTracker.age, level, pos);
         }
 
         return true;
     }
 
-    private static void setAmethistCluster(Direction direction, int state, Level level,
+    private static void setAmethistCluster(@NonNull Direction direction, int state, Level level,
             BlockPos pos) {
         Block block = AmethystClusterTracker.getBlockByIndex(state);
         BlockState blockState = level.getBlockState(pos.relative(direction));
@@ -95,6 +97,8 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
 
         BlockState newState = (BlockState) block.defaultBlockState().setValue(AmethystClusterBlock.FACING, direction)
                 .setValue(AmethystClusterBlock.WATERLOGGED, shouldBeWaterlogged);
+
+        if (newState != null)
         level.setBlockAndUpdate(pos.relative(direction), newState);
     }
 }
