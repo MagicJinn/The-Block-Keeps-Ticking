@@ -31,6 +31,10 @@ public class AgeableMobMixin implements TickingAccessor {
         } else if (currentAge == 0)
             return false;
 
+        // Golden dandelion age-locked babies should not age
+        if (ageableMob.isAgeLocked())
+            return changed;
+
         // Age up babies, "age" down adults to make their breeding cooldown pass
         // Move age towards zero
         ageableMob.setAge(TickingCalculator.MoveTowardsZero(currentAge, ticksToSimulate));
