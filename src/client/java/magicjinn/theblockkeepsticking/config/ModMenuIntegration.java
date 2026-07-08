@@ -119,8 +119,7 @@ public class ModMenuIntegration implements ModMenuApi {
     }
 
     // Dummy "Coming Soon" settings
-    String[] dummySettings = { "Beehives", "Villager breeding", "Leaf Decay",
-            "Copper oxidizing" };
+    String[] dummySettings = { "Beehives", "Villager breeding", "Copper oxidizing" };
 
     for (String settingName : dummySettings) {
         Option<String> dummyOpt = Option.<String>createBuilder()
