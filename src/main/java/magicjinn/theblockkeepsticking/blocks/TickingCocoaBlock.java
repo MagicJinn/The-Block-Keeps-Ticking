@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingCocoaBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingCocoaBlock();
-
     @Override
     public Class<?> getType() {
         return CocoaBlock.class;

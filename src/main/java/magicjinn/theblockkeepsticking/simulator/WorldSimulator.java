@@ -1,8 +1,10 @@
 package magicjinn.theblockkeepsticking.simulator;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.function.TriConsumer;
 import magicjinn.theblockkeepsticking.TheBlockKeepsTicking;
@@ -17,7 +19,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingCocoaBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingDriedGhastBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
-// import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock; // Disabled until further notice
+import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingPointedDripstoneBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingSaplingBlock;
@@ -36,7 +38,6 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.ChunkPos;
@@ -49,35 +50,58 @@ public class WorldSimulator {
     private static final ArrayList<TickingObject> TickingBlockEntityInstances = new ArrayList<>();
     private static final ArrayList<TickingObject> TickingEntityInstances = new ArrayList<>();
 
+    // Blocks are singletons, so the matching TickingObject for a given Block never
+    // changes. Cache the result (NO_MATCH for blocks that match nothing) so the
+    // hot scan loop does one identity lookup instead of ~18 isInstance checks.
+    private static final TickingObject NO_MATCH = new TickingObject() {
+        public Class<?> getType() {
+            return Void.class;
+        }
+
+        public String getName() {
+            return "";
+        }
+
+        public boolean Simulate(Object o, long t, Level l, BlockState s, BlockPos p) {
+            return false;
+        }
+    };
+    private static final Map<Block, TickingObject> blockMatchCache = new IdentityHashMap<>();
+
+    // Palette-level test: does a block state map to any ticking object? Used to
+    // skip whole chunk sections whose palette contains no ticking blocks.
+    private static final Predicate<BlockState> HAS_TICKING_BLOCK = state -> resolveTickingBlock(
+            state.getBlock()) != NO_MATCH;
+
     public static void InitializeTickingBlocks() {
         // Register built-in ticking blocks
-        RegisterTickingBlock(TickingAbstractFurnaceBlockEntity.INSTANCE);
-        RegisterTickingBlock(TickingCampfireBlockEntity.INSTANCE);
-        RegisterTickingBlock(TickingBrewingStandBlockEntity.INSTANCE);
+        RegisterTickingBlock(new TickingAbstractFurnaceBlockEntity());
+        RegisterTickingBlock(new TickingCampfireBlockEntity());
+        RegisterTickingBlock(new TickingBrewingStandBlockEntity());
 
-        RegisterTickingBlock(TickingCropBlock.INSTANCE);
-        RegisterTickingBlock(TickingStemBlock.INSTANCE);
-        RegisterTickingBlock(TickingNetherWartBlock.INSTANCE);
-        RegisterTickingBlock(TickingCocoaBlock.INSTANCE);
+        RegisterTickingBlock(new TickingCropBlock());
+        RegisterTickingBlock(new TickingStemBlock());
+        RegisterTickingBlock(new TickingNetherWartBlock());
+        RegisterTickingBlock(new TickingCocoaBlock());
 
-        RegisterTickingBlock(TickingSaplingBlock.INSTANCE);
-        // RegisterTickingBlock(TickingLeavesBlock.INSTANCE); // Laggy?
+        RegisterTickingBlock(new TickingSaplingBlock());
+        RegisterTickingBlock(new TickingLeavesBlock());
 
-        RegisterTickingBlock(TickingKelpBlock.INSTANCE);
-        RegisterTickingBlock(TickingBambooSaplingBlock.INSTANCE);
-        RegisterTickingBlock(TickingBambooStalkBlock.INSTANCE);
-        RegisterTickingBlock(TickingSugarCaneBlock.INSTANCE);
-        RegisterTickingBlock(TickingCactusBlock.INSTANCE);
+        RegisterTickingBlock(new TickingKelpBlock());
+        RegisterTickingBlock(new TickingBambooSaplingBlock());
+        RegisterTickingBlock(new TickingBambooStalkBlock());
+        RegisterTickingBlock(new TickingSugarCaneBlock());
+        RegisterTickingBlock(new TickingCactusBlock());
 
-        RegisterTickingBlock(TickingAgeableMob.INSTANCE); // Includes chickens
+        RegisterTickingBlock(new TickingAgeableMob()); // Includes chickens
 
-        RegisterTickingBlock(TickingDriedGhastBlock.INSTANCE);
-        RegisterTickingBlock(TickingSnifferEggBlock.INSTANCE);
+        RegisterTickingBlock(new TickingDriedGhastBlock());
+        RegisterTickingBlock(new TickingSnifferEggBlock());
 
         // Growing broken for now
-        RegisterTickingBlock(TickingPointedDripstoneBlock.INSTANCE); // Includes cauldrons
-        RegisterTickingBlock(TickingSweetBerryBushBlock.INSTANCE);
-        RegisterTickingBlock(TickingBuddingAmethystBlock.INSTANCE);
+        RegisterTickingBlock(new TickingPointedDripstoneBlock()); // Includes cauldrons
+        RegisterTickingBlock(new TickingSweetBerryBushBlock());
+        RegisterTickingBlock(new TickingBuddingAmethystBlock());
     }
 
     /**
@@ -137,25 +161,20 @@ public class WorldSimulator {
         try {
             Benchmarker.StartBenchmark("SimulateWorld.blocks");
             try {
-                forEachBlockInChunk(chunk, (block, state, pos) -> {
-                    for (TickingObject tickingBlock : TickingBlockInstances) {
-                        if (checkIfInstanceOf(tickingBlock, block)) {
-                            if (!ModConfig.isEnabled(tickingBlock.getName())) {
-                                return; // skip this block type
-                            }
-                            boolean result = tickingBlock.Simulate(block, ticks, level, state, pos);
-                            if (result && doDebugLogging)
-                                TheBlockKeepsTicking.LOGGER.info("Simulating block {} for {} ticks",
-                                        BuiltInRegistries.BLOCK.getKey(block),
-                                        String.format(Locale.ROOT, "%,d", ticks));
-                            return; // lambda break; equivalent
-                            // break to avoid multiple matches (which is impossible, so this saves time)
-                        }
-                    }
+                forEachTickingBlock(chunk, (tickingBlock, state, pos) -> {
+                    if (!ModConfig.isEnabled(tickingBlock.getName()))
+                        return; // ticking type disabled in config
+
+                    long start = doDebugLogging ? System.nanoTime() : 0L;
+                    boolean result = tickingBlock.Simulate(state.getBlock(), ticks, level, state, pos);
+                    if (doDebugLogging)
+                        Benchmarker.RecordObject(tickingBlock.getName(),
+                                System.nanoTime() - start, result);
                 });
             } finally {
                 Benchmarker.EndBenchmark("SimulateWorld.blocks");
             }
+
             Benchmarker.StartBenchmark("SimulateWorld.blockEntities");
             try {
                 for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
@@ -165,14 +184,13 @@ public class WorldSimulator {
                                 if (!ModConfig.isEnabled(tickingBlockEntity.getName())) {
                                     break; // skip this entity type
                                 }
+                                long start = doDebugLogging ? System.nanoTime() : 0L;
                                 boolean result = tickingBlockEntity.Simulate(blockEntity,
                                         ticks,
                                         level, blockEntity.getBlockState(), blockEntity.getBlockPos());
-                                if (result && doDebugLogging)
-                                    TheBlockKeepsTicking.LOGGER.info(
-                                            "Simulating block entity {} for {} ticks",
-                                            blockEntity.getNameForReporting(),
-                                            String.format(Locale.ROOT, "%,d", ticks));
+                                if (doDebugLogging)
+                                    Benchmarker.RecordObject(tickingBlockEntity.getName(),
+                                            System.nanoTime() - start, result);
                                 break;
                                 // break to avoid multiple matches (which is impossible, so this
                                 // saves time)
@@ -198,12 +216,12 @@ public class WorldSimulator {
                             if (!ModConfig.isEnabled(tickingEntity.getName())) {
                                 continue; // skip this entity type
                             }
+                            long start = doDebugLogging ? System.nanoTime() : 0L;
                             boolean result = tickingEntity.Simulate(ageableMob, ticks,
                                     level, null, null);
-                            if (result && doDebugLogging)
-                                TheBlockKeepsTicking.LOGGER.info("Simulating entity {} for {} ticks",
-                                        ageableMob.getName(),
-                                        String.format(Locale.ROOT, "%,d", ticks));
+                            if (doDebugLogging)
+                                Benchmarker.RecordObject(tickingEntity.getName(),
+                                        System.nanoTime() - start, result);
                         }
                     }
                 }
@@ -214,6 +232,7 @@ public class WorldSimulator {
             TheBlockKeepsTicking.LOGGER.error("Error during world simulation: ", e);
         } finally {
             Benchmarker.EndBenchmark("SimulateWorld");
+            Benchmarker.MaybeFlush();
         }
     }
 
@@ -229,13 +248,40 @@ public class WorldSimulator {
     }
 
     /**
-     * Iterates over all blocks in the given chunk from top to bottom
-     * 
-     * @param chunk  The chunk to iterate over
-     * @param action The action to perform on each block
+     * Returns the (cached) TickingObject that handles the given block, or
+     * {@link #NO_MATCH} if none does. The first lookup per block type runs the
+     * linear isInstance scan, subsequent ones are a single identity-map hit.
      */
-    public static void forEachBlockInChunk(LevelChunk chunk,
-            TriConsumer<Block, BlockState, BlockPos> action) {
+    private static TickingObject resolveTickingBlock(Block block) {
+        TickingObject cached = blockMatchCache.get(block);
+        if (cached != null)
+            return cached;
+
+        TickingObject match = NO_MATCH;
+        for (TickingObject tickingBlock : TickingBlockInstances) {
+            if (checkIfInstanceOf(tickingBlock, block)) {
+                match = tickingBlock;
+                break;
+            }
+        }
+        blockMatchCache.put(block, match);
+        return match;
+    }
+
+    /**
+     * Iterates over every ticking block in the chunk from top to bottom, invoking
+     * {@code action} with the resolved {@link TickingObject}.
+     *
+     * <p>
+     * Whole sections whose palette contains no ticking block are skipped after a
+     * single cheap palette check, and a {@link BlockPos} is only allocated once a
+     * block actually matches a ticking type.
+     *
+     * @param chunk  The chunk to iterate over
+     * @param action Invoked for each ticking block (tickingObject, state, pos)
+     */
+    public static void forEachTickingBlock(LevelChunk chunk,
+            TriConsumer<TickingObject, BlockState, BlockPos> action) {
         ChunkPos chunkPos = chunk.getPos();
         int chunkStartX = chunkPos.getMinBlockX();
         int chunkBottomY = chunk.getMinY();
@@ -247,20 +293,28 @@ public class WorldSimulator {
             LevelChunkSection section = chunk.getSection(sectionY);
             if (section == null || section.hasOnlyAir())
                 continue;
+            // Skip the whole section if its palette holds no ticking block
+            if (!section.maybeHas(HAS_TICKING_BLOCK))
+                continue;
 
             for (int x = 0; x < 16; x++) {
                 for (int y = 15; y >= 0; y--) { // Count down y because reasons
                     for (int z = 0; z < 16; z++) {
                         BlockState state = section.getBlockState(x, y, z);
+                        if (state.isAir())
+                            continue; // Air is never a ticking block. Skip to save work.
+
+                        TickingObject tickingBlock = resolveTickingBlock(state.getBlock());
+                        if (tickingBlock == NO_MATCH)
+                            continue; // not a ticking block
+
                         BlockPos blockPos = new BlockPos(chunkStartX + x,
                                 (sectionY << 4) + chunkBottomY + y, chunkStartZ + z);
-                        Block block = state.getBlock();
 
-                        action.accept(block, state, blockPos);
+                        action.accept(tickingBlock, state, blockPos);
                     }
                 }
             }
         }
     }
-
 }

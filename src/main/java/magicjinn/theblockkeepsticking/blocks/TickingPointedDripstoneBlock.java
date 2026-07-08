@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingPointedDripstoneBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingPointedDripstoneBlock();
-
     @Override
     public Class<PointedDripstoneBlock> getType() {
         return PointedDripstoneBlock.class;

@@ -15,6 +15,7 @@
         "BambooSaplingBlockMixin",
         "BambooStalkBlockMixin",
         "CactusBlockMixin",
+        "LeavesBlockMixin",
         "SugarCaneBlockMixin",
         "CocoaBlockMixin",
         "AgeableMobMixin",

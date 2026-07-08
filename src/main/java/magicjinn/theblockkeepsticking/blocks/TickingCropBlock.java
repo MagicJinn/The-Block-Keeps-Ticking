@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingCropBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingCropBlock();
-
     @Override
     public Class<CropBlock> getType() {
         return CropBlock.class;

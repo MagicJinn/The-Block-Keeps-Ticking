@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingDriedGhastBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingDriedGhastBlock();
-
     @Override
     public Class<DriedGhastBlock> getType() {
         return DriedGhastBlock.class;

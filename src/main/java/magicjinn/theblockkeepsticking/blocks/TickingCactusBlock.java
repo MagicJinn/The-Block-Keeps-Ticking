@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingCactusBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingCactusBlock();
-
     @Override
     public Class<CactusBlock> getType() {
         return CactusBlock.class;

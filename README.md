@@ -20,6 +20,7 @@
   * **Nether Wart:** Growth progression
   * **Cocoa Beans:** Growth progression
   * **Trees:** Sapling growth
+  * **Leaves:** Decay progression
   * **Growing Plants:** Kelp, Bamboo, Sugar Cane, Cactus
   * **Dried Ghast & Sniffer Eggs:** Hydration and hatching progression
   * **Budding Amethyst:** Growth progression
@@ -65,7 +66,6 @@ To register custom ticking objects for your mod:
 
 1. **Create a `TickingObject` implementation** for each block, block entity, or entity you want to simulate.  
    Extend `TickingObject` and implement at least:
-   * `INSTANCE` – a static final instance of the `TickingObject`
    * `getType()` – returns the class you want to handle (e.g. a `Block`, `BlockEntity`, or `Entity` subclass)
    * `getName()` – a unique name, only used for configuration and logging
    * `Simulate(...)` – contains the simulation logic
@@ -86,7 +86,7 @@ To register custom ticking objects for your mod:
    public class YourTickingBlocksInitializer implements InitializeTickingBlocks {
        @Override
        public void registerTickingBlocks(TickingBlockRegistry registry) {
-           registry.register(YourTickingBlock.INSTANCE);
+           registry.register(new YourTickingBlock());
            // register more ticking objects here if needed
        }
    }

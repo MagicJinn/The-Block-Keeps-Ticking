@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingSnifferEggBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingSnifferEggBlock();
-
     @Override
     public Class<SnifferEggBlock> getType() {
         return SnifferEggBlock.class;

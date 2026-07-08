@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingNetherWartBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingNetherWartBlock();
-
     @Override
     public Class<NetherWartBlock> getType() {
         return NetherWartBlock.class;

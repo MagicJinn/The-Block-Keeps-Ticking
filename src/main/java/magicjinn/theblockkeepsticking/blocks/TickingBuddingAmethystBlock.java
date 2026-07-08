@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingBuddingAmethystBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingBuddingAmethystBlock();
-
     @Override
     public Class<BuddingAmethystBlock> getType() {
         return BuddingAmethystBlock.class;

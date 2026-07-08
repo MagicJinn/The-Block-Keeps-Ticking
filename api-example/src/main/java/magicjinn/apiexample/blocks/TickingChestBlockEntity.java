@@ -10,8 +10,6 @@ import net.minecraft.world.level.Level;
 
 // Example TickingObject that gives us access to the Simulate method of the ChestBlockEntity
 public class TickingChestBlockEntity extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingChestBlockEntity();
-
     // The type of block entity the TickingObject will be simulating,
     // to be found in the world
     @SuppressWarnings("null")

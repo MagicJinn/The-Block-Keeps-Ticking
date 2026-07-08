@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingSugarCaneBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingSugarCaneBlock();
-
     @Override
     public Class<SugarCaneBlock> getType() {
         return SugarCaneBlock.class;

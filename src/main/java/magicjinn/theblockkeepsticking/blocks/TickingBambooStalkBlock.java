@@ -8,8 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 public class TickingBambooStalkBlock extends TickingObject {
-    public static final TickingObject INSTANCE = new TickingBambooStalkBlock();
-
     @Override
     public Class<BambooStalkBlock> getType() {
         return BambooStalkBlock.class;
