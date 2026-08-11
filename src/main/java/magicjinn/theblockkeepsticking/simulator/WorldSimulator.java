@@ -73,6 +73,31 @@ public class WorldSimulator {
     private static final Predicate<BlockState> HAS_TICKING_BLOCK = state -> resolveTickingBlock(
             state.getBlock()) != NO_MATCH;
 
+    /** Resumable position inside a chunk block scan. */
+    public static final class ScanCursor {
+        /** Section indices (chunk section array index) that need a walk, top-down. */
+        final int[] scannableSections;
+        /** Index into {@link #scannableSections}. */
+        int sectionListIndex;
+        int x;
+        /** Local Y within section, counts down 15..0. */
+        int y;
+        int z;
+        int cellsVisited;
+        final int totalCells;
+        boolean done;
+
+        ScanCursor(int[] scannableSections) {
+            this.scannableSections = scannableSections;
+            this.totalCells = scannableSections.length * 4096;
+            this.sectionListIndex = 0;
+            this.x = 0;
+            this.y = 15;
+            this.z = 0;
+            this.done = scannableSections.length == 0;
+        }
+    }
+
     public static void InitializeTickingBlocks() {
         // Register built-in ticking blocks
         RegisterTickingBlock(new TickingAbstractFurnaceBlockEntity());
@@ -140,94 +165,47 @@ public class WorldSimulator {
                         + tickingObject.getModId());
     }
 
-    // Simulate the world for the given chunk
+    /**
+     * Builds a scan cursor listing every section that needs a walk.
+     */
+    public static ScanCursor createScanCursor(LevelChunk chunk) {
+        int sectionCount = chunk.getHeight() >> 4;
+        int[] tmp = new int[sectionCount];
+        int n = 0;
+        for (int sectionY = sectionCount - 1; sectionY >= 0; sectionY--) {
+            LevelChunkSection section = chunk.getSection(sectionY);
+            if (section == null || section.hasOnlyAir())
+                continue;
+            if (!section.maybeHas(HAS_TICKING_BLOCK))
+                continue;
+            tmp[n++] = sectionY;
+        }
+        int[] scannable = new int[n];
+        System.arraycopy(tmp, 0, scannable, 0, n);
+        return new ScanCursor(scannable);
+    }
+
+    /**
+     * Full catch-up in one call (used for tests / forced flush). Prefer
+     * {@link ChunkSimScheduler} for normal play.
+     */
     public static void SimulateWorld(LevelChunk chunk, long ticksToSimulate) {
         if (chunk == null) {
             TheBlockKeepsTicking.LOGGER.warn("Tried to simulate null chunk!");
             return;
         }
 
-        Level level = chunk.getLevel();
-
         // Apply lazy tax
         long ticks = ModConfig.applyLazyTax(ticksToSimulate);
-
         if (ticks <= 0)
-            return; // Nothing to simulate, abort
-
-        boolean doDebugLogging = ModConfig.isDebugLogging();
+            return;
 
         Benchmarker.StartBenchmark("SimulateWorld");
         try {
-            Benchmarker.StartBenchmark("SimulateWorld.blocks");
-            try {
-                forEachTickingBlock(chunk, (tickingBlock, state, pos) -> {
-                    if (!ModConfig.isEnabled(tickingBlock.getName()))
-                        return; // ticking type disabled in config
-
-                    long start = doDebugLogging ? System.nanoTime() : 0L;
-                    boolean result = tickingBlock.Simulate(state.getBlock(), ticks, level, state, pos);
-                    if (doDebugLogging)
-                        Benchmarker.RecordObject(tickingBlock.getName(),
-                                System.nanoTime() - start, result);
-                });
-            } finally {
-                Benchmarker.EndBenchmark("SimulateWorld.blocks");
-            }
-
-            Benchmarker.StartBenchmark("SimulateWorld.blockEntities");
-            try {
-                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                    if (blockEntity != null) {
-                        for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
-                            if (checkIfInstanceOf(tickingBlockEntity, blockEntity)) {
-                                if (!ModConfig.isEnabled(tickingBlockEntity.getName())) {
-                                    break; // skip this entity type
-                                }
-                                long start = doDebugLogging ? System.nanoTime() : 0L;
-                                boolean result = tickingBlockEntity.Simulate(blockEntity,
-                                        ticks,
-                                        level, blockEntity.getBlockState(), blockEntity.getBlockPos());
-                                if (doDebugLogging)
-                                    Benchmarker.RecordObject(tickingBlockEntity.getName(),
-                                            System.nanoTime() - start, result);
-                                break;
-                                // break to avoid multiple matches (which is impossible, so this
-                                // saves time)
-                            }
-                        }
-                    }
-                }
-            } finally {
-                Benchmarker.EndBenchmark("SimulateWorld.blockEntities");
-            }
-            Benchmarker.StartBenchmark("SimulateWorld.entities");
-            try {
-                ChunkPos chunkPos = chunk.getPos();
-                AABB box = new AABB(chunkPos.getMinBlockX(), level.getMinY(), chunkPos.getMinBlockZ(),
-                        chunkPos.getMaxBlockX(), level.getMaxY(), chunkPos.getMaxBlockZ());
-
-                // Get all passive entities within chunk
-                List<AgeableMob> ageableMobs = level.getEntitiesOfClass(AgeableMob.class, box, AgeableMob -> true);
-
-                for (AgeableMob ageableMob : ageableMobs) {
-                    for (TickingObject tickingEntity : TickingEntityInstances) {
-                        if (checkIfInstanceOf(tickingEntity, ageableMob)) {
-                            if (!ModConfig.isEnabled(tickingEntity.getName())) {
-                                continue; // skip this entity type
-                            }
-                            long start = doDebugLogging ? System.nanoTime() : 0L;
-                            boolean result = tickingEntity.Simulate(ageableMob, ticks,
-                                    level, null, null);
-                            if (doDebugLogging)
-                                Benchmarker.RecordObject(tickingEntity.getName(),
-                                        System.nanoTime() - start, result);
-                        }
-                    }
-                }
-            } finally {
-                Benchmarker.EndBenchmark("SimulateWorld.entities");
-            }
+            ScanCursor cursor = createScanCursor(chunk);
+            simulateBlockSlice(chunk, ticks, cursor, Integer.MAX_VALUE);
+            simulateBlockEntities(chunk, ticks);
+            simulateEntities(chunk, ticks);
         } catch (Exception e) {
             TheBlockKeepsTicking.LOGGER.error("Error during world simulation: ", e);
         } finally {
@@ -237,12 +215,181 @@ public class WorldSimulator {
     }
 
     /**
-     * Checks if the given block is of the type defined by the TickingBlock
-     * 
-     * @param tickingBlock
-     * @param block
-     * @return
+     * Visits up to {@code maxCells} cells in scannable sections, simulating
+     * matches.
+     * Updates {@code cursor}; sets {@code cursor.done} when the scan is finished.
      */
+    public static void simulateBlockSlice(LevelChunk chunk, long ticks, ScanCursor cursor,
+            int maxCells) {
+        if (cursor.done || maxCells <= 0)
+            return;
+
+        Level level = chunk.getLevel();
+        ChunkPos chunkPos = chunk.getPos();
+        int chunkStartX = chunkPos.getMinBlockX();
+        int chunkBottomY = chunk.getMinY();
+        int chunkStartZ = chunkPos.getMinBlockZ();
+        boolean doDebugLogging = ModConfig.isDebugLogging();
+
+        int cellsThisSlice = 0;
+        int matches = 0;
+
+        Benchmarker.StartBenchmark("SimulateWorld.scan");
+        try {
+            while (!cursor.done && cellsThisSlice < maxCells) {
+                int sectionY = cursor.scannableSections[cursor.sectionListIndex];
+                LevelChunkSection section = chunk.getSection(sectionY);
+                if (section == null || section.hasOnlyAir()) {
+                    // Section became empty mid-job. Skip remaining cells in it
+                    int skipped = remainingCellsInSection(cursor);
+                    cursor.cellsVisited += skipped;
+                    cellsThisSlice += skipped;
+                    advanceToNextSection(cursor);
+                    continue;
+                }
+
+                while (!cursor.done && cellsThisSlice < maxCells
+                        && cursor.sectionListIndex < cursor.scannableSections.length
+                        && cursor.scannableSections[cursor.sectionListIndex] == sectionY) {
+
+                    BlockState state = section.getBlockState(cursor.x, cursor.y, cursor.z);
+                    cursor.cellsVisited++;
+                    cellsThisSlice++;
+
+                    if (!state.isAir()) {
+                        TickingObject tickingBlock = resolveTickingBlock(state.getBlock());
+                        if (tickingBlock != NO_MATCH) {
+                            matches++;
+                            BlockPos blockPos = new BlockPos(chunkStartX + cursor.x,
+                                    (sectionY << 4) + chunkBottomY + cursor.y,
+                                    chunkStartZ + cursor.z);
+
+                            Benchmarker.EndBenchmark("SimulateWorld.scan");
+                            Benchmarker.StartBenchmark("SimulateWorld.simulate");
+                            try {
+                                if (ModConfig.isEnabled(tickingBlock.getName())) {
+                                    long start = doDebugLogging ? System.nanoTime() : 0L;
+                                    boolean result = tickingBlock.Simulate(state.getBlock(), ticks,
+                                            level, state, blockPos);
+                                    if (doDebugLogging)
+                                        Benchmarker.RecordObject(tickingBlock.getName(),
+                                                System.nanoTime() - start, result);
+                                }
+                            } finally {
+                                Benchmarker.EndBenchmark("SimulateWorld.simulate");
+                                Benchmarker.StartBenchmark("SimulateWorld.scan");
+                            }
+                        }
+                    }
+
+                    advanceCell(cursor);
+                }
+            }
+        } finally {
+            Benchmarker.EndBenchmark("SimulateWorld.scan");
+        }
+
+        Benchmarker.RecordCounter("cellsVisited", cellsThisSlice);
+        Benchmarker.RecordCounter("scanMatches", matches);
+    }
+
+    private static int remainingCellsInSection(ScanCursor cursor) {
+        // Cells left including current: from (x,y,z) through end of section.
+        // Order: x outer, y down 15..0, z inner.
+        int cells = 0;
+        for (int x = cursor.x; x < 16; x++) {
+            int yStart = (x == cursor.x) ? cursor.y : 15;
+            for (int y = yStart; y >= 0; y--) {
+                int zStart = (x == cursor.x && y == cursor.y) ? cursor.z : 0;
+                cells += 16 - zStart;
+            }
+        }
+        return cells;
+    }
+
+    private static void advanceCell(ScanCursor cursor) {
+        cursor.z++;
+        if (cursor.z < 16)
+            return;
+        cursor.z = 0;
+        cursor.y--;
+        if (cursor.y >= 0)
+            return;
+        cursor.y = 15;
+        cursor.x++;
+        if (cursor.x < 16)
+            return;
+        cursor.x = 0;
+        advanceToNextSection(cursor);
+    }
+
+    private static void advanceToNextSection(ScanCursor cursor) {
+        cursor.sectionListIndex++;
+        cursor.x = 0;
+        cursor.y = 15;
+        cursor.z = 0;
+        if (cursor.sectionListIndex >= cursor.scannableSections.length)
+            cursor.done = true;
+    }
+
+    public static void simulateBlockEntities(LevelChunk chunk, long ticks) {
+        boolean doDebugLogging = ModConfig.isDebugLogging();
+        Level level = chunk.getLevel();
+
+        Benchmarker.StartBenchmark("SimulateWorld.blockEntities");
+        try {
+            for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                if (blockEntity == null)
+                    continue;
+                for (TickingObject tickingBlockEntity : TickingBlockEntityInstances) {
+                    if (!checkIfInstanceOf(tickingBlockEntity, blockEntity))
+                        continue;
+                    if (!ModConfig.isEnabled(tickingBlockEntity.getName()))
+                        break;
+                    long start = doDebugLogging ? System.nanoTime() : 0L;
+                    boolean result = tickingBlockEntity.Simulate(blockEntity, ticks, level,
+                            blockEntity.getBlockState(), blockEntity.getBlockPos());
+                    if (doDebugLogging)
+                        Benchmarker.RecordObject(tickingBlockEntity.getName(),
+                                System.nanoTime() - start, result);
+                    break;
+                }
+            }
+        } finally {
+            Benchmarker.EndBenchmark("SimulateWorld.blockEntities");
+        }
+    }
+
+    public static void simulateEntities(LevelChunk chunk, long ticks) {
+        boolean doDebugLogging = ModConfig.isDebugLogging();
+        Level level = chunk.getLevel();
+        ChunkPos chunkPos = chunk.getPos();
+        AABB box = new AABB(chunkPos.getMinBlockX(), level.getMinY(), chunkPos.getMinBlockZ(),
+                chunkPos.getMaxBlockX(), level.getMaxY(), chunkPos.getMaxBlockZ());
+
+        Benchmarker.StartBenchmark("SimulateWorld.entities");
+        try {
+            List<AgeableMob> ageableMobs = level.getEntitiesOfClass(AgeableMob.class, box,
+                    AgeableMob -> true);
+
+            for (AgeableMob ageableMob : ageableMobs) {
+                for (TickingObject tickingEntity : TickingEntityInstances) {
+                    if (!checkIfInstanceOf(tickingEntity, ageableMob))
+                        continue;
+                    if (!ModConfig.isEnabled(tickingEntity.getName()))
+                        continue;
+                    long start = doDebugLogging ? System.nanoTime() : 0L;
+                    boolean result = tickingEntity.Simulate(ageableMob, ticks, level, null, null);
+                    if (doDebugLogging)
+                        Benchmarker.RecordObject(tickingEntity.getName(),
+                                System.nanoTime() - start, result);
+                }
+            }
+        } finally {
+            Benchmarker.EndBenchmark("SimulateWorld.entities");
+        }
+    }
+
     private static Boolean checkIfInstanceOf(TickingObject tickingBlock, Object block) {
         return tickingBlock.getType().isInstance(block);
     }
@@ -271,50 +418,33 @@ public class WorldSimulator {
     /**
      * Iterates over every ticking block in the chunk from top to bottom, invoking
      * {@code action} with the resolved {@link TickingObject}.
-     *
-     * <p>
-     * Whole sections whose palette contains no ticking block are skipped after a
-     * single cheap palette check, and a {@link BlockPos} is only allocated once a
-     * block actually matches a ticking type.
-     *
-     * @param chunk  The chunk to iterate over
-     * @param action Invoked for each ticking block (tickingObject, state, pos)
      */
     public static void forEachTickingBlock(LevelChunk chunk,
             TriConsumer<TickingObject, BlockState, BlockPos> action) {
+        ScanCursor cursor = createScanCursor(chunk);
         ChunkPos chunkPos = chunk.getPos();
         int chunkStartX = chunkPos.getMinBlockX();
         int chunkBottomY = chunk.getMinY();
         int chunkStartZ = chunkPos.getMinBlockZ();
-        int sections = chunk.getHeight() >> 4;
 
-        // Iterate sections top-down
-        for (int sectionY = sections - 1; sectionY >= 0; sectionY--) {
+        while (!cursor.done) {
+            int sectionY = cursor.scannableSections[cursor.sectionListIndex];
             LevelChunkSection section = chunk.getSection(sectionY);
-            if (section == null || section.hasOnlyAir())
+            if (section == null || section.hasOnlyAir()) {
+                advanceToNextSection(cursor);
                 continue;
-            // Skip the whole section if its palette holds no ticking block
-            if (!section.maybeHas(HAS_TICKING_BLOCK))
-                continue;
+            }
 
-            for (int x = 0; x < 16; x++) {
-                for (int y = 15; y >= 0; y--) { // Count down y because reasons
-                    for (int z = 0; z < 16; z++) {
-                        BlockState state = section.getBlockState(x, y, z);
-                        if (state.isAir())
-                            continue; // Air is never a ticking block. Skip to save work.
-
-                        TickingObject tickingBlock = resolveTickingBlock(state.getBlock());
-                        if (tickingBlock == NO_MATCH)
-                            continue; // not a ticking block
-
-                        BlockPos blockPos = new BlockPos(chunkStartX + x,
-                                (sectionY << 4) + chunkBottomY + y, chunkStartZ + z);
-
-                        action.accept(tickingBlock, state, blockPos);
-                    }
+            BlockState state = section.getBlockState(cursor.x, cursor.y, cursor.z);
+            if (!state.isAir()) {
+                TickingObject tickingBlock = resolveTickingBlock(state.getBlock());
+                if (tickingBlock != NO_MATCH) {
+                    BlockPos blockPos = new BlockPos(chunkStartX + cursor.x,
+                            (sectionY << 4) + chunkBottomY + cursor.y, chunkStartZ + cursor.z);
+                    action.accept(tickingBlock, state, blockPos);
                 }
             }
+            advanceCell(cursor);
         }
     }
 }

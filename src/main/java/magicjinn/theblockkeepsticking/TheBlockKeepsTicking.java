@@ -17,10 +17,10 @@ import net.minecraft.server.MinecraftServer;
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
 import magicjinn.theblockkeepsticking.config.ModConfig;
+import magicjinn.theblockkeepsticking.simulator.ChunkSimScheduler;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
 import magicjinn.theblockkeepsticking.util.Benchmarker;
 import magicjinn.theblockkeepsticking.util.ChunkUtil;
-import magicjinn.theblockkeepsticking.util.Timer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
@@ -54,7 +54,7 @@ public class TheBlockKeepsTicking implements ModInitializer {
 		// options)
 		ModConfig.ensureDefaultsPresent();
 		ModConfig.HANDLER.save();
-		Timer.RegisterShutdownEvent();
+		ChunkSimScheduler.Register();
 
 		ServerChunkEvents.FULL_CHUNK_STATUS_CHANGE.register(this::onChunkLevelTypeChange);
 
@@ -139,13 +139,8 @@ public class TheBlockKeepsTicking implements ModInitializer {
 	}
 
 	private void ScheduleSimulation(LevelChunk chunk, long ticksToSimulate) {
-		// Schedule simulation in the future,
-		// to avoid changing blockstates during chunk loading (BAD!)
-		Timer.INSTANCE.Schedule("chunk_simulation_" + chunk.getPos().pack(),
-				(server, chunkToSimulate) -> {
-					WorldSimulator.SimulateWorld((LevelChunk) chunkToSimulate,
-							ticksToSimulate);
-				}, (LevelChunk) chunk);
+		// Inhabited gate + 20-tick staggered scan
+		ChunkSimScheduler.INSTANCE.enqueue(chunk, ticksToSimulate);
 	}
 
 	/**

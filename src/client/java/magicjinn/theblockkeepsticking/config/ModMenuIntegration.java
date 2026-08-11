@@ -73,9 +73,19 @@ public class ModMenuIntegration implements ModMenuApi {
                     ModConfig.setDebugLogging(newVal);
                 }).controller(BooleanControllerBuilder::create).build();
 
+        // Min inhabited time before catch-up (travel lag gate)
+        Option<Integer> minInhabitedOpt = Option.<Integer>createBuilder()
+                .name(Component.literal("Min Inhabited Time (ticks)"))
+                .description(OptionDescription.of(Component.literal(
+                        "Chunks with less inhabited time than this are not simulated. Reduces lag when traveling through fresh terrain. 6000 = 5 minutes. 0 = always simulate.")))
+                .binding(ModConfig.getMinInhabitedTicks(), ModConfig::getMinInhabitedTicks,
+                        ModConfig::setMinInhabitedTicks)
+                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 24000).step(200))
+                .build();
+
         OptionGroup general = OptionGroup.createBuilder().name(Component.literal("General"))
                 .option(timeModeOpt).option(lazyTaxOpt).option(simulateChunksWhenSleepingOpt)
-                .option(debugLoggingOpt).build();
+                .option(minInhabitedOpt).option(debugLoggingOpt).build();
 
         // Per-object toggles
         OptionGroup.Builder objectsGroupBuilder = OptionGroup.createBuilder()

@@ -48,14 +48,18 @@ You can configure the following values with [ModMenu](https://github.com/Terrafo
 
 * **Simulate After Sleeping:** When enabled, time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip. (Default: false)
 
+* **Min Inhabited Time (ticks):** Chunks with less inhabited time than this are not simulated. Keeps exploration lag down. `6000` is 5 minutes. `0` always simulates. Range: 0–24000. (Default: 6000)
+
 * **Lazy Tax (%):** Simulated ticks are reduced by this percentage. Increasing this value slows down simulation in unloaded chunks. Range: 0-99. (Default: 0)
 
-* **Debug Logging:** Enables detailed logging when simulation occurs, showing which blocks, block entities, and entities are being simulated. (Default: false)
+* **Debug Logging:** Enables detailed logging when simulation occurs, including scan vs simulate timings, inhabited-time skips, and staggered catch-up slices. (Default: false)
 
 * **Ticking Objects:** Individual toggles to enable or disable simulation for each supported block type and entity. All are enabled by default.
 
 ### ⚠️ Warning: This mod stores Fabric chunk attachments. Removing it may cause harmless log spam about unknown attachment types. This is a Fabric limitation, not a bug in the mod.
+
 ---
+
 ### API usage
 
 **The Block Keeps Ticking** exposes a small API so other mods can register their own ticking objects to be simulated in unloaded chunks.
@@ -70,7 +74,7 @@ To register custom ticking objects for your mod:
    * `getName()` – a unique name, only used for configuration and logging
    * `Simulate(...)` – contains the simulation logic
 
-   **Important:** You are responsible for fully implementing your own `Simulate(...)` method. **The Block Keeps Ticking** only tells you **how many** ticks should be simulated and **when**; it does not provide default behavior or automatically advance your blocks or entities for you. To make this easier, there are helper methods available in the provided API and utility classes that you can call from inside your `Simulate(...)` implementation.
+   **Important:** You are responsible for fully implementing your own `Simulate(...)` method. **The Block Keeps Ticking** only tells you **how many** ticks should be simulated and **when**. It does not provide default behavior or automatically advance your blocks or entities for you. To make this easier, there are helper methods available in the provided API and utility classes that you can call from inside your `Simulate(...)` implementation.
 
    Optionally override `getModId()` to return your mod's ID, so logs and config clearly show which mod registered the object.
 

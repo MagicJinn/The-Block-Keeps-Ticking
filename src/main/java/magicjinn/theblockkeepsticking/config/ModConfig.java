@@ -87,6 +87,9 @@ public final class ModConfig {
     boolean simulateChunksWhenSleeping = true;
     @SerialEntry
     boolean debugLogging = false;
+    /** Minimum chunk inhabited time (ticks) before catch-up is scheduled. 0 = always simulate. Default 5 minutes. */
+    @SerialEntry
+    int minInhabitedTicks = 6000;
 
     public ModConfig() {}
 
@@ -147,6 +150,15 @@ public final class ModConfig {
 
     public static void setDebugLogging(boolean enabled) {
         getInstance().debugLogging = enabled;
+        HANDLER.save();
+    }
+
+    public static int getMinInhabitedTicks() {
+        return getInstance().minInhabitedTicks;
+    }
+
+    public static void setMinInhabitedTicks(int ticks) {
+        getInstance().minInhabitedTicks = Math.max(0, ticks);
         HANDLER.save();
     }
 

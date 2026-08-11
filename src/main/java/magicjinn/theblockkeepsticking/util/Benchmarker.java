@@ -28,10 +28,12 @@ public class Benchmarker {
 
     // Stopwatch starts for currently open named sections.
     private static final Map<String, Long> activeBenchmarks = new HashMap<>();
-    // Timings of nested code sections (e.g. "SimulateWorld.blocks").
+    // Timings of nested code sections (e.g. "SimulateWorld.scan").
     private static final Map<String, Stat> sectionStats = new HashMap<>();
     // Timings of individual ticking objects (e.g. "Leaves", "Cactus").
     private static final Map<String, Stat> objectStats = new HashMap<>();
+    // Simple event / quantity counters (inhabited skips, cells, flushes).
+    private static final Map<String, Long> counters = new HashMap<>();
 
     private static long windowStartMs = 0L;
 
@@ -82,7 +84,21 @@ public class Benchmarker {
      * @param changed       whether the simulation actually took place
      */
     public static void RecordObject(String name, long durationNanos, boolean changed) {
+        if (!ModConfig.isDebugLogging())
+            return;
         record(objectStats, name, durationNanos, changed);
+    }
+
+    /** Increments a named counter by 1. */
+    public static void RecordCounter(String name) {
+        RecordCounter(name, 1L);
+    }
+
+    /** Increments a named counter by {@code amount}. */
+    public static void RecordCounter(String name, long amount) {
+        if (!ModConfig.isDebugLogging() || amount == 0L)
+            return;
+        counters.merge(name, amount, Long::sum);
     }
 
     public static void MaybeFlush() {
@@ -96,7 +112,7 @@ public class Benchmarker {
         if (now - windowStartMs < FLUSH_INTERVAL_MS)
             return;
 
-        if (!sectionStats.isEmpty() || !objectStats.isEmpty())
+        if (!sectionStats.isEmpty() || !objectStats.isEmpty() || !counters.isEmpty())
             flush(now - windowStartMs);
 
         windowStartMs = now;
@@ -115,6 +131,14 @@ public class Benchmarker {
         StringBuilder sb = new StringBuilder(256);
         sb.append(String.format(Locale.ROOT, "Simulation profile (last %.1fs)", windowMs / 1000.0));
 
+        if (!counters.isEmpty()) {
+            sb.append("\n  Counters:");
+            List<Map.Entry<String, Long>> entries = new ArrayList<>(counters.entrySet());
+            entries.sort(Comparator.comparingLong((Map.Entry<String, Long> e) -> e.getValue()).reversed());
+            for (Map.Entry<String, Long> entry : entries) {
+                sb.append(String.format(Locale.ROOT, "\n    %-22s %d", entry.getKey(), entry.getValue()));
+            }
+        }
         if (!sectionStats.isEmpty()) {
             sb.append("\n  Sections:");
             appendStats(sb, sectionStats, false);
@@ -128,6 +152,7 @@ public class Benchmarker {
 
         sectionStats.clear();
         objectStats.clear();
+        counters.clear();
     }
 
     private static void appendStats(StringBuilder sb, Map<String, Stat> map, boolean showChanged) {
