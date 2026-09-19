@@ -32,6 +32,7 @@ public class BuddingAmethystBlockMixin implements TickingAccessor {
 
         AmethystClusterTracker.Initialize();
 
+        // Must be local. Block is a singleton. A field would permanently drop faces.
         List<Direction> directions = new ArrayList<>(Arrays.asList(Direction.values()));
         List<AmethystClusterTracker> amethystClusterTrackers = new ArrayList<>();
 

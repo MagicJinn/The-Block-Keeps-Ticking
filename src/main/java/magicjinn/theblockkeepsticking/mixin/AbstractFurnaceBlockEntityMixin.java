@@ -38,6 +38,11 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
     @Shadow
     protected NonNullList<ItemStack> items;
 
+    @Shadow
+    protected int getBurnDuration(ServerLevel level, ItemStack stack) {
+        throw new AssertionError();
+    }
+
     @Override
     public boolean Simulate(long ticksToSimulate, Level level, BlockState state, BlockPos pos) {
         AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) (Object) this;
@@ -78,7 +83,7 @@ public class AbstractFurnaceBlockEntityMixin implements TickingAccessor {
             return false;
 
         // Compute fuel ticks
-        int fuelTicksPerItem = serverLevel.fuelValues().burnDuration(fuel);
+        int fuelTicksPerItem = getBurnDuration(serverLevel, fuel);
         int totalFuelTicks = litTimeRemaining + (fuel.getCount() * fuelTicksPerItem);
 
         int maxByFuel = (int) Math.min(ticksToSimulate / recipeCookTime, totalFuelTicks / recipeCookTime);
