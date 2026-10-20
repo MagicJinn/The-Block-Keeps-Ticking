@@ -43,3 +43,14 @@ tasks.named('sourcesJar', Jar) {
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 }
+
+// Shared selftest run-dir prep for Fabric + NeoForge (eula + pinned server.properties). Wipes the prior world if it exists.
+ext.prepareTbktSelftestRunDir = { File dir ->
+    dir.mkdirs()
+    project.delete(new File(dir, 'tbkt-selftest'))
+    new File(dir, 'eula.txt').text = 'eula=true\n'
+    project.copy {
+        from rootProject.file('scripts/selftest/server.properties')
+        into dir
+    }
+}

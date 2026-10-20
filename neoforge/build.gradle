@@ -44,6 +44,16 @@ neoForge {
             server()
             this.file('runs/server').createParentDirectories()
             gameDirectory = this.mkdir(this.file('runs/server'))
+            // ModDev server() does not add nogui. Without it, Windows opens ServerGui.
+            programArguments.add('nogui')
+        }
+        selftest {
+            server()
+            this.file('runs/selftest').createParentDirectories()
+            gameDirectory = this.mkdir(this.file('runs/selftest'))
+            systemProperty 'tbkt.selftest', 'true'
+            systemProperty 'java.awt.headless', 'true'
+            programArguments.add('nogui')
         }
     }
     mods {
@@ -54,6 +64,12 @@ neoForge {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.named('prepareSelftestRun') {
+    doLast {
+        prepareTbktSelftestRunDir(file('runs/selftest'))
+    }
+}
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->

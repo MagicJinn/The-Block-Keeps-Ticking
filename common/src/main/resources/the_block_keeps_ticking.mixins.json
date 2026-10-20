@@ -15,6 +15,7 @@
     "KelpBlockMixin",
     "BambooSaplingBlockMixin",
     "BambooStalkBlockMixin",
+    "CactusBlockAccessor",
     "CactusBlockMixin",
     "LeavesBlockMixin",
     "SugarCaneBlockMixin",

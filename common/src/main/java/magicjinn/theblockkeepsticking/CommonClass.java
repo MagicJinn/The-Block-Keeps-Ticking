@@ -8,6 +8,7 @@ import magicjinn.theblockkeepsticking.platform.Services;
 import magicjinn.theblockkeepsticking.platform.services.ITBKTPlatform;
 import magicjinn.theblockkeepsticking.simulator.ChunkSimScheduler;
 import magicjinn.theblockkeepsticking.simulator.WorldSimulator;
+import magicjinn.theblockkeepsticking.test.TbktSelfTest;
 import magicjinn.theblockkeepsticking.util.Benchmarker;
 import magicjinn.theblockkeepsticking.util.ChunkUtil;
 import magicjinn.theblockkeepsticking.util.Timer;
@@ -42,6 +43,9 @@ public final class CommonClass {
         Services.PLATFORM.registerCommands(TbktCommands::register);
         Services.PLATFORM.registerChunkFullStatusChange(CommonClass::onChunkLevelTypeChange);
         Services.PLATFORM.registerServerTickEnd(CommonClass::onServerTick);
+        Services.PLATFORM.registerServerTickEnd(TbktSelfTest::onServerTick);
+        // Arm the selftest auto-run if autorun is enabled.
+        Services.PLATFORM.registerServerStarted(TbktSelfTest::armAutoRun);
     }
 
     private static void onServerTick(MinecraftServer server) {

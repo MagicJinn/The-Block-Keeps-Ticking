@@ -41,7 +41,29 @@ loom {
             setConfigName('Fabric Server')
             ideConfigGenerated(true)
             runDir('runs/server')
+            programArg 'nogui'
         }
+        selftest {
+            server()
+            setConfigName('Fabric Selftest')
+            ideConfigGenerated(true)
+            runDir('runs/selftest')
+            property 'tbkt.selftest', 'true'
+            property 'java.awt.headless', 'true'
+            programArg 'nogui'
+        }
+    }
+}
+
+tasks.register('prepareSelftestRun') {
+    doLast {
+        prepareTbktSelftestRunDir(file('runs/selftest'))
+    }
+}
+
+tasks.configureEach {
+    if (it.name == 'runSelftest') {
+        it.dependsOn 'prepareSelftestRun'
     }
 }
 

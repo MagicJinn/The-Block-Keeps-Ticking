@@ -23,6 +23,10 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
+      - name: selftest fabric
+        run: ./gradlew :fabric:runSelftest --console=plain
+      - name: selftest neoforge
+        run: ./gradlew :neoforge:runSelftest --console=plain
       - name: capture build artifacts
         uses: actions/upload-artifact@v7
         with:

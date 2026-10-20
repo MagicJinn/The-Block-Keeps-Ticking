@@ -92,6 +92,11 @@ public final class FabricPlatformHelper implements ITBKTPlatform {
     }
 
     @Override
+    public void registerServerStarted(Consumer<MinecraftServer> callback) {
+        ServerLifecycleEvents.SERVER_STARTED.register(callback::accept);
+    }
+
+    @Override
     public void registerServerStopped(Consumer<MinecraftServer> callback) {
         ServerLifecycleEvents.SERVER_STOPPED.register(callback::accept);
     }

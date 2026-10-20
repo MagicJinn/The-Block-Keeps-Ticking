@@ -42,6 +42,8 @@ public interface ITBKTPlatform {
 
     void registerServerTickEnd(Consumer<MinecraftServer> callback);
 
+    void registerServerStarted(Consumer<MinecraftServer> callback);
+
     void registerServerStopped(Consumer<MinecraftServer> callback);
 
     void registerCommands(Consumer<CommandDispatcher<CommandSourceStack>> callback);

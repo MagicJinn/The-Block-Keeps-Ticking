@@ -25,6 +25,7 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -115,6 +116,12 @@ public final class NeoForgePlatformHelper implements ITBKTPlatform {
     @Override
     public void registerServerTickEnd(Consumer<MinecraftServer> callback) {
         NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class,
+                event -> callback.accept(event.getServer()));
+    }
+
+    @Override
+    public void registerServerStarted(Consumer<MinecraftServer> callback) {
+        NeoForge.EVENT_BUS.addListener(ServerStartedEvent.class,
                 event -> callback.accept(event.getServer()));
     }
 
