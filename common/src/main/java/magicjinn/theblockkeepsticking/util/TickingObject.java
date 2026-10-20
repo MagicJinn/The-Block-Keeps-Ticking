@@ -19,51 +19,48 @@ import net.minecraft.world.level.block.state.BlockState;
  * 
  * <p>
  * Example:
- * 
- * <pre>
- * {
- *     &#64;code
- *     public class MyTickingBlock extends TickingObject {
- *         public static final MyTickingBlock INSTANCE = new MyTickingBlock();
- * 
- *         &#64;Override
- *         public Class<?> getType() {
- *             return MyBlock.class;
+ *
+ * <pre>{@code
+ * public class MyTickingBlock extends TickingObject {
+ *     public static final MyTickingBlock INSTANCE = new MyTickingBlock();
+ *
+ *     @Override
+ *     public Class<?> getType() {
+ *         return MyBlock.class;
+ *     }
+ *
+ *     @Override
+ *     public String getName() {
+ *         return "my_ticking_block";
+ *     }
+ *
+ *     @Override
+ *     public String getModId() {
+ *         return "my_mod_id";
+ *     }
+ *
+ *     @Override
+ *     public boolean Simulate(Object obj, long ticks, Level level, BlockState state, BlockPos pos) {
+ *         // If your block is a vanilla block, from another mod, or simply requires a
+ *         // mixin,
+ *         // add the TickingAccessor interface to your mixin implementation.
+ *         // For custom blocks, it is also recommended to implement the TickingAccessor
+ *         // interface.
+ *         // You can then access the simulation function as follows:
+ *         if (objectInstance instanceof MyBlock myBlock) {
+ *             return ((TickingAccessor) myBlock).Simulate(ticksToSimulate, level, state, pos);
  *         }
- * 
- *         &#64;Override
- *         public String getName() {
- *             return "my_ticking_block";
- *         }
- * 
- *         &#64;Override
- *         public String getModId() {
- *             return "my_mod_id";
- *         }
- * 
- *         @Override
- *         public boolean Simulate(Object obj, long ticks, Level level, BlockState state, BlockPos pos) {
- *             // If your block is a vanilla block, from another mod, or simply requires a
- *             // mixin,
- *             // add the TickingAccessor interface to your mixin implementation.
- *             // For custom blocks, it is also recommended to implement the TickingAccessor
- *             // interface.
- *             // You can then access the simulation function as follows:
- *             if (objectInstance instanceof MyBlock myBlock) {
- *                 return ((TickingAccessor) myBlock).Simulate(ticksToSimulate, level, state, pos);
- *             }
- * 
- *             // Else, if the block is simple enough to simulate it without "native" access
- *             // or mixins, you can also put the simulation logic here.
- *             // Though, for clarity, it is recommended to use the TickingAccessor
- *             // interface anyway, so that every single TickingObject has roughly the same
- *             // structure.
- * 
- *             return false; // If we reached this point, the simulation was not performed
- *         }
+ *
+ *         // Else, if the block is simple enough to simulate it without "native" access
+ *         // or mixins, you can also put the simulation logic here.
+ *         // Though, for clarity, it is recommended to use the TickingAccessor
+ *         // interface anyway, so that every single TickingObject has roughly the same
+ *         // structure.
+ *
+ *         return false; // If we reached this point, the simulation was not performed
  *     }
  * }
- * </pre>
+ * }</pre>
  */
 public abstract class TickingObject {
     /**
@@ -101,7 +98,7 @@ public abstract class TickingObject {
      * @param objectInstance  The block, block entity, or entity instance to
      *                        simulate
      * @param ticksToSimulate The number of ticks to simulate
-     * @param world           The world the object is in
+     * @param level           The world the object is in
      * @param state           The block state (null for entities)
      * @param pos             The block position (null for entities)
      * @return true if simulation was performed, false otherwise

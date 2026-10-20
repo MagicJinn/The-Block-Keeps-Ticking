@@ -134,8 +134,8 @@ public class WorldSimulator {
 
     /**
      * Registers a TickingBlock to be simulated
-     * 
-     * @param instanceClass The TickingBlock to register
+     *
+     * @param tickingObject The TickingBlock to register
      */
     public static void RegisterTickingBlock(TickingObject tickingObject) {
         if (tickingObject == null) {
