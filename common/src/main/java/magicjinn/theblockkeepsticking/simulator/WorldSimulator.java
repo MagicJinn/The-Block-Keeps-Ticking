@@ -18,6 +18,7 @@ import magicjinn.theblockkeepsticking.blocks.TickingCampfireBlockEntity;
 import magicjinn.theblockkeepsticking.blocks.TickingCocoaBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingCropBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingDriedGhastBlock;
+import magicjinn.theblockkeepsticking.blocks.TickingFarmlandBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingKelpBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingLeavesBlock;
 import magicjinn.theblockkeepsticking.blocks.TickingNetherWartBlock;
@@ -127,6 +128,8 @@ public class WorldSimulator {
         RegisterTickingBlock(new TickingPointedDripstoneBlock()); // Includes cauldrons
         RegisterTickingBlock(new TickingSweetBerryBushBlock());
         RegisterTickingBlock(new TickingBuddingAmethystBlock());
+
+        RegisterTickingBlock(new TickingFarmlandBlock());
     }
 
     /**

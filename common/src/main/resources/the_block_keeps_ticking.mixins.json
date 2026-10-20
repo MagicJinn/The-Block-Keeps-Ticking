@@ -21,6 +21,7 @@
     "CocoaBlockMixin",
     "AgeableMobMixin",
     "DriedGhastBlockMixin",
+    "FarmlandBlockMixin",
     "SweetBerryBushBlockMixin",
     "BuddingAmethystBlockMixin",
     "PointedDripstoneBlockMixin",
