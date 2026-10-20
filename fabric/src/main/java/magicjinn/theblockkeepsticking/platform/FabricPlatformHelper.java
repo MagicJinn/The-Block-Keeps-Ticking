@@ -3,17 +3,20 @@ package magicjinn.theblockkeepsticking.platform;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.Constants;
 import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
 import magicjinn.theblockkeepsticking.platform.services.ITBKTPlatform;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -91,6 +94,12 @@ public final class FabricPlatformHelper implements ITBKTPlatform {
     @Override
     public void registerServerStopped(Consumer<MinecraftServer> callback) {
         ServerLifecycleEvents.SERVER_STOPPED.register(callback::accept);
+    }
+
+    @Override
+    public void registerCommands(Consumer<CommandDispatcher<CommandSourceStack>> callback) {
+        CommandRegistrationCallback.EVENT.register(
+                (dispatcher, registryAccess, environment) -> callback.accept(dispatcher));
     }
 
     @Override

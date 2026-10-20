@@ -2,7 +2,9 @@ package magicjinn.theblockkeepsticking.platform.services;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
+import com.mojang.brigadier.CommandDispatcher;
 import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.FullChunkStatus;
@@ -41,6 +43,8 @@ public interface ITBKTPlatform {
     void registerServerTickEnd(Consumer<MinecraftServer> callback);
 
     void registerServerStopped(Consumer<MinecraftServer> callback);
+
+    void registerCommands(Consumer<CommandDispatcher<CommandSourceStack>> callback);
 
     void registerChunkFullStatusChange(ChunkFullStatusCallback callback);
 

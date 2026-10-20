@@ -2,11 +2,13 @@ package magicjinn.theblockkeepsticking.platform;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import magicjinn.theblockkeepsticking.Constants;
 import magicjinn.theblockkeepsticking.api.InitializeTickingBlocks;
 import magicjinn.theblockkeepsticking.neoforge.event.RegisterTickingBlocksEvent;
 import magicjinn.theblockkeepsticking.platform.services.ITBKTPlatform;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.FullChunkStatus;
@@ -22,6 +24,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -119,6 +122,12 @@ public final class NeoForgePlatformHelper implements ITBKTPlatform {
     public void registerServerStopped(Consumer<MinecraftServer> callback) {
         NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class,
                 event -> callback.accept(event.getServer()));
+    }
+
+    @Override
+    public void registerCommands(Consumer<CommandDispatcher<CommandSourceStack>> callback) {
+        NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class,
+                event -> callback.accept(event.getDispatcher()));
     }
 
     @Override

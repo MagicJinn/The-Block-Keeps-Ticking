@@ -2,6 +2,7 @@ package magicjinn.theblockkeepsticking;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import magicjinn.theblockkeepsticking.command.TbktCommands;
 import magicjinn.theblockkeepsticking.config.ModConfig;
 import magicjinn.theblockkeepsticking.platform.Services;
 import magicjinn.theblockkeepsticking.platform.services.ITBKTPlatform;
@@ -38,6 +39,7 @@ public final class CommonClass {
         ChunkSimScheduler.Register();
         Timer.Register();
 
+        Services.PLATFORM.registerCommands(TbktCommands::register);
         Services.PLATFORM.registerChunkFullStatusChange(CommonClass::onChunkLevelTypeChange);
         Services.PLATFORM.registerServerTickEnd(CommonClass::onServerTick);
     }
