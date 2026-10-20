@@ -1,0 +1,81 @@
+package magicjinn.theblockkeepsticking.util;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import magicjinn.theblockkeepsticking.platform.Services;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.chunk.LevelChunk;
+
+// Changing blockstates during chunk loading is VERY bad,
+// so we use a timer to schedule the changes for later.
+public class Timer {
+    public static final Timer INSTANCE = new Timer();
+    private final Map<String, TimerEntry> pendingActions = new ConcurrentHashMap<>();
+
+    private static class TimerEntry {
+        private long ticksRemaining;
+        private final BiConsumer<MinecraftServer, LevelChunk> callback;
+        private final LevelChunk chunk;
+
+        public TimerEntry(long ticksRemaining, BiConsumer<MinecraftServer, LevelChunk> callback,
+                LevelChunk chunk) {
+            this.ticksRemaining = ticksRemaining;
+            this.callback = callback;
+            this.chunk = chunk;
+        }
+
+        public boolean tick() {
+            return --this.ticksRemaining <= 0;
+        }
+
+        public void execute(MinecraftServer server) {
+            callback.accept(server, chunk);
+        }
+    }
+
+    public void Schedule(String id, BiConsumer<MinecraftServer, LevelChunk> callback,
+            LevelChunk chunk) {
+        Schedule(id, 1L, callback, chunk);
+    }
+
+    public void Schedule(String id, long ticksUntilAction,
+            BiConsumer<MinecraftServer, LevelChunk> callback, LevelChunk chunk) {
+        this.pendingActions.put(id, new TimerEntry(ticksUntilAction, callback, chunk));
+    }
+
+    public void Cancel(String id) {
+        this.pendingActions.remove(id);
+    }
+
+    public void onEndTick(MinecraftServer server) {
+        pendingActions.entrySet().removeIf(entry -> {
+            TimerEntry timerEntry = entry.getValue();
+
+            if (timerEntry.tick()) {
+                try {
+                    timerEntry.execute(server);
+                } catch (Exception e) {
+                    // Log error but don't crash the server
+                    System.err.println("Error executing timer callback: " + e.getMessage());
+                }
+                return true; // Remove this entry
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Clears all pending actions. Should be called during server shutdown to
+     * prevent callbacks from
+     * executing with null references.
+     */
+    public void clearAllPendingActions() {
+        pendingActions.clear();
+    }
+
+    public static void Register() {
+        Services.PLATFORM.registerServerTickEnd(INSTANCE::onEndTick);
+        Services.PLATFORM.registerServerStopped(server -> INSTANCE.clearAllPendingActions());
+    }
+}
