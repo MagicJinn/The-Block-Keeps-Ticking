@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "id": "${fabric_mod_id}",
+    "version": "${version}",
+    "name": "${mod_name}",
+    "description": "${description}",
+    "authors": [
+        "${mod_author}"
+    ],
+    "contact": {
+        "homepage": "https://github.com/MagicJinn/The-Block-Keeps-Ticking/",
+        "issues": "https://github.com/MagicJinn/The-Block-Keeps-Ticking/issues"
+    },
+    "license": "${license}",
+    "icon": "assets/${mod_id}/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "magicjinn.theblockkeepsticking.TheBlockKeepsTickingFabric"
+        ],
+        "client": [
+            "magicjinn.theblockkeepsticking.TheBlockKeepsTickingFabricClient"
+        ],
+        "modmenu": [
+            "magicjinn.theblockkeepsticking.config.ModMenuIntegration"
+        ]
+    },
+    "mixins": [
+        "${mod_id}.mixins.json",
+        "${mod_id}.fabric.mixins.json"
+    ],
+    "accessWidener": "${mod_id}.accesswidener",
+    "depends": {
+        "fabricloader": ">=${fabric_loader_version}",
+        "fabric-api": "*",
+        "minecraft": "~${minecraft_version}",
+        "java": ">=${java_version}"
+    },
+    "suggests": {
+        "modmenu": "*",
+        "yet_another_config_lib_v3": "*"
+    },
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.discord": "https://discord.gg/bQvtauxXWp",
+                "modmenu.source": "https://github.com/MagicJinn/The-Block-Keeps-Ticking"
+            }
+        }
+    }
+}
