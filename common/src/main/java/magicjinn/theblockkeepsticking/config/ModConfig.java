@@ -183,12 +183,17 @@ public final class ModConfig {
     }
 
     public static void setLazyTaxPercent(int percent) {
-        getInstance().lazyTaxPercent = percent;
+        getInstance().lazyTaxPercent = ConfigOptions.LAZY_TAX_PERCENT.clamp(percent);
         HANDLER.save();
     }
 
     public static Map<String, Boolean> getEnabledByName() {
         return getInstance().enabledByName;
+    }
+
+    public static void setEnabled(String tickingObjectName, boolean enabled) {
+        getInstance().enabledByName.put(tickingObjectName, enabled);
+        HANDLER.save();
     }
 
     public static boolean isSimulateChunksWhenSleeping() {
@@ -214,7 +219,7 @@ public final class ModConfig {
     }
 
     public static void setMinInhabitedTicks(int ticks) {
-        getInstance().minInhabitedTicks = Math.max(0, ticks);
+        getInstance().minInhabitedTicks = ConfigOptions.MIN_INHABITED_TICKS.clamp(ticks);
         HANDLER.save();
     }
 

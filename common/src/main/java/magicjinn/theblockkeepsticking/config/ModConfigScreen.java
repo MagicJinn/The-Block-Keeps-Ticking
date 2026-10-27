@@ -24,60 +24,15 @@ public final class ModConfigScreen {
         ModConfig.HANDLER.load();
         ModConfig.ensureDefaultsPresent();
 
-        Option<ModConfig.TimeMode> timeModeOpt = Option.<ModConfig.TimeMode>createBuilder()
-                .name(Component.literal("Time Source"))
-                .description(OptionDescription.of(Component.literal(
-                        "Choose whether to use world time or real time for simulation calculations. World time only passes when you are in your level. Real time passes at the same rate as the real world, even when you are not playing the game.\n(Real Time works well with lazy tax.)")))
-                .binding(ModConfig.getTimeMode(), () -> ModConfig.getTimeMode(),
-                        ModConfig::setTimeMode)
-                .controller(opt -> EnumControllerBuilder.create(opt)
-                        .enumClass(ModConfig.TimeMode.class))
-                .build();
-
-        Option<Integer> lazyTaxOpt = Option.<Integer>createBuilder()
-                .name(Component.literal("Lazy Tax (%)"))
-                .description(OptionDescription.of(Component.literal(
-                        "Simulated ticks are reduced by this percentage. Increasing this value slows down simulation in unloaded chunks.")))
-                .binding(ModConfig.getLazyTaxPercent(), ModConfig::getLazyTaxPercent,
-                        ModConfig::setLazyTaxPercent)
-                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 99).step(1))
-                .build();
-
-        Option<Boolean> simulateChunksWhenSleepingOpt = Option.<Boolean>createBuilder()
-                .name(Component.literal("Simulate After Sleeping"))
-                .description(OptionDescription.of(Component.literal(
-                        "When enabled, time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip.")))
-                .binding(ModConfig.isSimulateChunksWhenSleeping(),
-                        ModConfig::isSimulateChunksWhenSleeping,
-                        ModConfig::setSimulateChunksWhenSleeping)
-                .controller(BooleanControllerBuilder::create)
-                .build();
-
-        Option<Boolean> debugLoggingOpt = Option.<Boolean>createBuilder()
-                .name(Component.literal("Debug Logging"))
-                .description(OptionDescription.of(Component.literal(
-                        "Enables detailed logging when simulation occurs. Shows which blocks, block entities, and entities are being simulated.")))
-                .binding(ModConfig.isDebugLogging(), ModConfig::isDebugLogging,
-                        ModConfig::setDebugLogging)
-                .controller(BooleanControllerBuilder::create)
-                .build();
-
-        Option<Integer> minInhabitedOpt = Option.<Integer>createBuilder()
-                .name(Component.literal("Min Inhabited Time (ticks)"))
-                .description(OptionDescription.of(Component.literal(
-                        "Chunks with less inhabited time than this are not simulated. Reduces lag when traveling through fresh terrain. 6000 = 5 minutes. 0 = always simulate.")))
-                .binding(ModConfig.getMinInhabitedTicks(), ModConfig::getMinInhabitedTicks,
-                        ModConfig::setMinInhabitedTicks)
-                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 24000)
-                        .step(200))
-                .build();
-
-        OptionGroup general = OptionGroup.createBuilder().name(Component.literal("General"))
-                .option(timeModeOpt).option(lazyTaxOpt).option(simulateChunksWhenSleepingOpt)
-                .option(minInhabitedOpt).option(debugLoggingOpt).build();
+        OptionGroup.Builder generalBuilder = OptionGroup.createBuilder().name(Component.literal("General"));
+        for (ConfigOptions.Option option : ConfigOptions.GENERAL) {
+            generalBuilder.option(toYaclOption(option));
+        }
 
         OptionGroup.Builder objectsGroupBuilder = OptionGroup.createBuilder()
-                .name(Component.literal("Ticking Objects"));
+                .name(Component.literal("Ticking Objects"))
+                .description(OptionDescription.of(Component.literal(
+                        "Enable or disable simulation for each supported block, block entity, and entity. Disabled entries are skipped when unloaded chunks catch up.")));
 
         for (TickingObject tickingObject : WorldSimulator.TickingObjectInstances) {
             String name = tickingObject.getName();
@@ -92,10 +47,7 @@ public final class ModConfigScreen {
                                     .withStyle(ChatFormatting.GRAY))))
                     .binding(ModConfig.getEnabledByName().getOrDefault(name, true),
                             () -> ModConfig.getEnabledByName().getOrDefault(name, true),
-                            newVal -> {
-                                ModConfig.getInstance().enabledByName.put(name, newVal);
-                                ModConfig.HANDLER.save();
-                            })
+                            newVal -> ModConfig.setEnabled(name, newVal))
                     .controller(BooleanControllerBuilder::create).build();
             objectsGroupBuilder.option(objOpt);
             if ("Ageable Entities".equals(name)) {
@@ -112,11 +64,7 @@ public final class ModConfigScreen {
                         .binding(ModConfig.getEnabledByName().getOrDefault(eggKey, true),
                                 () -> ModConfig.getEnabledByName().getOrDefault(eggKey,
                                         true),
-                                newVal -> {
-                                    ModConfig.getInstance().enabledByName
-                                            .put(eggKey, newVal);
-                                    ModConfig.HANDLER.save();
-                                })
+                                newVal -> ModConfig.setEnabled(eggKey, newVal))
                         .controller(BooleanControllerBuilder::create).build();
                 objectsGroupBuilder.option(chickenEggOpt);
             }
@@ -135,7 +83,36 @@ public final class ModConfigScreen {
         return YetAnotherConfigLib.createBuilder().title(Component.literal(""))
                 .category(ConfigCategory.createBuilder()
                         .name(Component.literal("The Block Keeps Ticking"))
-                        .group(general).group(objectsGroupBuilder.build()).build())
+                        .group(generalBuilder.build()).group(objectsGroupBuilder.build()).build())
                 .build().generateScreen(parent);
+    }
+
+    private static Option<?> toYaclOption(ConfigOptions.Option option) {
+        return switch (option) {
+            case ConfigOptions.BoolOption boolOption -> Option.<Boolean>createBuilder()
+                    .name(Component.literal(boolOption.displayName()))
+                    .description(OptionDescription.of(Component.literal(boolOption.description())))
+                    .binding(boolOption.get(), boolOption::get, boolOption::set)
+                    .controller(BooleanControllerBuilder::create)
+                    .build();
+            case ConfigOptions.IntOption intOption -> Option.<Integer>createBuilder()
+                    .name(Component.literal(intOption.displayName()))
+                    .description(OptionDescription.of(Component.literal(intOption.description())))
+                    .binding(intOption.get(), intOption::get, intOption::set)
+                    .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                            .range(intOption.min(), intOption.max())
+                            .step(intOption.step()))
+                    .build();
+            case ConfigOptions.EnumOption<?> enumOption -> enumYaclOption(enumOption);
+        };
+    }
+
+    private static <E extends Enum<E>> Option<E> enumYaclOption(ConfigOptions.EnumOption<E> enumOption) {
+        return Option.<E>createBuilder()
+                .name(Component.literal(enumOption.displayName()))
+                .description(OptionDescription.of(Component.literal(enumOption.description())))
+                .binding(enumOption.get(), enumOption::get, enumOption::set)
+                .controller(opt -> EnumControllerBuilder.create(opt).enumClass(enumOption.type()))
+                .build();
     }
 }

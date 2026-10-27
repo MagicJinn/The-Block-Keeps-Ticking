@@ -25,8 +25,10 @@
   * **Dried Ghast & Sniffer Eggs:** Hydration and hatching progression
   * **Budding Amethyst:** Growth progression
   * **Cauldrons:** Water and lava dripping
-  * **Mud:** Mud above Dripstone conversion to clay
+  * **Mud & Farmland:** Mud above dripstone converting to clay, farmland hydration
   * **Sweet Berry Bushes:** Growth progression
+
+* **Entity Support:** Ageable mobs (growth toward adulthood), including chicken egg laying in unloaded chunks
 
 <sup>*Note: Due to the way Sniffer Eggs and Dried Ghasts are processed, some precision is lost during simulation.</sup>
 
@@ -38,15 +40,17 @@
 
 * **Per-Object Configuration:** Enable or disable simulation for specific blocks and entities individually.
 
+* **Commands:** Owner/op commands to inspect or change config and manually simulate chunks or blocks (see below).
+  
 * **Serverside:** When installed on a server, players do not need to install the mod. Can also be installed in singleplayer worlds.
 
 ### Configuration
 
-You can configure the following values with [ModMenu](https://github.com/TerraformersMC/ModMenu) and [YetAnotherConfigLib](https://github.com/isXander/YetAnotherConfigLib), or by editing `config\the-block-keeps-ticking.json`.
+You can configure the following values with [ModMenu](https://github.com/TerraformersMC/ModMenu) and [YetAnotherConfigLib](https://github.com/isXander/YetAnotherConfigLib), by editing `config\the-block-keeps-ticking.json`, or with `/tbkt config` (see Commands).
 
 * **Time Source:** Choose between "World Time" (only progresses when playing) or "Real Time" (progresses even when offline). Real Time works well with lazy tax. (Default: World Time)
 
-* **Simulate After Sleeping:** When enabled, time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip. (Default: false)
+* **Simulate After Sleeping:** When enabled, time skips (e.g. from sleeping) will simulate loaded chunks for the duration of the time skip. (Default: true)
 
 * **Min Inhabited Time (ticks):** Chunks with less inhabited time than this are not simulated. Keeps exploration lag down. `6000` is 5 minutes. `0` always simulates. Range: 0–24000. (Default: 6000)
 
@@ -55,6 +59,19 @@ You can configure the following values with [ModMenu](https://github.com/Terrafo
 * **Debug Logging:** Enables detailed logging when simulation occurs, including scan vs simulate timings, inhabited-time skips, and staggered catch-up slices. (Default: false)
 
 * **Ticking Objects:** Individual toggles to enable or disable simulation for each supported block type and entity. All are enabled by default.
+
+### Commands
+
+All commands require permission level 4. Also available as `/theblockkeepsticking ...`.
+
+* `/tbkt config`: Lists current config values and set usage
+* `/tbkt config reload`: Reloads the config from disk and writes any missing defaults
+* `/tbkt config set <option> <value>`: Sets a general option (`timeMode`, `lazyTaxPercent`, `simulateChunksWhenSleeping`, `minInhabitedTicks`, `debugLogging`)
+* `/tbkt config set tickingObject <true|false> <name>`: Enables or disables a ticking object
+* `/tbkt simulate chunk <ticks> [<chunkX> <chunkZ>]`: Simulates all ticking objects in a loaded chunk. Omit coordinates to use the executing player's chunk
+* `/tbkt simulate block <ticks> [<x> <y> <z>]`: Simulates a single supported block or block entity. Omit coordinates to use the executing player's position
+
+The chunk must be loaded for `simulate chunk`.
 
 ### ⚠️ Warning: This mod stores Fabric chunk attachments. Removing it may cause harmless log spam about unknown attachment types. This is a Fabric limitation, not a bug in the mod.
 
